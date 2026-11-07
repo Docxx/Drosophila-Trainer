@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fly Trainer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    { "imports": { "three": "../node_modules/three/build/three.module.js", "three/addons/": "../node_modules/three/examples/jsm/" } }
+  </script>
+</head>
+<body data-mode="exercise">
+  <main class="bench">
+    <header class="hud left">
+      <div class="brand"><span class="brand-mark">FT</span><div><h1>Fly Trainer</h1><p id="mode-label">Virgin collection</p></div></div>
+      <nav class="mode-switch" aria-label="Activity">
+        <button data-mode="exercise" aria-pressed="true" class="on">Collection</button>
+        <button data-mode="cross" aria-pressed="false">First cross</button>
+        <button data-mode="reference" aria-pressed="false">Reference bench</button>
+      </nav>
+      <section class="exercise-only">
+        <span class="eyebrow">01 · First collection</span>
+        <h2>Find your females</h2>
+        <p>Collect <strong>at least two virgin females</strong> from this batch. Leave uncertain flies on the pad or set them aside.</p>
+        <div class="source-record"><h3>Source vial · Canton-S</h3>
+          <dl><div><dt>Cleared</dt><dd>09:00</dd></div><div><dt>Collected</dt><dd>11:00</dd></div><div><dt>Temperature</dt><dd>25 °C</dd></div></dl>
+          <p>All adults removed at clearing; food and vial walls checked. This teaching batch uses a two-hour collection interval.</p>
+        </div>
+        <details class="support"><summary>Why the vial history matters</summary><p>The complete clearing and short collection interval support collecting females as virgins in this batch. You still need to identify their sex. Colour alone does not establish sex or mating history.</p><p>Collection windows depend on conditions and lab protocols. This is a defined teaching scenario, not a universal time limit.</p></details>
+      </section>
+      <section class="cross-only">
+        <span class="eyebrow">02 · From collection to offspring</span><h2>Who fathered these flies?</h2>
+        <p>Use a separate white-eyed stock for this mission. Collect candidate females, cross them to known red-eyed males, and interpret the F1 offspring. Your Canton-S collection stays in its own notebook.</p>
+        <div class="source-record"><h3>Maternal stock · w¹¹¹⁸</h3><p id="cross-source-title"></p><p id="cross-source-record"></p><p id="cross-source-evidence"></p></div>
+        <div class="cross-collecting"><p>Try to collect at least two females. There is no parent-selection verdict before this cross: your decisions affect the offspring.</p>
+          <label for="cross-prediction">Prediction for the intended cross</label><select id="cross-prediction"><option value="unknown">Not sure yet</option><option value="expected">Red daughters; white sons</option><option value="red">All red-eyed</option><option value="white">All white-eyed</option></select>
+          <button data-act="cross-start" class="primary">Set up cross · add two Canton-S males</button>
+        </div>
+        <div class="timeline"><strong id="cross-day">Day 0</strong><p id="cross-progress"></p><p id="cross-parents"></p><button class="cross-developing primary" data-act="cross-advance">Advance to next event</button></div>
+        <details class="support"><summary>Chromosomes and the intended cross</summary>
+          <p>Stock records: white-eyed females carry two white alleles. Canton-S males carry the normal allele on their X chromosome.</p>
+          <div class="chromosome-pair"><span>Mother</span><b class="allele-white">Xʷ</b><b class="allele-white">Xʷ</b></div><div class="chromosome-pair"><span>Tester male</span><b class="allele-red">X⁺</b><b>Y</b></div>
+          <p>A daughter receives one X from each parent; a son receives his mother's X and his father's Y. A normal allele of the white gene masks the recessive white-eye mutation in this simplified background.</p>
+          <p class="secondary">Conventional notation: w/w ♀ × +/Y ♂. These are recorded stock genotypes, not a reveal of hidden individuals.</p>
+        </details>
+        <details class="support"><summary>Try another vial history</summary><label for="cross-scenario">New batch source record</label><select id="cross-scenario"><option value="documented">Documented collection</option><option value="uncertain">Uncertain vial history</option></select><button data-act="cross-new">Start new cross batch</button><p>A new batch replaces this cross notebook. Export it first if you want to keep the record.</p></details>
+      </section>
+      <section class="reference-only"><span class="eyebrow">Practice · No assessment</span><h2>Learn what to look for</h2><p>Compare known male and female specimens before collecting your own flies.</p></section>
+      <details class="support" open><summary>Handling controls</summary>
+        <p>Drag a fly to move it. Choose Rotate to roll it; hold Shift to turn. Scroll to zoom. Right-drag or drag empty pad to move the view.</p>
+        <p>Double-click to focus. <kbd>Q</kbd>/<kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Esc</kbd> overview</p>
+      </details>
+      <div class="tool-row" role="group" aria-label="Handling tool"><button data-tool="move" aria-pressed="true" class="on">Move <kbd>G</kbd></button><button data-tool="rotate" aria-pressed="false">Rotate <kbd>R</kbd></button></div>
+      <details class="support"><summary>Field guide</summary><p>Look for sex combs on the first tarsal segment of the male forelegs. Mature males usually have a darker, shorter abdominal tip. Young males can be pale, so check more than body colour.</p><p>These first-pass models have expanded wings. Meconium and unexpanded wings are not yet represented.</p></details>
+      <details class="support"><summary>Worked example</summary><p>In a separate example, a pale fly has visible foreleg sex combs. That identifies a male, so he is excluded from a female collection. A fly identified as female still needs an appropriate collection history before she can be used as a virgin.</p></details>
+      <details class="support lesson-only"><summary>Supervisor</summary><label class="check-label"><input type="checkbox" id="supervisor-enabled" checked /> Offer occasional reminders</label><button data-act="hint">Ask for a hint</button><p id="supervisor-note" aria-live="polite">Help is available whenever you need it.</p></details>
+    </header>
+
+    <section class="microscope" aria-label="Virtual dissecting microscope">
+      <div class="scope-caption"><span class="eyebrow" id="scope-heading">Dissecting microscope</span><span id="scope-context">CO₂ pad · practice time is paused</span></div>
+      <div class="eyepiece"><canvas id="scope" aria-label="Microscope pad with selectable flies"></canvas><div class="vignette"></div><div class="experiment-empty" id="experiment-empty" hidden><div class="vial-illustration" aria-hidden="true"></div><h2 id="experiment-empty-title"></h2><p id="experiment-empty-note"></p></div><div class="loading" role="status">Preparing your flies…</div></div>
+      <p class="scope-tip">Select a fly to inspect it. Drag onto a destination or use the collection buttons.</p>
+    </section>
+
+    <aside class="hud right">
+      <h2 id="inventory-title">Your batch · six flies</h2>
+      <div class="chips" id="specimens" role="group" aria-label="Choose a fly"></div>
+      <section class="inspection"><h3 id="specimen-name">Preparing flies…</h3><p id="specimen-note">Inspect the abdomen and forelegs from different angles.</p><button data-act="focus" data-needs-selection disabled>Focus selected fly</button><button data-act="overview">Whole pad</button></section>
+      <section class="collection-controls transfers" aria-label="Move the selected fly">
+        <button data-transfer="collection" disabled>Collect selected fly</button><button data-transfer="rejected" disabled>Set selected fly aside</button><button data-transfer="pad" disabled>Return selected fly to pad</button>
+        <div class="destination collection" data-drop="collection"><div><h3>Collection vial</h3><span id="collection-count">0</span></div><p id="collection-contents">Empty</p></div>
+        <div class="destination" data-drop="rejected"><div><h3>Set aside</h3><span id="rejected-count">0</span></div><p id="rejected-contents">Empty</p><small>Retained for reconsideration.</small></div>
+        <button class="primary exercise-only" data-act="submit" disabled>Declare collection ready</button>
+      </section>
+      <section class="cross-only cross-observations">
+        <div class="tool-row pagination"><button data-act="cross-previous">Previous six</button><span id="cross-page"></span><button data-act="cross-next">Next six</button></div>
+        <h3>Record selected F1 fly</h3><div class="score-buttons" role="group" aria-label="Offspring observation"><button data-score="red-F" aria-pressed="false">Red-eyed female</button><button data-score="white-F" aria-pressed="false">White-eyed female</button><button data-score="red-M" aria-pressed="false">Red-eyed male</button><button data-score="white-M" aria-pressed="false">White-eyed male</button><button data-score="uncertain" aria-pressed="false">Uncertain</button></div>
+        <details class="support"><summary>Your recorded counts</summary><div id="cross-tally"></div></details>
+        <label for="cross-interpretation">Interpret the observations</label><select id="cross-interpretation"><option value="unknown">I need more evidence</option><option value="consistent">Consistent; virginity not proven</option><option value="unintended">Unexpected daughters: unintended father</option><option value="none">No progeny: review possible causes</option></select><button data-act="cross-submit" class="primary">Review my observations</button>
+      </section>
+      <button class="lesson-only" data-act="notebook">Open lab notebook</button>
+      <p id="save-status" class="save-status" role="status">Notebook saved on this computer</p>
+      <p id="activity-status" class="sr-only" role="status"></p>
+    </aside>
+
+    <footer class="hud bottom">
+      <div class="tool-row" role="group" aria-label="Inspection angle"><button data-act="dorsal" data-needs-selection disabled>Back</button><button data-act="lateral" data-needs-selection disabled>Side</button><button data-act="ventral" data-needs-selection disabled>Underside</button></div>
+      <div class="tool-row" role="group" aria-label="Rotate selected fly"><button data-act="roll-left" data-needs-selection disabled>Roll −30°</button><button data-act="roll-right" data-needs-selection disabled>Roll +30°</button><button data-act="flip" data-needs-selection disabled>Flip</button><button data-act="turn" data-needs-selection disabled>Turn 90°</button></div>
+      <button data-act="reset">Reset pad</button>
+      <label class="mag">Magnification <input type="range" id="mag" min="8" max="50" step="1" value="12" /><output id="magOut">12×</output></label>
+    </footer>
+  </main>
+
+  <dialog id="notebook" aria-labelledby="notebook-title"><div class="dialog-heading"><div><span class="eyebrow" id="notebook-context">Canton-S · First collection</span><h2 id="notebook-title">Lab notebook</h2></div><button data-close="notebook" aria-label="Close notebook">Close</button></div>
+    <p>Actions are recorded automatically. Your prediction and conclusion are optional and saved as you type.</p>
+    <label for="prediction">Prediction / collection plan</label><textarea id="prediction" maxlength="5000" placeholder="Which evidence will you use to identify females and support virgin collection?"></textarea>
+    <label for="conclusion">Conclusion / what you learned</label><textarea id="conclusion" maxlength="5000" placeholder="What did you observe? What would you check next time?"></textarea>
+    <h3>Action history</h3><ol id="history" class="history"></ol><button data-act="export">Export notebook as text</button>
+  </dialog>
+  <dialog id="review" aria-labelledby="review-title"><div class="dialog-heading"><div><span class="eyebrow">Collection review</span><h2 id="review-title">Review your collection</h2></div><button data-close="review">Close</button></div>
+    <p id="review-summary"></p><ul id="review-rows" class="review-rows"></ul>
+    <p class="secondary">Flies left on the pad or set aside are not counted as mistakes. Reopen the batch to reconsider your choices; a new batch replaces the current notebook, which you can export first.</p>
+    <div class="tool-row"><button class="primary" data-act="retry">Adjust this collection</button><button data-act="new-batch">Start a new batch</button><button data-act="next-cross">Next: first genetic cross</button></div>
+  </dialog>
+  <dialog id="cross-review" aria-labelledby="cross-review-title"><div class="dialog-heading"><div><span class="eyebrow">First cross · Evidence review</span><h2 id="cross-review-title">What do the offspring tell you?</h2></div><button data-close="cross-review">Close</button></div>
+    <p id="cross-review-summary"></p><div class="result-counts" id="cross-review-counts"></div><p id="cross-review-learning"></p><ul id="cross-review-corrections" class="history"></ul><p id="cross-review-limitations" class="secondary"></p><button data-act="cross-rescore">Revisit F1 observations</button>
+  </dialog>
+  <script type="module" src="js/scope.js"></script>
+</body>
+</html>

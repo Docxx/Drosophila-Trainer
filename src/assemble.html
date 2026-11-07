@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fly assembly bench</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #20242a; overflow: hidden; font: 13px 'Segoe UI', sans-serif; color: #ddd; }
+      #info { position: absolute; left: 10px; top: 8px; }
+    </style>
+    <script type="importmap">
+      { "imports": { "three": "../node_modules/three/build/three.module.js", "three/addons/": "../node_modules/three/examples/jsm/" } }
+    </script>
+  </head>
+  <body>
+    <div id="info"></div>
+    <script type="module">
+      // Dev page: place parts, then call window.bench.* from devtools.
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { loadPart, applyTransform, splitComponents, ASSEMBLY } from './js/flyModel.js';
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(devicePixelRatio);
+      renderer.setSize(innerWidth, innerHeight);
+      document.body.appendChild(renderer.domElement);
+      const scene = new THREE.Scene();
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 1.6));
+      const sun = new THREE.DirectionalLight(0xffffff, 2);
+      sun.position.set(200, 300, 150);
+      scene.add(sun);
+      scene.add(new THREE.AxesHelper(60));
+      const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 1, 5000);
+      camera.position.set(100, 300, 400);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(100, 40, 0);
+
+      const colors = [0xd9a066, 0x8fb3d9, 0xd98f8f, 0x9fd98f, 0xd9d38f, 0xb38fd9, 0x8fd9d0];
+      const meshes = {};
+      async function add(id, t = ASSEMBLY[id] || { pos: [0, 0, 0], rot: [0, 0, 0] }, color) {
+        const g = await loadPart(id);
+        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: color ?? colors[Object.keys(meshes).length % colors.length], side: THREE.DoubleSide, roughness: 0.6 }));
+        applyTransform(m, t);
+        placed[id] = t;
+        meshes[id]?.removeFromParent();
+        meshes[id] = m;
+        scene.add(m);
+        return m;
+      }
+      const placed = {};
+      function set(id, t) {
+        placed[id] = { ...{ pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1] }, ...t };
+        applyTransform(meshes[id], placed[id]);
+        // Keep any mirrored twin in step.
+        if (meshes[`${id}~m`]) applyTransform(meshes[`${id}~m`], { ...placed[id], mirror: true });
+      }
+      function mirror(id) {
+        const m = new THREE.Mesh(meshes[id].geometry, meshes[id].material);
+        meshes[`${id}~m`]?.removeFromParent();
+        meshes[`${id}~m`] = m;
+        scene.add(m);
+        applyTransform(m, { ...placed[id], mirror: true });
+      }
+      function view(name, target = controls.target.toArray(), dist = 450) {
+        const d = { top: [0, 1, 0.001], bottom: [0, -1, 0.001], left: [0, 0, 1], right: [0, 0, -1], front: [1, 0, 0], back: [-1, 0, 0], iso: [0.6, 0.6, 0.6] }[name];
+        controls.target.fromArray(target);
+        camera.position.set(target[0] + d[0] * dist, target[1] + d[1] * dist, target[2] + d[2] * dist);
+        controls.update();
+      }
+      function only(ids) { for (const [k, m] of Object.entries(meshes)) m.visible = !ids || ids.includes(k); }
+      function box(id) { const b = new THREE.Box3().setFromObject(meshes[id]); return [b.min.toArray().map((v) => +v.toFixed(1)), b.max.toArray().map((v) => +v.toFixed(1))]; }
+      async function split(id, minTris = 200) {
+        const parts = splitComponents(await loadPart(id)).filter((g) => g.index.count / 3 >= minTris);
+        meshes[id]?.removeFromParent();
+        delete meshes[id];
+        return parts.map((g, i) => {
+          const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: colors[i % colors.length], side: THREE.DoubleSide }));
+          meshes[`${id}#${i}`] = m;
+          scene.add(m);
+          return [`${id}#${i}`, g.index.count / 3, box(`${id}#${i}`)];
+        });
+      }
+      // Principal axes of a part's vertices (smallest variance first).
+      function pca(id) {
+        const p = meshes[id].geometry.attributes.position.array;
+        const n = p.length / 3;
+        const m = [0, 0, 0];
+        for (let i = 0; i < p.length; i += 3) for (let k = 0; k < 3; k++) m[k] += p[i + k] / n;
+        const C = new THREE.Matrix3();
+        const c = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < p.length; i += 3) {
+          const d = [p[i] - m[0], p[i + 1] - m[1], p[i + 2] - m[2]];
+          for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) c[a * 3 + b] += (d[a] * d[b]) / n;
+        }
+        // Jacobi eigen-decomposition of the symmetric 3x3 covariance.
+        let A = [[c[0], c[1], c[2]], [c[3], c[4], c[5]], [c[6], c[7], c[8]]];
+        let V = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+        const mul = (X, Y) => X.map((r, i) => [0, 1, 2].map((j) => X[i][0] * Y[0][j] + X[i][1] * Y[1][j] + X[i][2] * Y[2][j]));
+        for (let it = 0; it < 50; it++) {
+          let [pp, q] = [0, 1];
+          for (const [a, b] of [[0, 1], [0, 2], [1, 2]]) if (Math.abs(A[a][b]) > Math.abs(A[pp][q])) [pp, q] = [a, b];
+          if (Math.abs(A[pp][q]) < 1e-9) break;
+          const th = 0.5 * Math.atan2(2 * A[pp][q], A[q][q] - A[pp][pp]);
+          const J = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+          J[pp][pp] = J[q][q] = Math.cos(th);
+          J[pp][q] = Math.sin(th);
+          J[q][pp] = -Math.sin(th);
+          const Jt = J[0].map((_, i) => J.map((r) => r[i]));
+          A = mul(mul(Jt, A), J);
+          V = mul(V, J);
+        }
+        const ev = [0, 1, 2].map((i) => ({ val: +A[i][i].toFixed(1), vec: [V[0][i], V[1][i], V[2][i]].map((v) => +v.toFixed(3)) })).sort((a, b) => a.val - b.val);
+        return { mean: m.map((v) => +v.toFixed(1)), ev };
+      }
+      // Rotation (Euler XYZ degrees) taking the part's thin axis to `ta` and middle axis to `tb`.
+      function orient(id, ta, tb, flipA = false, flipB = false) {
+        const { mean, ev } = pca(id);
+        const p = meshes[id].geometry.attributes.position.array;
+        const a = new THREE.Vector3(...ev[0].vec);
+        let mx = -1e9, mn = 1e9;
+        for (let i = 0; i < p.length; i += 3) {
+          const d = (p[i] - mean[0]) * a.x + (p[i + 1] - mean[1]) * a.y + (p[i + 2] - mean[2]) * a.z;
+          mx = Math.max(mx, d);
+          mn = Math.min(mn, d);
+        }
+        if (Math.abs(mn) > Math.abs(mx)) a.negate();
+        if (flipA) a.negate();
+        const b = new THREE.Vector3(...ev[1].vec);
+        if (flipB) b.negate();
+        const cc = new THREE.Vector3().crossVectors(a, b);
+        const A = new THREE.Vector3(...ta), B = new THREE.Vector3(...tb), Cc = new THREE.Vector3().crossVectors(A, B);
+        const R = new THREE.Matrix4().makeBasis(A, B, Cc).multiply(new THREE.Matrix4().makeBasis(a, b, cc).transpose());
+        const e = new THREE.Euler().setFromRotationMatrix(R, 'XYZ');
+        return [e.x, e.y, e.z].map((v) => +THREE.MathUtils.radToDeg(v).toFixed(2));
+      }
+      // Set rotation, then translate so the given local point (default: centroid) lands on `target`.
+      function place(id, rot, target, local = pca(id).mean, extra = {}) {
+        const m = new THREE.Vector3(...local).applyEuler(new THREE.Euler(...rot.map((d) => THREE.MathUtils.degToRad(d)), 'XYZ'));
+        const pos = [target[0] - m.x, target[1] - m.y, target[2] - m.z].map((v) => +v.toFixed(2));
+        set(id, { pos, rot, ...extra });
+        return pos;
+      }
+      window.bench = { pca, orient, place, add, set, mirror, placed, view, only, box, split, meshes, THREE, camera, controls };
+      (function loop() {
+        if (renderer.domElement.width !== Math.floor(innerWidth * devicePixelRatio)) {
+          renderer.setSize(innerWidth, innerHeight);
+          camera.aspect = innerWidth / innerHeight;
+          camera.updateProjectionMatrix();
+        }
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+      })();
+      for (const id of Object.keys(ASSEMBLY)) {
+        await add(id);
+        if (ASSEMBLY[id].bilateral) mirror(id);
+      }
+      document.getElementById('info').textContent = 'ready';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "fly-trainer",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "serve": "node tools/serve.mjs",
+    "snapshot": "electron . --snapshot=snapshot.png",
+    "check": "node tools/check-models.mjs && node --test tools/collection.test.mjs tools/experiment.test.mjs",
+    "convert-model": "node tools/convert-model.mjs",
+    "check:genetics": "node tools/check-puzzles.mjs"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "meshoptimizer": "^0.21.0"
+  },
+  "description": "Offline 3D trainer for Drosophila handling and genetics."
+}
