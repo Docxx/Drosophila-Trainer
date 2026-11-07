@@ -198,7 +198,23 @@ function cuticleMaterial(color, opts = {}) {
  * dark band along the posterior edge of each tergite. Those edges are the steps
  * where one tergite overlaps the next, i.e. surfaces facing backward (+x).
  */
-function paintBodyHalf(mesh, { sex, stage }) {
+// Meconium: the first gut contents, a dark greenish mass seen through the pale
+// ventral and lateral abdominal wall for the first hours after eclosion.
+// Ellipsoid in the fly frame; dorsal tergites (y > ~48) stay unpainted.
+const MECONIUM = { c: new THREE.Vector3(152, 32, MIDLINE_Z), r: new THREE.Vector3(20, 16, 42), color: new THREE.Color(0x2b3420) };
+
+function meconiumWeight(x, y, z) {
+  const d = Math.hypot((x - MECONIUM.c.x) / MECONIUM.r.x, (y - MECONIUM.c.y) / MECONIUM.r.y, (z - MECONIUM.c.z) / MECONIUM.r.z);
+  return 1 - THREE.MathUtils.smoothstep(d, 0.65, 1);
+}
+
+// Pale colours for newly eclosed flies; teneral (wings not yet expanded) are palest.
+const PALE = {
+  teneral: { cuticle: new THREE.Color(0xe3cf9f), abdomen: new THREE.Color(0xeee0b4), leg: 0xd6bc86 },
+  fresh: { cuticle: new THREE.Color(0xd7bb81), abdomen: new THREE.Color(0xe5ce96), leg: 0xc8a46c },
+};
+
+function paintBodyHalf(mesh, { sex, stage, meconium }) {
   mesh.updateMatrixWorld();
   const g = mesh.geometry;
   const p = g.attributes.position;
@@ -235,8 +251,9 @@ function paintBodyHalf(mesh, { sex, stage }) {
   }
   const col = new THREE.Color();
   const colors = new Float32Array(N * 3);
-  const cuticle = stage === 'fresh' ? new THREE.Color(0xd7bb81) : PALETTE.cuticle;
-  const abdomen = stage === 'fresh' ? new THREE.Color(0xe5ce96) : PALETTE.abdomen;
+  const cuticle = PALE[stage]?.cuticle || PALETTE.cuticle;
+  const abdomen = PALE[stage]?.abdomen || PALETTE.abdomen;
+  const young = stage !== 'mature';
   for (let i = 0; i < N; i++) {
     const x = wp[i * 3], y = wp[i * 3 + 1], z = wp[i * 3 + 2];
     let band = rim[i];
@@ -260,7 +277,8 @@ function paintBodyHalf(mesh, { sex, stage }) {
     // The posterior male tergites merge into a dark patch. Fresh males retain
     // sex combs but have little abdominal pigmentation immediately after eclosion.
     const maleTip = sex === 'M' ? THREE.MathUtils.smoothstep(x, 174, 187) * THREE.MathUtils.smoothstep(y, 27, 36) : 0;
-    col.lerp(PALETTE.band, Math.max(Math.min(1, band), maleTip) * (stage === 'fresh' ? 0.16 : 0.94));
+    col.lerp(PALETTE.band, Math.max(Math.min(1, band), maleTip) * (young ? 0.16 : 0.94));
+    if (meconium) col.lerp(MECONIUM.color, 0.85 * meconiumWeight(x, y, z));
     colors.set([col.r, col.g, col.b], i * 3);
   }
   g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -324,6 +342,28 @@ function buildSexComb(leg, joints, mirror, material) {
   return group;
 }
 
+/** A newly eclosed fly's wing before it has inflated: the printed wing shrunk
+ * about its hinge (file coordinates) and crumpled into soft folds. */
+function unexpandedWing(source) {
+  const g = source.clone();
+  const hinge = new THREE.Vector3(5.72, 15.72, 2.23);
+  const L = new THREE.Vector3(...WING_SEAT.long).normalize();
+  const A = new THREE.Vector3(-L.y, L.x, 0);
+  const p = g.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).sub(hinge);
+    const l = v.dot(L), a = v.dot(A), n = v.z;
+    const fold = 2.4 * Math.sin(l * 0.16) * Math.cos(a * 0.22) + 1.2 * Math.sin(a * 0.5 + l * 0.05);
+    v.copy(hinge).addScaledVector(L, l * 0.36).addScaledVector(A, a * 0.48);
+    v.z += n + fold * THREE.MathUtils.smoothstep(l, 4, 30);
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  p.needsUpdate = true;
+  g.computeVertexNormals();
+  return g;
+}
+
 function bristleGeometry(len, r0) {
   const g = new THREE.CylinderGeometry(r0 * 0.12, r0, len, 6, 10, false);
   g.translate(0, len / 2, 0);
@@ -375,9 +415,19 @@ function buildBristles(notum, { lengthScale = 1, thickness = 1 } = {}) {
  * Build a complete fly. Returns a Group in millimetres (about 2.2 mm long),
  * centred on its body, plus handles for changing markers later.
  */
-export async function buildFly({ sex = 'F', stage = 'mature', eye = 'red', wingSpread = 8, wingRaise = 45, base } = {}) {
+export const STAGES = ['teneral', 'fresh', 'mature'];
+
+/**
+ * `stage`: 'teneral' = just eclosed, wings not yet expanded, palest;
+ * 'fresh' = wings expanded, still pale; 'mature' = fully pigmented.
+ * `meconium` shows the dark gut contents of the first hours (independent of stage).
+ */
+export async function buildFly({ sex = 'F', stage = 'mature', meconium = false, eye = 'red', wingSpread = 8, wingRaise = 45, base } = {}) {
   if (!['F', 'M'].includes(sex)) throw new Error(`Unknown sex: ${sex}`);
-  if (!['mature', 'fresh'].includes(stage)) throw new Error(`Unknown developmental stage: ${stage}`);
+  if (!STAGES.includes(stage)) throw new Error(`Unknown developmental stage: ${stage}`);
+  const teneral = stage === 'teneral';
+  // Unexpanded wings lie close along the body rather than being held up.
+  if (teneral) { wingSpread = 14; wingRaise = 22; }
   const raw = new THREE.Group(); // in print units, fly frame
   const ids = Object.keys(ASSEMBLY);
   const geoms = await Promise.all(ids.map((id) => loadPart(id, base)));
@@ -390,18 +440,21 @@ export async function buildFly({ sex = 'F', stage = 'mature', eye = 'red', wingS
     sheen: 0.4,
     sheenColor: new THREE.Color(0xff8a70),
   });
-  const wingMat = new THREE.MeshPhysicalMaterial({
-    color: 0xd6d2c4,
-    roughness: 0.15,
-    transparent: true,
-    opacity: 0.36,
-    iridescence: 0.45,
-    iridescenceIOR: 1.5,
-    iridescenceThicknessRange: [250, 650],
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const cuticle = stage === 'fresh' ? new THREE.Color(0xd7bb81) : PALETTE.cuticle;
+  const wingMat = teneral
+    ? // Folded, still-wet wing pads are milky and nearly opaque.
+      new THREE.MeshPhysicalMaterial({ color: 0xd9d2bf, roughness: 0.45, transparent: true, opacity: 0.85, sheen: 0.3, side: THREE.DoubleSide })
+    : new THREE.MeshPhysicalMaterial({
+        color: 0xd6d2c4,
+        roughness: 0.15,
+        transparent: true,
+        opacity: 0.36,
+        iridescence: 0.45,
+        iridescenceIOR: 1.5,
+        iridescenceThicknessRange: [250, 650],
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+  const cuticle = PALE[stage]?.cuticle || PALETTE.cuticle;
   const materials = {
     body_l: cuticleMaterial(0xffffff, { vertexColors: true }),
     body_r: cuticleMaterial(0xffffff, { vertexColors: true }),
@@ -411,7 +464,10 @@ export async function buildFly({ sex = 'F', stage = 'mature', eye = 'red', wingS
     antenna_l: cuticleMaterial(cuticle.clone().multiplyScalar(0.85)),
     wing_l: wingMat,
   };
-  const legMat = cuticleMaterial(stage === 'fresh' ? 0xc8a46c : PALETTE.leg);
+  const legMat = cuticleMaterial(PALE[stage]?.leg ?? PALETTE.leg);
+  const sourceGeoms = [...geoms]; // cached and shared; never disposed per fly
+  const wingIndex = ids.indexOf('wing_l');
+  if (teneral) geoms[wingIndex] = unexpandedWing(geoms[wingIndex]);
 
   const placement = (id) => (ASSEMBLY[id].seat ? { ...ASSEMBLY[id], ...wingSeat(wingSpread, wingRaise) } : ASSEMBLY[id]);
   const parts = {};
@@ -435,12 +491,12 @@ export async function buildFly({ sex = 'F', stage = 'mature', eye = 'red', wingS
       parts[twin.name] = twin;
     }
   });
-  parts.wing_l.castShadow = parts.wing_r.castShadow = false;
+  parts.wing_l.castShadow = parts.wing_r.castShadow = teneral;
   parts.wing_l.renderOrder = parts.wing_r.renderOrder = 2;
 
   raw.updateMatrixWorld(true);
   for (const body of [parts.body_l, parts.body_r]) {
-    paintBodyHalf(body, { sex, stage });
+    paintBodyHalf(body, { sex, stage, meconium });
     if (sex === 'M') shapeMaleAbdomen(body);
   }
   const bristles = buildBristles(parts.notum);
@@ -490,7 +546,7 @@ export async function buildFly({ sex = 'F', stage = 'mature', eye = 'red', wingS
     dispose() {
       // Source parts are cached and shared. Dispose only instance-owned geometry
       // and materials when changing activities, keeping those sources reusable.
-      const sources = new Set([...geoms, ...legGeoms]);
+      const sources = new Set([...sourceGeoms, ...legGeoms]);
       const geometries = new Set();
       const materials = new Set();
       fly.traverse((object) => {

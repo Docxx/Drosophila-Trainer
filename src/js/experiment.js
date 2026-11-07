@@ -1,10 +1,27 @@
-import { CollectionSession, makePopulation } from './collection.js';
+import { CollectionSession, makePopulation, RESTS } from './collection.js';
 import { parseGenotype, offspring, phenotype } from './genetics/genetics.js';
 
 export const CROSS_SCENARIOS = Object.freeze({
-  documented: { title: 'Documented collection', clearing: '09:00: all adults removed; food and walls checked. Collected at 11:00, 25 °C.', evidence: 'A complete clearing and two-hour interval support virgin collection. Identify females by anatomy.' },
-  uncertain: { title: 'Uncertain vial history', clearing: 'Morning clearing recorded, but the time and completeness were not checked. Collected at 11:00, 25 °C.', evidence: 'Older adults may remain. Appearance does not establish mating history. Some females may have stored sperm; use the offspring as evidence.' },
+  documented: { title: 'Documented collection', clearing: 'Cleared at 09:00, all adults removed. Collected at 17:00, 25 °C.', evidence: 'Every fly is under 8 hours old: the females are virgins. Identify them by anatomy.' },
+  uncertain: { title: 'Uncertain vial history', clearing: 'A morning clearing was noted, but nobody recorded when or whether it was complete. Collected at 17:00, 25 °C.', evidence: 'These females could be older than 8 hours, and appearance cannot show whether they have mated.' },
 });
+// After the learner discards everything and clears the vial themselves.
+export const RECLEARED_SOURCE = Object.freeze({
+  title: 'Re-cleared vial',
+  clearing: 'You discarded every adult and cleared the vial yourself; collected 8 hours later at 25 °C.',
+  evidence: 'Your own complete clearing: every female here is a virgin. Identify them by anatomy.',
+});
+export const RECLEAR_DELAY_HOURS = 8;
+
+// Paternity model. A virgin female mates once in the 2 days with the males;
+// her mate is drawn from the males present. A previously mated female is
+// usually still unreceptive (sex peptide), so she remates with probability
+// REMATING_PROBABILITY; if she does, the new male sires LAST_MALE_SHARE of her
+// later offspring (last-male sperm precedence, P2 about 0.8). Illustrative
+// teaching values, documented in README and the About panel.
+export const REMATING_PROBABILITY = 0.3;
+export const LAST_MALE_SHARE = 0.8;
+const TESTER_MALES = 2;
 export const SCORE_CLASSES = Object.freeze({
   'red-F': 'Red-eyed female', 'white-F': 'White-eyed female',
   'red-M': 'Red-eyed male', 'white-M': 'White-eyed male', uncertain: 'Uncertain',
@@ -44,14 +61,18 @@ export class CrossSession {
   #scores = {};
   #offspring = [];
   #report = null;
+  #seed;
+  #recleared = false;
   constructor({ seed = Math.floor(Math.random() * 4294967296), scenario = 'documented', saved = null } = {}) {
     if (saved) {
-      if (saved.version !== 1 || !CROSS_SCENARIOS[saved.scenario] || !['collecting', 'developing', 'scoring', 'review'].includes(saved.phase)) throw new Error('Unsupported experiment notebook');
+      if (saved.version !== 2 || !CROSS_SCENARIOS[saved.scenario] || !['collecting', 'developing', 'scoring', 'review'].includes(saved.phase)) throw new Error('Unsupported experiment notebook');
       seed = saved.seed; scenario = saved.scenario;
+      this.#recleared = saved.recleared === true && scenario === 'uncertain';
     }
+    this.#seed = seed >>> 0;
     this.#scenario = scenario;
     if (!CROSS_SCENARIOS[scenario]) throw new Error('Unknown source-vial scenario');
-    this.#collection = new CollectionSession({ seed, saved: saved?.collection || null, startDetail: 'Opened white-eyed stock parent collection for the first cross.' });
+    this.#collection = this.#newCollection(saved?.collection || null, 'Opened white-eyed stock parent collection for the first cross.');
     if (saved) {
       if (this.#collection.snapshot().submitted) throw new Error('Invalid experiment collection');
       if (!CROSS_PREDICTIONS[saved.prediction] || !CROSS_INTERPRETATIONS[saved.interpretation]) throw new Error('Invalid saved interpretation');
@@ -72,14 +93,22 @@ export class CrossSession {
       }
     } else this.log('mission', null, `Opened first cross: white-eyed stock; ${CROSS_SCENARIOS[scenario].title.toLowerCase()}.`);
   }
+  // The parents' vial: a re-clear starts a fresh, fully documented batch.
+  #batchSeed() { return this.#recleared ? (this.#seed ^ 0x5bd1e995) >>> 0 : this.#seed; }
+  #uncertain() { return this.#scenario === 'uncertain' && !this.#recleared; }
+  #newCollection(saved, startDetail) {
+    const seed = this.#batchSeed();
+    return new CollectionSession({ seed, saved, startDetail, population: makePopulation(seed, { holdover: false }) });
+  }
   #parents() {
     let female = 0;
-    return makePopulation(this.#collection.seed).map((f) => {
-      // Mixed histories deliberately have no visual marker. Age/mating status
-      // are independent of the pale/mature rendering used by this first model.
-      const mated = this.#scenario === 'uncertain' && f.sex === 'F' && female++ % 2 === 0;
-      return { ...f, eye: 'white', stage: this.#scenario === 'uncertain' ? 'mature' : 'fresh',
-        ageMinutes: this.#scenario === 'uncertain' ? 2880 + f.ageMinutes : f.ageMinutes,
+    const uncertain = this.#uncertain();
+    return makePopulation(this.#batchSeed(), { holdover: false }).map((f) => {
+      // Mixed histories deliberately have no visual marker: every fly in an
+      // uncertain vial looks mature, whether or not she has mated.
+      const mated = uncertain && f.sex === 'F' && female++ % 2 === 0;
+      return { ...f, eye: 'white',
+        ...(uncertain ? { stage: 'mature', meconium: false, ageMinutes: 2880 + f.ageMinutes } : {}),
         matingHistory: f.sex === 'F' ? (mated ? 'previous-white-male' : 'unmated') : null };
     });
   }
@@ -88,29 +117,45 @@ export class CrossSession {
     return this.#parents().filter((f) => ids.includes(f.id));
   }
   get appearance() {
-    return this.#parents().map(({ matingHistory, ageMinutes, ...f }) => f);
+    return this.#parents().map(({ matingHistory, ageMinutes, holdover, ...f }) => f);
   }
   specimens(page = 0) {
     if (this.#phase === 'collecting') return this.appearance;
     if (this.#phase === 'developing') return [];
     return this.#offspring.slice(page * 6, page * 6 + 6).map(({ g, ...f }, index) => ({ ...f, x: (index % 3 - 1) * 3.05, z: (index < 3 ? -1 : 1) * 1.85 }));
   }
+  /** Share of each mother's offspring sired by a white-eyed male, decided once per mother. */
+  #whiteShare(mother, whiteMales, random) {
+    const mateIsWhite = () => random() < whiteMales / (whiteMales + TESTER_MALES);
+    if (mother.matingHistory === 'unmated') return mateIsWhite() ? 1 : 0;
+    // Stored sperm from an earlier white-eyed mate.
+    if (random() >= REMATING_PROBABILITY) return 1;
+    return mateIsWhite() ? 1 : 1 - LAST_MALE_SHARE;
+  }
   #makeOffspring() {
     const parents = this.#selected(), females = parents.filter((f) => f.sex === 'F');
     if (!females.length) return [];
-    const extraMale = parents.some((f) => f.sex === 'M');
-    const random = randomFor(this.#collection.seed);
+    const whiteMales = parents.filter((f) => f.sex === 'M').length;
+    const random = randomFor(this.#batchSeed());
+    const shares = females.map((mother) => this.#whiteShare(mother, whiteMales, random));
     const result = [];
     for (let i = 0; i < 12; i++) {
-      const mother = females[Math.floor(random() * females.length)];
-      // Illustrative paternity model, not a measured sperm-competition ratio:
-      // prior sperm contributes 75%, or an extra resident male competes at 50%.
-      const unintendedShare = mother.matingHistory !== 'unmated' ? 0.75 : extraMale ? 0.5 : 0;
-      const g = sample(random() < unintendedShare ? UNINTENDED : INTENDED, random);
+      const m = Math.floor(random() * females.length);
+      const g = sample(random() < shares.at(m) ? UNINTENDED : INTENDED, random);
       const ph = phenotype(g);
-      result.push({ id: `f1-${i + 1}`, label: `F1 ${String(i + 1).padStart(2, '0')}`, sex: ph.sex, eye: ph.eye, stage: 'mature', heading: random() * Math.PI * 2, g });
+      result.push({ id: `f1-${i + 1}`, label: `F1 ${String(i + 1).padStart(2, '0')}`, sex: ph.sex, eye: ph.eye, stage: 'mature', meconium: false,
+        heading: random() * Math.PI * 2, rest: RESTS.at(Math.floor(random() * RESTS.length)), g });
     }
     return result;
+  }
+  /** Discard every adult in an uncertain vial and clear it yourself; costs a collection interval. */
+  reclear() {
+    if (this.#phase !== 'collecting' || !this.#uncertain()) throw new Error('Only an uncertain vial can be re-cleared before the cross is set up.');
+    const events = this.#collection.snapshot().events;
+    this.#recleared = true;
+    this.#collection = this.#newCollection(null, `Discarded all adults from the uncertain vial and re-cleared it; collected again ${RECLEAR_DELAY_HOURS} hours later.`);
+    // Keep the earlier history in the notebook ahead of the new batch.
+    this.#collection.restoreHistory(events);
   }
   log(action, id, detail) { this.#collection.log(action, id, detail); }
   move(id, destination) {
@@ -166,7 +211,7 @@ export class CrossSession {
         : conclusion === 'unintended'
         ? 'White-eyed daughters are not expected from the recorded w/w females and +/Y tester males. They indicate a white-eyed father in this simplified stock system. A previously mated female or an extra white-eyed male can both explain this; offspring alone cannot distinguish those causes.'
         : 'The observed sample is consistent with the intended cross: red-eyed daughters and white-eyed sons. A small sample without unexpected daughters does not prove every mother was virgin.',
-      limitations: 'Twelve offspring are sampled; ratios fluctuate. Development uses fixed teaching events. Fertility is idealised. The paternity weights illustrate possible consequences, not measured biological frequencies.' };
+      limitations: 'Twelve offspring vary by chance. The assumptions behind this cross are under About this model.' };
   }
   submit() {
     if (this.#phase === 'review') return structuredClone(this.#report);
@@ -182,7 +227,9 @@ export class CrossSession {
   }
   snapshot() {
     const base = this.#collection.snapshot();
-    return { ...base, scenario: this.#scenario, source: { ...CROSS_SCENARIOS[this.#scenario] }, phase: this.#phase, day: this.#day,
+    return { ...base, scenario: this.#scenario, recleared: this.#recleared, canReclear: this.#phase === 'collecting' && this.#uncertain(),
+      delayHours: this.#recleared ? RECLEAR_DELAY_HOURS : 0,
+      source: { ...(this.#recleared ? RECLEARED_SOURCE : CROSS_SCENARIOS[this.#scenario]) }, phase: this.#phase, day: this.#day,
       submitted: this.#phase !== 'collecting', report: this.#report ? structuredClone(this.#report) : null,
       prediction: this.#prediction, interpretation: this.#interpretation,
       scores: { ...this.#scores }, scored: Object.keys(this.#scores).length,
@@ -191,7 +238,7 @@ export class CrossSession {
     };
   }
   serialize() {
-    return { version: 1, seed: this.#collection.seed, scenario: this.#scenario, phase: this.#phase, day: this.#day,
+    return { version: 2, seed: this.#seed, recleared: this.#recleared, scenario: this.#scenario, phase: this.#phase, day: this.#day,
       prediction: this.#prediction, interpretation: this.#interpretation, scores: { ...this.#scores }, collection: this.#collection.serialize() };
   }
 }

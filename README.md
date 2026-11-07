@@ -16,9 +16,14 @@ The launcher installs dependencies on first use; subsequent runs work offline.
 
 ## Current activities
 
-**Virgin collection:** inspect six flies from a documented, completely cleared
-Canton-S vial. Collect at least two females, set uncertain flies aside, and declare
-the collection ready. Feedback appears only after submission. Reopen the same batch
+**Virgin collection:** inspect seven flies from a Canton-S vial cleared at 09:00 and
+collected at 17:00 (25 °C). Six eclosed since the clearing, at ages spread across the
+8 hours: the youngest still have folded, unexpanded wings, and the meconium shows for
+the first few hours. One older, fully pigmented fly was missed at clearing; collecting
+it is an error whatever its sex or actual history, because the record no longer
+supports it. Flies land on their sides or backs at random. Collect at least two
+virgin females, set uncertain flies aside, and declare the collection ready.
+Feedback appears only after submission. Reopen the same batch
 to correct mistakes or start a new batch. Collection decisions, predictions,
 conclusions and action history are saved locally in the lab notebook, which can be
 exported as text. Starting a new batch replaces that notebook; export it first if
@@ -31,6 +36,10 @@ Canton-S males. Advance to parent removal on day 2 and examination of an F1 samp
 on day 12. Inspect twelve offspring in two groups of six, record eye colour and sex
 (or Uncertain), and interpret the evidence before reviewing the observations.
 
+With an uncertain vial, **Discard these flies and re-clear the vial** throws every
+adult away and starts a fresh, fully documented batch at a cost of 8 hours: the
+conservative choice a fly worker would usually make.
+
 An extra white-eyed male or previously mated female can contribute unintended
 paternity. The review explains what the offspring support without revealing an
 individual mother's mating history. Absence of unexpected offspring is not proof
@@ -41,13 +50,14 @@ The **First cross** tab is always accessible; the collection review also links t
 it. Under **Try another vial history**, start a new cross batch with the alternate
 source record. New batches replace only their own mission notebook.
 
-**Reference bench:** compare four known specimens: mature female, mature male,
-pale female and pale male. Inspection notes describe what to look for.
+**Reference bench:** compare five known specimens: mature female, mature male,
+just-eclosed female (unexpanded wings, meconium), pale female (meconium) and pale
+male. Inspection notes describe what to look for.
 
-The introductory source-vial scenario uses a two-hour collection interval at 25 C
-following a complete clearing. The exercise teaches sex identification alongside
-collection history; age and pale colour are not universal guarantees of virginity.
-The interval is supported by the [laboratory-handling primer hosted by Bloomington](https://bdsc.indiana.edu/pdf/Experiments_with_Drosophila_for_Biology_Courses.pdf).
+The collection window is the standard one: females do not mate for about 8–10 hours
+after eclosion at 25 °C (about 16 hours at 18 °C), per the [Berg lab introduction](https://depts.washington.edu/cberglab/wordpress/outreach/an-introduction-to-fruit-flies/1000/).
+The exercises use 8 hours. Learner-facing caveats live in one **About this model**
+panel rather than in the instructions.
 
 ## Controls
 
@@ -100,6 +110,9 @@ The 3D cross mission now uses the shared genetics engine for Mendelian progeny.
 The advanced puzzle interface has not yet been reintroduced. A local V1 source recovery archive is in
 `tmp/migration/v1-source.zip`; it is outside the active app and excluded from Git.
 
+The project is under Git (local repository, branch `main`). Commit before handing the
+folder between assistants or people so every change can be reviewed and undone.
+
 ## Model provenance and limitations
 
 The anatomy meshes derive from the Hidalgo lab (University of Birmingham) external
@@ -108,15 +121,21 @@ source licence before distributing these derived assets outside the lab.
 
 Male anatomy is a first-pass adaptation of the female-derived source: shorter
 abdomen, posterior pigmentation and sex combs on both forelegs. Detailed male
-terminalia have not been reconstructed. Pale flies demonstrate reduced cuticle
-pigmentation; expanded wings are shown, while unexpanded wings and meconium are
-not yet modelled. Mating history is maintained separately from outward appearance.
+terminalia have not been reconstructed. Young flies come in two stages: `teneral`
+(under an hour old: palest, with the printed wing shrunk and crumpled into an
+unexpanded pad) and `fresh` (wings expanded, still pale). A dark meconium is painted
+through the ventral and lateral abdomen for the first 5 hours. These timings are
+simplified teaching values. Mating history is maintained separately from outward
+appearance.
 
 The cross samples twelve adults rather than enforcing an exact 1:1 ratio.
-Development follows fixed teaching events; fertility is idealised. For illustration,
-prior stored sperm contributes 75% of fertilisations for a previously mated female,
-or an extra selected white-eyed male competes at 50% when no prior mating exists.
-These are simulation weights, not measured paternity frequencies or lab predictions.
+Development follows fixed teaching events; fertility is idealised. Paternity: a
+virgin female mates once during the two days, with a male drawn from those present
+(two red-eyed testers plus any white-eyed males collected by mistake). A previously
+mated female is usually still unreceptive, so she remates with probability 0.3; if
+she does, the new male sires 0.8 of her later offspring, following the usual
+last-male sperm precedence benchmark ([Laturney et al. 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6121866/)).
+These are illustrative teaching values, not lab predictions.
 No females yields no progeny in this model, while the review acknowledges other
 possible causes in real work. Only known X-linked white inheritance is represented
 in this mission; other pigment mutations, nondisjunction and parthenogenesis are

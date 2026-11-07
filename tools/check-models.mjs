@@ -17,6 +17,11 @@ const originalColours = female.parts.body_l.geometry.attributes.color.array.slic
 const male = await buildFly({ sex: 'M' });
 const paleMale = await buildFly({ sex: 'M', stage: 'fresh' });
 const femaleAgain = await buildFly();
+const wingSource = female.parts.wing_l.geometry.attributes.position.array.slice();
+const teneral = await buildFly({ stage: 'teneral', meconium: true });
+const withMeconium = await buildFly({ stage: 'fresh', meconium: true });
+const withoutMeconium = await buildFly({ stage: 'fresh' });
+const wingAfter = await buildFly();
 
 const comb = (fly) => {
   const found = [];
@@ -34,7 +39,16 @@ assert.notDeepEqual(male.parts.body_l.geometry.attributes.position.array, origin
 assert.notDeepEqual(paleMale.parts.body_l.geometry.attributes.color.array, male.parts.body_l.geometry.attributes.color.array, 'Pale male pigment must differ from mature pigment');
 assert.equal(male.object.scale.x, female.object.scale.x, 'Abdomen shortening must not enlarge the male head');
 
-for (const fly of [female, male, paleMale, femaleAgain]) {
+// Teneral flies: unexpanded wings are much smaller, and the shared wing source is untouched.
+const span = (mesh) => new THREE.Box3().setFromBufferAttribute(mesh.geometry.attributes.position).getSize(new THREE.Vector3());
+assert(span(teneral.parts.wing_l).x < span(female.parts.wing_l).x * 0.6, 'Unexpanded wings must be shorter than expanded wings');
+assert.deepEqual(wingAfter.parts.wing_l.geometry.attributes.position.array, wingSource, 'Crumpling a teneral wing must not alter the cached wing');
+// Meconium darkens the ventral abdomen only.
+const luminance = (fly) => { const c = fly.parts.body_l.geometry.attributes.color.array; let min = 3; for (let i = 0; i < c.length; i += 3) min = Math.min(min, c[i] + c[i + 1] + c[i + 2]); return min; };
+assert(luminance(withMeconium) < luminance(withoutMeconium) - 0.3, 'Meconium must show as a dark patch');
+assert.deepEqual(comb(teneral), [], 'A teneral female has no sex combs');
+
+for (const fly of [female, male, paleMale, femaleAgain, teneral, withMeconium]) {
   fly.object.updateMatrixWorld(true);
   fly.object.traverse((o) => {
     if (!o.isMesh) return;

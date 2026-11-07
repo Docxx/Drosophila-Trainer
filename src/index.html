@@ -21,18 +21,19 @@
       <section class="exercise-only">
         <span class="eyebrow">01 · First collection</span>
         <h2>Find your females</h2>
-        <p>Collect <strong>at least two virgin females</strong> from this batch. Leave uncertain flies on the pad or set them aside.</p>
+        <p>Collect <strong>at least two virgin females</strong> from this batch. Leave anything you are unsure about on the pad, or set it aside.</p>
         <div class="source-record"><h3>Source vial · Canton-S</h3>
-          <dl><div><dt>Cleared</dt><dd>09:00</dd></div><div><dt>Collected</dt><dd>11:00</dd></div><div><dt>Temperature</dt><dd>25 °C</dd></div></dl>
-          <p>All adults removed at clearing; food and vial walls checked. This teaching batch uses a two-hour collection interval.</p>
+          <dl><div><dt>Cleared</dt><dd>09:00</dd></div><div><dt>Collected</dt><dd>17:00</dd></div><div><dt>Temperature</dt><dd>25 °C</dd></div></dl>
+          <p>All adults removed at clearing.</p>
         </div>
-        <details class="support"><summary>Why the vial history matters</summary><p>The complete clearing and short collection interval support collecting females as virgins in this batch. You still need to identify their sex. Colour alone does not establish sex or mating history.</p><p>Collection windows depend on conditions and lab protocols. This is a defined teaching scenario, not a universal time limit.</p></details>
+        <details class="support"><summary>Why the vial history matters</summary><p>A fly that eclosed after 09:00 is under 8 hours old, and females that young have not mated. The record does half the work: you still have to find the females, and spot any fly too old to fit the record.</p></details>
       </section>
       <section class="cross-only">
         <span class="eyebrow">02 · From collection to offspring</span><h2>Who fathered these flies?</h2>
-        <p>Use a separate white-eyed stock for this mission. Collect candidate females, cross them to known red-eyed males, and interpret the F1 offspring. Your Canton-S collection stays in its own notebook.</p>
+        <p>Collect females from a white-eyed stock, cross them to red-eyed males, and read the answer in their offspring.</p>
         <div class="source-record"><h3>Maternal stock · w¹¹¹⁸</h3><p id="cross-source-title"></p><p id="cross-source-record"></p><p id="cross-source-evidence"></p></div>
-        <div class="cross-collecting"><p>Try to collect at least two females. There is no parent-selection verdict before this cross: your decisions affect the offspring.</p>
+        <div class="cross-collecting"><p>Collect at least two females. Nothing is checked before the cross: your choices show up in the offspring.</p>
+          <button data-act="cross-reclear" hidden>Discard these flies and re-clear the vial · +8 hours</button>
           <label for="cross-prediction">Prediction for the intended cross</label><select id="cross-prediction"><option value="unknown">Not sure yet</option><option value="expected">Red daughters; white sons</option><option value="red">All red-eyed</option><option value="white">All white-eyed</option></select>
           <button data-act="cross-start" class="primary">Set up cross · add two Canton-S males</button>
         </div>
@@ -41,7 +42,7 @@
           <p>Stock records: white-eyed females carry two white alleles. Canton-S males carry the normal allele on their X chromosome.</p>
           <div class="chromosome-pair"><span>Mother</span><b class="allele-white">Xʷ</b><b class="allele-white">Xʷ</b></div><div class="chromosome-pair"><span>Tester male</span><b class="allele-red">X⁺</b><b>Y</b></div>
           <p>A daughter receives one X from each parent; a son receives his mother's X and his father's Y. A normal allele of the white gene masks the recessive white-eye mutation in this simplified background.</p>
-          <p class="secondary">Conventional notation: w/w ♀ × +/Y ♂. These are recorded stock genotypes, not a reveal of hidden individuals.</p>
+          <p class="secondary">Conventional notation: w/w ♀ × +/Y ♂.</p>
         </details>
         <details class="support"><summary>Try another vial history</summary><label for="cross-scenario">New batch source record</label><select id="cross-scenario"><option value="documented">Documented collection</option><option value="uncertain">Uncertain vial history</option></select><button data-act="cross-new">Start new cross batch</button><p>A new batch replaces this cross notebook. Export it first if you want to keep the record.</p></details>
       </section>
@@ -51,9 +52,17 @@
         <p>Double-click to focus. <kbd>Q</kbd>/<kbd>E</kbd> turn · <kbd>F</kbd> flip · <kbd>Esc</kbd> overview</p>
       </details>
       <div class="tool-row" role="group" aria-label="Handling tool"><button data-tool="move" aria-pressed="true" class="on">Move <kbd>G</kbd></button><button data-tool="rotate" aria-pressed="false">Rotate <kbd>R</kbd></button></div>
-      <details class="support"><summary>Field guide</summary><p>Look for sex combs on the first tarsal segment of the male forelegs. Mature males usually have a darker, shorter abdominal tip. Young males can be pale, so check more than body colour.</p><p>These first-pass models have expanded wings. Meconium and unexpanded wings are not yet represented.</p></details>
+      <details class="support"><summary>Field guide</summary><p>Look for sex combs on the first tarsal segment of the male forelegs. Mature males usually have a darker, shorter abdominal tip. Young males can be pale, so check more than body colour.</p><p>Newly eclosed flies are pale. For the first few hours a dark meconium shows through the underside of the abdomen, and in the first hour the wings are still folded and unexpanded.</p></details>
       <details class="support"><summary>Worked example</summary><p>In a separate example, a pale fly has visible foreleg sex combs. That identifies a male, so he is excluded from a female collection. A fly identified as female still needs an appropriate collection history before she can be used as a virgin.</p></details>
       <details class="support lesson-only"><summary>Supervisor</summary><label class="check-label"><input type="checkbox" id="supervisor-enabled" checked /> Offer occasional reminders</label><button data-act="hint">Ask for a hint</button><p id="supervisor-note" aria-live="polite">Help is available whenever you need it.</p></details>
+      <details class="support about"><summary>About this model</summary>
+        <p><strong>Virgin window.</strong> Females do not mate for about 8–10 hours after eclosion at 25 °C (about 16 hours at 18 °C). The exercises use 8 hours.</p>
+        <p><strong>Age cues.</strong> Wings expand within the first hour and the meconium shows for a few hours. These timings are simplified, and pigment darkens gradually over the first day.</p>
+        <p><strong>Clues, not proof.</strong> Mating history is tracked separately from appearance, so a fly's look never guarantees she is a virgin.</p>
+        <p><strong>Paternity.</strong> A previously mated female remates during the two days with a chance of 30%; if she does, the new male fathers 80% of her later offspring (last-male sperm precedence). Illustrative values.</p>
+        <p><strong>Samples.</strong> Twelve offspring are sampled, so ratios vary by chance. Development uses fixed events and fertility is idealised.</p>
+        <p><strong>Not modelled.</strong> Male terminalia, other pigment mutations, nondisjunction.</p>
+      </details>
     </header>
 
     <section class="microscope" aria-label="Virtual dissecting microscope">
@@ -63,7 +72,7 @@
     </section>
 
     <aside class="hud right">
-      <h2 id="inventory-title">Your batch · six flies</h2>
+      <h2 id="inventory-title">Your batch</h2>
       <div class="chips" id="specimens" role="group" aria-label="Choose a fly"></div>
       <section class="inspection"><h3 id="specimen-name">Preparing flies…</h3><p id="specimen-note">Inspect the abdomen and forelegs from different angles.</p><button data-act="focus" data-needs-selection disabled>Focus selected fly</button><button data-act="overview">Whole pad</button></section>
       <section class="collection-controls transfers" aria-label="Move the selected fly">
@@ -99,7 +108,7 @@
   </dialog>
   <dialog id="review" aria-labelledby="review-title"><div class="dialog-heading"><div><span class="eyebrow">Collection review</span><h2 id="review-title">Review your collection</h2></div><button data-close="review">Close</button></div>
     <p id="review-summary"></p><ul id="review-rows" class="review-rows"></ul>
-    <p class="secondary">Flies left on the pad or set aside are not counted as mistakes. Reopen the batch to reconsider your choices; a new batch replaces the current notebook, which you can export first.</p>
+    <p class="secondary">Flies left on the pad or set aside never count against you. A new batch replaces this notebook, so export it first if you want to keep it.</p>
     <div class="tool-row"><button class="primary" data-act="retry">Adjust this collection</button><button data-act="new-batch">Start a new batch</button><button data-act="next-cross">Next: first genetic cross</button></div>
   </dialog>
   <dialog id="cross-review" aria-labelledby="cross-review-title"><div class="dialog-heading"><div><span class="eyebrow">First cross · Evidence review</span><h2 id="cross-review-title">What do the offspring tell you?</h2></div><button data-close="cross-review">Close</button></div>

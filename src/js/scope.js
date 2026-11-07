@@ -100,7 +100,8 @@ function resize() {
 new ResizeObserver(resize).observe(canvas);
 
 // ---- Activities and saved notebook ------------------------------------------
-const STORAGE_KEY = 'fly-trainer.collection.v1';
+// v2: 8-hour batches with ages, poses and a holdover fly; v1 notebooks are left untouched.
+const STORAGE_KEY = 'fly-trainer.collection.v2';
 let persistenceWarning = '';
 function restoreSession() {
   try {
@@ -113,7 +114,7 @@ function restoreSession() {
   return new CollectionSession();
 }
 let session = restoreSession();
-const CROSS_STORAGE_KEY = 'fly-trainer.cross.v1';
+const CROSS_STORAGE_KEY = 'fly-trainer.cross.v2';
 function restoreCross() {
   try {
     const raw = localStorage.getItem(CROSS_STORAGE_KEY);
@@ -135,18 +136,21 @@ let drag = null;
 let helpVisits = 0;
 const specimens = [];
 const references = [
-  { id: 'reference-female', label: 'Mature female', sex: 'F', stage: 'mature', x: -1.65, z: -1.5, heading: -1.25, note: 'Inspect the pointed abdomen and separated pigment bands. Females lack foreleg sex combs.' },
-  { id: 'reference-male', label: 'Mature male', sex: 'M', stage: 'mature', x: 1.65, z: -1.5, heading: -1.25, note: 'Compare the shorter abdomen and dark posterior tergites. Inspect the first tarsal segment of each foreleg for sex combs.' },
-  { id: 'reference-pale-female', label: 'Pale female', sex: 'F', stage: 'fresh', x: -1.65, z: 1.5, heading: -1.25, note: 'Pale colour is a developmental cue, not a mating record. These reference wings are expanded; unexpanded wings and meconium are not modelled yet.' },
-  { id: 'reference-pale-male', label: 'Pale male', sex: 'M', stage: 'fresh', x: 1.65, z: 1.5, heading: -1.25, note: 'The abdomen has little pigmentation. Inspect the forelegs for sex combs; pale colour alone does not identify a female.' },
+  { id: 'reference-female', label: 'Mature female', sex: 'F', stage: 'mature', x: -3.05, z: -1.5, heading: -1.25, rest: 'left', note: 'The pointed abdomen with separate pigment bands. Females have no sex combs on the forelegs.' },
+  { id: 'reference-male', label: 'Mature male', sex: 'M', stage: 'mature', x: 0, z: -1.5, heading: -1.25, rest: 'left', note: 'A shorter abdomen with a dark tip. Zoom in on the first tarsal segment of each foreleg to see the sex combs.' },
+  { id: 'reference-teneral-female', label: 'Just-eclosed female', sex: 'F', stage: 'teneral', meconium: true, x: 3.05, z: -1.5, heading: -1.25, rest: 'left', note: 'Under an hour old: very pale, wings still folded and unexpanded, and the dark meconium in the abdomen. All signs she eclosed very recently.' },
+  { id: 'reference-pale-female', label: 'Pale female', sex: 'F', stage: 'fresh', meconium: true, x: -1.65, z: 1.5, heading: -1.25, rest: 'left', note: 'A few hours old: wings expanded but still pale, with the meconium showing through the underside of the abdomen.' },
+  { id: 'reference-pale-male', label: 'Pale male', sex: 'M', stage: 'fresh', x: 1.65, z: 1.5, heading: -1.25, rest: 'left', note: 'A young male: little abdominal pigment yet, so he can pass for a female from above. The sex combs on his forelegs give him away.' },
 ];
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const padPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
-function startingRotation(heading) {
+// How a knocked-out fly lies: on its left side (left side up), right side or back.
+const REST_ROLL = { left: -Math.PI / 2, right: Math.PI / 2, back: Math.PI };
+function startingRotation(heading, rest = 'left') {
   return new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading)
-    .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2));
+    .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), REST_ROLL[rest] ?? REST_ROLL.left));
 }
 function save() {
   try {
@@ -242,7 +246,7 @@ function select(specimen, log = true) {
     record('inspect', `Inspected ${specimen.reference.label}.`);
     helpVisits++;
     if (helpVisits === 4 && document.getElementById('supervisor-enabled').checked)
-      document.getElementById('supervisor-note').textContent = 'Try the underside view at higher magnification. Can you identify the foreleg sex combs?';
+      document.getElementById('supervisor-note').textContent = 'Try the underside view at higher magnification: the forelegs show sex combs, and the abdomen shows any meconium.';
   }
   renderCrossControls();
 }
@@ -264,10 +268,11 @@ async function loadActivity(nextMode) {
   renderCrossControls();
   document.querySelectorAll('[data-mode]').forEach((b) => { b.disabled = true; b.classList.toggle('on', b.dataset.mode === mode); b.setAttribute('aria-pressed', String(b.dataset.mode === mode)); });
   document.getElementById('mode-label').textContent = mode === 'exercise' ? 'Virgin collection' : mode === 'cross' ? 'First genetic cross' : 'Reference bench';
-  document.getElementById('inventory-title').textContent = mode === 'exercise' ? 'Your batch · six flies' : mode === 'cross' ? (isCollecting() ? 'White-eyed stock · six flies' : crossSession.snapshot().phase === 'developing' ? 'Cross vial · developing' : `F1 sample · page ${crossPage + 1}`) : 'Known reference specimens';
   const loading = document.querySelector('.loading');
   loading.classList.remove('done');
   const population = mode === 'exercise' ? session.appearance : mode === 'cross' ? crossSession.specimens(crossPage) : references;
+  const count = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'].at(population.length) || String(population.length);
+  document.getElementById('inventory-title').textContent = mode === 'exercise' ? `Your batch · ${count} flies` : mode === 'cross' ? (isCollecting() ? `White-eyed stock · ${count} flies` : crossSession.snapshot().phase === 'developing' ? 'Cross vial · developing' : `F1 sample · page ${crossPage + 1}`) : 'Known reference specimens';
   for (const reference of population) {
     loading.textContent = `Preparing flies ${specimens.length + 1}/${population.length}…`;
     const fly = await buildFly(reference);
@@ -275,7 +280,7 @@ async function loadActivity(nextMode) {
     const holder = new THREE.Group(); holder.add(fly.object);
     holder.position.set(reference.x, 0, reference.z);
     scene.add(holder);
-    const specimen = { reference, holder, fly, samples: samplePoints(holder), start: startingRotation(reference.heading) };
+    const specimen = { reference, holder, fly, samples: samplePoints(holder), start: startingRotation(reference.heading, reference.rest), side: startingRotation(reference.heading, 'left') };
     holder.quaternion.copy(specimen.start);
     settle(specimen); specimens.push(specimen);
   }
@@ -412,8 +417,8 @@ function showReview() {
   const result = session.submit(); save(); select(selected, false); renderInventory();
   document.getElementById('review-title').textContent = result.success ? 'Collection ready' : 'Review your collection';
   document.getElementById('review-summary').textContent = result.success
-    ? `You collected ${result.females} female flies with no males. The source-vial history supports using these females as virgins in this exercise.`
-    : result.errors ? `Your vial contains ${result.errors} male ${result.errors === 1 ? 'fly' : 'flies'}. Recheck the forelegs before collecting again.`
+    ? `You collected ${result.females} virgin females and nothing else.`
+    : result.errors ? `Your vial contains ${result.errors} ${result.errors === 1 ? 'fly that does' : 'flies that do'} not belong in a virgin collection. See why below, then try again.`
     : `You collected ${result.females} female flies. The objective is at least ${SOURCE_RECORD.target}; you can return set-aside flies to the pad and inspect them again.`;
   const rows = document.getElementById('review-rows'); rows.replaceChildren();
   for (const row of result.rows) {
@@ -445,7 +450,10 @@ function renderCrossControls() {
   document.getElementById('cross-day').textContent = `Day ${state.day}`;
   const labels = state.flies.filter((f) => f.destination === 'collection').map((f) => f.label);
   document.getElementById('cross-parents').textContent = labels.length ? `Parent vial: ${labels.join(', ')}${state.phase === 'collecting' ? '' : ' + two verified Canton-S males'}.` : 'No candidate parents collected yet.';
-  document.getElementById('cross-progress').textContent = state.phase === 'collecting' ? 'Choose candidate females, record a prediction, then set up the cross.'
+  const reclear = document.querySelector('[data-act="cross-reclear"]');
+  reclear.hidden = !state.canReclear; reclear.disabled = busy;
+  document.getElementById('cross-progress').textContent = state.phase === 'collecting'
+    ? (state.recleared ? `Re-cleared vial: ${state.delayHours} hours spent waiting for new flies. ` : '') + 'Choose candidate females, record a prediction, then set up the cross.'
     : state.phase === 'developing' ? state.day === 0 ? 'Cross set up. Next event: remove all parents on day 2.' : 'Parents removed. Next event: examine an F1 sample on day 12.'
     : state.phase === 'review' ? 'Evidence reviewed. You can revisit your observations or start another batch.'
     : `Record each F1 fly by eye colour and sex: ${state.scored}/${state.offspringCount} observations. Uncertain is an acceptable observation.`;
@@ -528,7 +536,7 @@ document.querySelector('.bench').addEventListener('click', (e) => {
   else if (act === 'focus') focusSelected();
   else if (act === 'overview') overview();
   else if (act === 'dorsal') animateTo(new THREE.Quaternion());
-  else if (act === 'lateral' && selected) animateTo(selected.start.clone());
+  else if (act === 'lateral' && selected) animateTo(selected.side.clone());
   else if (act === 'ventral') animateTo(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI));
   else if (act === 'reset') {
     for (const s of specimens) { s.holder.position.set(s.reference.x, 0, s.reference.z); s.holder.quaternion.copy(s.start); settle(s); }
@@ -539,9 +547,12 @@ document.querySelector('.bench').addEventListener('click', (e) => {
   else if (act === 'cross-advance') { crossSession.advance(); crossPage = 0; save(); startActivity('cross'); }
   else if (act === 'cross-submit') showCrossReview();
   else if (act === 'cross-previous' || act === 'cross-next') { crossPage += act === 'cross-next' ? 1 : -1; startActivity('cross'); }
+  else if (act === 'cross-reclear') { crossSession.reclear(); crossPage = 0; save(); startActivity('cross'); }
   else if (act === 'cross-new') { crossSession = new CrossSession({ scenario: document.getElementById('cross-scenario').value }); crossPage = 0; save(); startActivity('cross'); }
   else if (act === 'hint') {
-    document.getElementById('supervisor-note').textContent = mode === 'cross' ? 'Use the maternal stock record and tester X chromosome to predict daughters separately from sons. Unexpected daughters can reveal an unintended father, but cannot identify an individual mother’s mating history.' : 'Separate the two decisions: identify a female from her anatomy, then use the clearing record to support virgin collection. Try the underside view and zoom in on the forelegs.';
+    document.getElementById('supervisor-note').textContent = mode === 'cross'
+      ? (crossSession.snapshot().canReclear ? 'You cannot tell from looking whether these females have mated. When a vial’s history is unreliable, many people discard everything and clear it again.' : 'Predict daughters and sons separately: daughters get their father’s X, sons his Y. A white-eyed daughter means a white-eyed father.')
+      : 'Two questions for each fly: is it female (no sex combs on the forelegs), and is it young enough for the record? Pale colour, folded wings and a dark meconium mean a recent eclosion.';
     record('hint', 'Requested a supervisor hint.');
   }
   if (['flip', 'turn', 'roll-left', 'roll-right', 'dorsal', 'lateral', 'ventral'].includes(act) && canHandle()) record('rotate', `${selected.reference.label}: inspected ${button.textContent.trim().toLowerCase()}.`);

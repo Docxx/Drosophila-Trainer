@@ -1,4 +1,4 @@
-// Run with --snapshot-js=tools/review-scope.js from the project root.
+﻿// Run with --snapshot-js=tools/review-scope.js from the project root.
 // Exercise the rendered reference controls before capturing a focused male.
 (async () => {
   await window.scope.startActivity('reference');
@@ -9,8 +9,8 @@
     button.click();
   };
   const waitFrame = () => new Promise((resolve) => setTimeout(resolve, 500));
-  assert(window.scope.ready && window.scope.specimens.length === 4, 'Four reference specimens must be ready');
-  for (let i = 0; i < 4; i++) {
+  assert(window.scope.ready && window.scope.specimens.length === 5, 'Five reference specimens must be ready');
+  for (let i = 0; i < 5; i++) {
     click(`[data-specimen="${i}"]`);
     assert(document.querySelector(`[data-specimen="${i}"]`).getAttribute('aria-pressed') === 'true', 'Selected reference must be announced');
     assert(window.scope.holder === window.scope.specimens[i].holder, 'Selection must choose the correct individual');
@@ -42,5 +42,5 @@
   click('[data-act="ventral"]');
   await waitFrame();
   assert(window.scope.view.mag === 32, 'Reference selection must focus the microscope');
-  return 'PASS: four specimen selections, twelve inspection views, move/rotate tools, keyboard shortcuts, individual rotation, focus and reset';
+  return 'PASS: five specimen selections, fifteen inspection views, move/rotate tools, keyboard shortcuts, individual rotation, focus and reset';
 })();
