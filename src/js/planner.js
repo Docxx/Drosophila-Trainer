@@ -19,16 +19,21 @@ export function mountPlanner(root, { onExit, mission = null, savedPlan = null, o
     root.innerHTML = `<article class="planner-list">
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button><div><span class="eyebrow">Building stocks</span><h2>Cross planner</h2></div></header>
       <p>Start with puzzles 1–2 after Balancers. Revisit the driver, lethal and recombination puzzles after their teaching modules. Each puzzle gives you a few stocks and a target. Cross vials, keep the offspring classes you want by their markers, and declare the vial you believe is the target. You see what a geneticist sees: markers and eye colour, never the genotype. <strong>Par</strong> is the fewest generations that can do it.</p>
-      <div class="cards">${PUZZLES.map((p, i) => `<button type="button" class="card ${best[p.id] ? 'done' : ''}" data-puzzle="${i}">
+      <div class="cards">${PUZZLES.map(
+        (p, i) => `<button type="button" class="card ${best[p.id] ? 'done' : ''}" data-puzzle="${i}">
         <span class="eyebrow">${i + 1} · ${esc(p.skill)}</span><strong>${esc(p.title)}</strong><span>${esc(p.summary)}</span>
-        <span class="meta">Par ${p.par}${best[p.id] ? ` · solved in ${best[p.id]}` : ''}</span></button>`).join('')}</div></article>`;
+        <span class="meta">Par ${p.par}${best[p.id] ? ` · solved in ${best[p.id]}` : ''}</span></button>`,
+      ).join('')}</div></article>`;
     root.querySelector('[data-exit]').addEventListener('click', onExit);
     root.querySelectorAll('[data-puzzle]').forEach((b) => b.addEventListener('click', () => open(Number(b.dataset.puzzle))));
   }
 
   function open(i) {
     session = new PlannerSession(PUZZLES[i]);
-    pick = { F: null, M: null }; latest = null; notice = null; hints = [];
+    pick = { F: null, M: null };
+    latest = null;
+    notice = null;
+    hints = [];
     render();
   }
 
@@ -50,7 +55,8 @@ export function mountPlanner(root, { onExit, mission = null, savedPlan = null, o
     const s = session;
     const p = s.puzzle;
     const t = targetChroms(s.target);
-    const f = pick.F && s.vial(pick.F), m = pick.M && s.vial(pick.M);
+    const f = pick.F && s.vial(pick.F),
+      m = pick.M && s.vial(pick.M);
     const gens = Math.max(0, ...s.vials.map((v) => v.generation));
     root.innerHTML = `<article class="planner">
       <header class="lesson-head"><button type="button" class="link" data-list>← Puzzles</button><div><span class="eyebrow">${esc(p.skill)} · par ${p.par}</span><h2>${esc(p.title)}</h2></div><span class="badge big">Generations used: ${gens}</span></header>
@@ -64,7 +70,17 @@ export function mountPlanner(root, { onExit, mission = null, savedPlan = null, o
           <button type="button" class="primary" data-cross ${f && m ? '' : 'disabled'}>Cross them</button>
           ${notice ? `<div class="feedback ${notice.kind}" role="status">${notice.html}</div>` : ''}
           ${latest ? resultHTML(latest) : '<p class="secondary">The offspring appear here, sorted into classes by their markers and eye colour.</p>'}
-          ${s.crosses.length > 1 ? `<details class="support"><summary>Earlier crosses (${s.crosses.length - 1})</summary><ul class="history">${s.crosses.filter((c) => c !== latest).map((c) => `<li><button type="button" class="link" data-show="${c.id}">Gen ${c.generation}: ${esc(s.vial(c.mother)?.name || 'discarded vial')} ♀ × ${esc(s.vial(c.father)?.name || 'discarded vial')} ♂</button></li>`).join('')}</ul></details>` : ''}
+          ${
+            s.crosses.length > 1
+              ? `<details class="support"><summary>Earlier crosses (${s.crosses.length - 1})</summary><ul class="history">${s.crosses
+                  .filter((c) => c !== latest)
+                  .map(
+                    (c) =>
+                      `<li><button type="button" class="link" data-show="${c.id}">Gen ${c.generation}: ${esc(s.vial(c.mother)?.name || 'discarded vial')} ♀ × ${esc(s.vial(c.father)?.name || 'discarded vial')} ♂</button></li>`,
+                  )
+                  .join('')}</ul></details>`
+              : ''
+          }
         </section>
       </div></article>`;
     wire();
@@ -73,8 +89,12 @@ export function mountPlanner(root, { onExit, mission = null, savedPlan = null, o
 
   function resultHTML(c) {
     return `<div class="result"><h4>Generation ${c.generation} offspring</h4>
-      <table class="classes"><thead><tr><th>Class (what you see)</th><th>Share</th><th>Sexes</th><th></th></tr></thead><tbody>${c.classes.map((row, i) =>
-        `<tr><td>${esc(row.label)}</td><td>${ratioText(row.p)}</td><td>${row.sexes.map((x) => (x === 'F' ? '♀' : '♂')).join(' ')}</td><td><button type="button" data-keep="${c.id}:${i}">Keep</button></td></tr>`).join('')}</tbody></table>
+      <table class="classes"><thead><tr><th>Class (what you see)</th><th>Share</th><th>Sexes</th><th></th></tr></thead><tbody>${c.classes
+        .map(
+          (row, i) =>
+            `<tr><td>${esc(row.label)}</td><td>${ratioText(row.p)}</td><td>${row.sexes.map((x) => (x === 'F' ? '♀' : '♂')).join(' ')}</td><td><button type="button" data-keep="${c.id}:${i}">Keep</button></td></tr>`,
+        )
+        .join('')}</tbody></table>
       ${c.dead > 0 ? `<p class="secondary">${ratioText(c.dead)} of the fertilised eggs died (lethal combinations).</p>` : ''}</div>`;
   }
 
@@ -82,50 +102,92 @@ export function mountPlanner(root, { onExit, mission = null, savedPlan = null, o
     const s = session;
     const back = root.querySelector('[data-list]');
     if (mission !== null) back.textContent = 'Restart mission';
-    back.addEventListener('click', () => mission === null ? list() : open(mission));
+    back.addEventListener('click', () => (mission === null ? list() : open(mission)));
     root.querySelector('[data-restart]').addEventListener('click', () => open(PUZZLES.indexOf(s.puzzle)));
-    root.querySelector('[data-hint]').addEventListener('click', () => { const h = s.hint(); if (h) hints.push(h); render(); });
-    root.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { pick.F = pick.F === b.dataset.f ? null : b.dataset.f; render(); }));
-    root.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => { pick.M = pick.M === b.dataset.m ? null : b.dataset.m; render(); }));
-    root.querySelector('[data-cross]').addEventListener('click', () => { latest = s.cross(pick.F, pick.M); notice = null; render(); });
-    root.querySelectorAll('[data-show]').forEach((b) => b.addEventListener('click', () => { latest = s.crosses.find((c) => c.id === b.dataset.show); render(); }));
-    root.querySelectorAll('[data-keep]').forEach((b) => b.addEventListener('click', () => {
-      const [cid, i] = b.dataset.keep.split(':');
-      const v = s.keep(cid, Number(i));
-      notice = { kind: '', html: `Kept as a new vial: <strong>${esc(v.name)}</strong> (generation ${v.generation}). It is on the shelf.` };
+    root.querySelector('[data-hint]').addEventListener('click', () => {
+      const h = s.hint();
+      if (h) hints.push(h);
       render();
-    }));
-    root.querySelectorAll('[data-discard]').forEach((b) => b.addEventListener('click', () => {
-      s.discard(b.dataset.discard);
-      if (pick.F === b.dataset.discard) pick.F = null;
-      if (pick.M === b.dataset.discard) pick.M = null;
+    });
+    root.querySelectorAll('[data-f]').forEach((b) =>
+      b.addEventListener('click', () => {
+        pick.F = pick.F === b.dataset.f ? null : b.dataset.f;
+        render();
+      }),
+    );
+    root.querySelectorAll('[data-m]').forEach((b) =>
+      b.addEventListener('click', () => {
+        pick.M = pick.M === b.dataset.m ? null : b.dataset.m;
+        render();
+      }),
+    );
+    root.querySelector('[data-cross]').addEventListener('click', () => {
+      latest = s.cross(pick.F, pick.M);
+      notice = null;
       render();
-    }));
-    root.querySelectorAll('[data-declare]').forEach((b) => b.addEventListener('click', () => {
-      const r = s.declare(b.dataset.declare);
-      if (r.ok) {
-        progress.solvePuzzle(s.puzzle.id, r.generations);
-        if (PUZZLES.every((p) => progress.get().puzzles[p.id])) progress.complete('planner');
-        const verdict = r.generations <= r.par ? 'Par or better.' : `Par is ${r.par}: see if you can find a shorter route.`;
-        notice = { kind: 'right', html: `<strong>Target built in ${r.generations} generation${r.generations === 1 ? '' : 's'}.</strong> ${verdict}${r.hints ? ` You used ${r.hints} hint${r.hints === 1 ? '' : 's'}.` : ''} <button type="button" class="link" data-list2>Next puzzle</button>` };
-      } else notice = { kind: 'wrong', html: esc(r.message) };
-      render();
-      if (r.ok && onSolved) { onSolved(r); return; }
-      root.querySelector('[data-list2]')?.addEventListener('click', list);
-    }));
+    });
+    root.querySelectorAll('[data-show]').forEach((b) =>
+      b.addEventListener('click', () => {
+        latest = s.crosses.find((c) => c.id === b.dataset.show);
+        render();
+      }),
+    );
+    root.querySelectorAll('[data-keep]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const [cid, i] = b.dataset.keep.split(':');
+        const v = s.keep(cid, Number(i));
+        notice = {
+          kind: '',
+          html: `Kept as a new vial: <strong>${esc(v.name)}</strong> (generation ${v.generation}). It is on the shelf.`,
+        };
+        render();
+      }),
+    );
+    root.querySelectorAll('[data-discard]').forEach((b) =>
+      b.addEventListener('click', () => {
+        s.discard(b.dataset.discard);
+        if (pick.F === b.dataset.discard) pick.F = null;
+        if (pick.M === b.dataset.discard) pick.M = null;
+        render();
+      }),
+    );
+    root.querySelectorAll('[data-declare]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const r = s.declare(b.dataset.declare);
+        if (r.ok) {
+          progress.solvePuzzle(s.puzzle.id, r.generations);
+          if (PUZZLES.every((p) => progress.get().puzzles[p.id])) progress.complete('planner');
+          const verdict = r.generations <= r.par ? 'Par or better.' : `Par is ${r.par}: see if you can find a shorter route.`;
+          notice = {
+            kind: 'right',
+            html: `<strong>Target built in ${r.generations} generation${r.generations === 1 ? '' : 's'}.</strong> ${verdict}${r.hints ? ` You used ${r.hints} hint${r.hints === 1 ? '' : 's'}.` : ''} <button type="button" class="link" data-list2>Next puzzle</button>`,
+          };
+        } else notice = { kind: 'wrong', html: esc(r.message) };
+        render();
+        if (r.ok && onSolved) {
+          onSolved(r);
+          return;
+        }
+        root.querySelector('[data-list2]')?.addEventListener('click', list);
+      }),
+    );
   }
 
   if (mission === null) list();
   else if (savedPlan) {
     try {
       session = replayPlan(PUZZLES[mission], savedPlan);
-      pick = { F: session.vial(savedPlan.pick?.F)?.F ? savedPlan.pick.F : null, M: session.vial(savedPlan.pick?.M)?.M ? savedPlan.pick.M : null };
+      pick = {
+        F: session.vial(savedPlan.pick?.F)?.F ? savedPlan.pick.F : null,
+        M: session.vial(savedPlan.pick?.M)?.M ? savedPlan.pick.M : null,
+      };
       latest = session.crosses.find((c) => c.id === savedPlan.latest) || session.crosses.at(-1) || null;
       hints = session.puzzle.hints.slice(0, session.hintsUsed);
       render();
     } catch {
       open(mission);
-      notice = { kind: 'wrong', html: 'The saved construction could not be restored. Start again from the known stocks.' }; render();
+      notice = { kind: 'wrong', html: 'The saved construction could not be restored. Start again from the known stocks.' };
+      render();
     }
   } else open(mission);
   return { rerender: () => (session ? render() : list()) };

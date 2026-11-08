@@ -7,9 +7,27 @@ import * as THREE from 'three';
 // Joint points in each leg file's own coordinates (peg, hip, knee, ankle, claw),
 // read off the flat-printed meshes.
 export const LEG_JOINTS = {
-  leg1_l: [[125.83, 14.38, 43.07], [100.7, 14, 3.6], [75.4, 14, 47.3], [50.4, 14, 16.1], [2.38, 12.37, 7.16]],
-  leg2_l: [[130.71, 15.75, 18.18], [111, 15, 3.6], [101.3, 15, 58.9], [61, 15, 28.6], [0.9, 15.89, 7.17]],
-  leg3_l: [[168.42, 14.14, 22.33], [142.3, 14, 3.6], [100.4, 14, 57.1], [64.6, 14, 24.1], [0.67, 12.01, 6.35]],
+  leg1_l: [
+    [125.83, 14.38, 43.07],
+    [100.7, 14, 3.6],
+    [75.4, 14, 47.3],
+    [50.4, 14, 16.1],
+    [2.38, 12.37, 7.16],
+  ],
+  leg2_l: [
+    [130.71, 15.75, 18.18],
+    [111, 15, 3.6],
+    [101.3, 15, 58.9],
+    [61, 15, 28.6],
+    [0.9, 15.89, 7.17],
+  ],
+  leg3_l: [
+    [168.42, 14.14, 22.33],
+    [142.3, 14, 3.6],
+    [100.4, 14, 57.1],
+    [64.6, 14, 24.1],
+    [0.67, 12.01, 6.35],
+  ],
 };
 
 // Where each left leg's coxa peg seats (fly frame) and which way its coxa hangs.
@@ -67,9 +85,7 @@ export function legRestMatrix(id) {
   const seat = LEG_SEATS[id];
   const peg = new THREE.Vector3(...LEG_JOINTS[id][0]);
   // File +x (peg axis) -> up, file +z (the way the knee points) -> outward.
-  const R = new THREE.Matrix4()
-    .makeRotationY(THREE.MathUtils.degToRad(seat.yaw))
-    .multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
+  const R = new THREE.Matrix4().makeRotationY(THREE.MathUtils.degToRad(seat.yaw)).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
   if (seat.coxa) {
     // Swing the whole leg about its peg so the coxa hangs the given way.
     const hip = new THREE.Vector3(...LEG_JOINTS[id][1]);
@@ -108,7 +124,12 @@ export function poseLeg(geometry, joints, dirs) {
   const move = (v, k) => v.clone().sub(joints[k]).applyQuaternion(turn[k]).add(posed[k]);
   // Across joint k, ease the rotation itself around the joint (k-1 -> k), so the
   // surface bends like a hinge instead of collapsing and cracking.
-  const bend = (v, k, t) => v.clone().sub(joints[k]).applyQuaternion(turn[k - 1].clone().slerp(turn[k], t)).add(posed[k]);
+  const bend = (v, k, t) =>
+    v
+      .clone()
+      .sub(joints[k])
+      .applyQuaternion(turn[k - 1].clone().slerp(turn[k], t))
+      .add(posed[k]);
 
   // Each joint is split by the plane that bisects the two segments meeting there,
   // so thick parts (the coxa, the femur's base) can't be claimed by the wrong bone.
@@ -134,7 +155,10 @@ export function poseLeg(geometry, joints, dirs) {
     let out = null;
     for (let k = 1; k <= 3; k++) {
       if ((seg !== k - 1 && seg !== k) || v.distanceTo(joints[k]) > NEAR) continue;
-      const s = v.clone().sub(joints[k]).dot(planes[k - 1]);
+      const s = v
+        .clone()
+        .sub(joints[k])
+        .dot(planes[k - 1]);
       out = bend(v, k, THREE.MathUtils.smoothstep(s, -BLEND, BLEND));
       break;
     }

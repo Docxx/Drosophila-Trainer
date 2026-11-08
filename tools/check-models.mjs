@@ -25,26 +25,53 @@ const wingAfter = await buildFly();
 
 const comb = (fly) => {
   const found = [];
-  fly.object.traverse((o) => { if (/^sex-comb-[lr]-\d+$/.test(o.name)) found.push(o); });
+  fly.object.traverse((o) => {
+    if (/^sex-comb-[lr]-\d+$/.test(o.name)) found.push(o);
+  });
   return found;
 };
 assert.equal(comb(female).length, 0, 'Females must not carry sex combs');
 assert.equal(comb(male).length, 20, 'A male must have ten teeth on each foreleg');
 assert.equal(comb(paleMale).length, 20, 'Pale males retain sex combs');
-assert.deepEqual(female.parts.body_l.geometry.attributes.position.array, originalPositions, 'Building a male must not reshape an existing female');
-assert.deepEqual(female.parts.body_l.geometry.attributes.color.array, originalColours, 'Building a pale fly must not recolour an existing female');
-assert.deepEqual(femaleAgain.parts.body_l.geometry.attributes.position.array, originalPositions, 'Cached source geometry must remain unchanged');
+assert.deepEqual(
+  female.parts.body_l.geometry.attributes.position.array,
+  originalPositions,
+  'Building a male must not reshape an existing female',
+);
+assert.deepEqual(
+  female.parts.body_l.geometry.attributes.color.array,
+  originalColours,
+  'Building a pale fly must not recolour an existing female',
+);
+assert.deepEqual(
+  femaleAgain.parts.body_l.geometry.attributes.position.array,
+  originalPositions,
+  'Cached source geometry must remain unchanged',
+);
 assert.deepEqual(femaleAgain.parts.body_l.geometry.attributes.color.array, originalColours);
 assert.notDeepEqual(male.parts.body_l.geometry.attributes.position.array, originalPositions, 'Male silhouette must differ');
-assert.notDeepEqual(paleMale.parts.body_l.geometry.attributes.color.array, male.parts.body_l.geometry.attributes.color.array, 'Pale male pigment must differ from mature pigment');
+assert.notDeepEqual(
+  paleMale.parts.body_l.geometry.attributes.color.array,
+  male.parts.body_l.geometry.attributes.color.array,
+  'Pale male pigment must differ from mature pigment',
+);
 assert.equal(male.object.scale.x, female.object.scale.x, 'Abdomen shortening must not enlarge the male head');
 
 // Teneral flies: unexpanded wings are much smaller, and the shared wing source is untouched.
 const span = (mesh) => new THREE.Box3().setFromBufferAttribute(mesh.geometry.attributes.position).getSize(new THREE.Vector3());
 assert(span(teneral.parts.wing_l).x < span(female.parts.wing_l).x * 0.6, 'Unexpanded wings must be shorter than expanded wings');
-assert.deepEqual(wingAfter.parts.wing_l.geometry.attributes.position.array, wingSource, 'Crumpling a teneral wing must not alter the cached wing');
+assert.deepEqual(
+  wingAfter.parts.wing_l.geometry.attributes.position.array,
+  wingSource,
+  'Crumpling a teneral wing must not alter the cached wing',
+);
 // Meconium darkens the ventral abdomen only.
-const luminance = (fly) => { const c = fly.parts.body_l.geometry.attributes.color.array; let min = 3; for (let i = 0; i < c.length; i += 3) min = Math.min(min, c[i] + c[i + 1] + c[i + 2]); return min; };
+const luminance = (fly) => {
+  const c = fly.parts.body_l.geometry.attributes.color.array;
+  let min = 3;
+  for (let i = 0; i < c.length; i += 3) min = Math.min(min, c[i] + c[i + 1] + c[i + 2]);
+  return min;
+};
 assert(luminance(withMeconium) < luminance(withoutMeconium) - 0.3, 'Meconium must show as a dark patch');
 assert.deepEqual(comb(teneral), [], 'A teneral female has no sex combs');
 

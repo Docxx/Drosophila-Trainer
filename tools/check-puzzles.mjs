@@ -35,7 +35,10 @@ for (const pz of PUZZLES) {
       for (const m of ms) {
         if (Math.max(f.gen, m.gen) !== gen - 1) continue;
         for (const row of phenoClasses(crossMixes(f.mix, m.mix).mix)) {
-          for (const [s, map] of [['F', F], ['M', M]]) {
+          for (const [s, map] of [
+            ['F', F],
+            ['M', M],
+          ]) {
             if (!row[s]) continue;
             if (isPure(row[s].members, t)) found = gen;
             add(map, row[s].members, gen);

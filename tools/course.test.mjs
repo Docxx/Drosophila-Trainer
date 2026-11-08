@@ -5,17 +5,43 @@ import assert from 'node:assert/strict';
 import { parseGenotype } from '../src/js/genetics/genetics.js';
 import { PUZZLES } from '../src/js/genetics/puzzles.js';
 import {
-  LESSON_CONTENT, classesFor, gametesFor, canCrossOver, crossoverKey, crossoverBlock, punnett,
-  FRACTIONS, classMatches, recommendStart,
+  LESSON_CONTENT,
+  classesFor,
+  gametesFor,
+  canCrossOver,
+  crossoverKey,
+  crossoverBlock,
+  punnett,
+  FRACTIONS,
+  classMatches,
+  recommendStart,
 } from '../src/js/lessons.js';
 import { LESSONS, SECTIONS, progress, nextLesson } from '../src/js/course.js';
 import {
-  threePointClasses, threePointData, cloneTissue, cloneGoalMet, SHOCK_TIMES, SHOCK_LENGTHS,
-  STAGES, simulateTarget, targetChecks, DOSES, PER_GENE, screenStats, screenChecks,
+  threePointClasses,
+  threePointData,
+  cloneTissue,
+  cloneGoalMet,
+  SHOCK_TIMES,
+  SHOCK_LENGTHS,
+  STAGES,
+  simulateTarget,
+  targetChecks,
+  DOSES,
+  PER_GENE,
+  screenStats,
+  screenChecks,
 } from '../src/js/research.js';
 import { PlannerSession, replayPlan } from '../src/js/plannerSession.js';
 import {
-  expression, sampleCounts, rng, chiSquare, chiSquareP, complements, complementationCross, deficiencyMap,
+  expression,
+  sampleCounts,
+  rng,
+  chiSquare,
+  chiSquareP,
+  complements,
+  complementationCross,
+  deficiencyMap,
 } from '../src/js/lessons.js';
 import { practiceProblem, benchCross, countVial, PRESETS } from '../src/js/sandboxLogic.js';
 import { lessonDraft, restoreDraft } from '../src/js/lessonDraft.js';
@@ -26,7 +52,8 @@ import { CURRICULUM, PATH, STAGES as TEACHING_STAGES, DEMONSTRATIONS } from '../
 import { teachingModel } from '../src/js/teachingModels.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-9;
-const steps = (type) => Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
+const steps = (type) =>
+  Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
 const share = (rows, label) => rows.find((r) => r.label === label)?.p ?? 0;
 
 test('every genetics lesson has a labelled chromosome-first visual sequence', () => {
@@ -65,21 +92,27 @@ test('visual activities offer navigation cues, with a separate mapping example',
 test('beginner steps select specific visual concepts and all guide stages render', () => {
   const teaching = (id, title) => LESSON_CONTENT[id].steps.find((s) => s.title === title);
   for (const [title, expected] of [
-    ['Genes ride on chromosomes', 'chromosomes'], ['Meet Curly', 'dominance'],
-    ['Curly × normal', 'fertilisation'], ['Two pairs at once', 'assortment'], ['Curly × Curly', 'lethals'],
-  ]) assert.equal(teaching('inheritance', title).visual, expected);
+    ['Genes ride on chromosomes', 'chromosomes'],
+    ['Meet Curly', 'dominance'],
+    ['Curly × normal', 'fertilisation'],
+    ['Two pairs at once', 'assortment'],
+    ['Curly × Curly', 'lethals'],
+  ])
+    assert.equal(teaching('inheritance', title).visual, expected);
   assert.equal(teaching('xlinked', 'Females XX, males XY').visual, 'x-copies');
   assert.equal(teaching('xlinked', 'Swap the parents').visual, 'reciprocal');
   assert.equal(teaching('balancers', 'The same chromosomes in a male').visual, 'male-meiosis');
   assert.equal(teaching('balancers', 'And over a balancer').visual, 'balancer-transmission');
-  for (const lesson of Object.values(LESSON_CONTENT)) for (const step of lesson.steps) {
-    if (step.visual) assert(VISUAL_GUIDES[step.visual], `unknown guide ${step.visual}`);
-  }
-  for (const [id, guide] of Object.entries(VISUAL_GUIDES)) for (let i = 0; i < guide.frames.length; i++) {
-    const scene = guideScene(id, i);
-    assert(!/undefined|NaN|Infinity/.test(scene), `${id} stage ${i}: finite, labelled geometry`);
-    assert(scene.includes('role="img"') && scene.includes('aria-label='));
-  }
+  for (const lesson of Object.values(LESSON_CONTENT))
+    for (const step of lesson.steps) {
+      if (step.visual) assert(VISUAL_GUIDES[step.visual], `unknown guide ${step.visual}`);
+    }
+  for (const [id, guide] of Object.entries(VISUAL_GUIDES))
+    for (let i = 0; i < guide.frames.length; i++) {
+      const scene = guideScene(id, i);
+      assert(!/undefined|NaN|Infinity/.test(scene), `${id} stage ${i}: finite, labelled geometry`);
+      assert(scene.includes('role="img"') && scene.includes('aria-label='));
+    }
   assert(VISUAL_GUIDES.assortment.frames[3][1].includes('different chromosome pairs'));
   assert(VISUAL_GUIDES.lethals.frames[3][1].includes('surviving adults'));
   assert(VISUAL_GUIDES['x-copies'].frames[0][1].includes('not sex determination'));
@@ -94,86 +127,171 @@ test('every lesson in the course has content, and every step is well formed', ()
   for (const l of LESSONS.filter((x) => x.kind === 'lesson')) assert.ok(LESSON_CONTENT[l.id], `content for ${l.id}`);
   for (const [id, lesson] of Object.entries(LESSON_CONTENT)) {
     for (const s of lesson.steps) {
-      assert.ok(['text', 'choice', 'gametes', 'predict', 'pick', 'go', 'multi', 'count', 'chance', 'chisq', 'grid', 'threepoint', 'clones', 'target', 'screen', 'worked', 'mission', 'reflection'].includes(s.type), `${id}: step type ${s.type}`);
-      for (const g of [s.parent, s.mother, s.father, ...(s.diagrams || []).map((d) => d.g)].filter(Boolean)) assert.doesNotThrow(() => parseGenotype(g), `${id}: ${g}`);
-      if (s.type === 'multi') assert.ok(s.options.some((o) => o.correct) && s.options.every((o) => o.why), `${id}: multi has answers and notes`);
+      assert.ok(
+        [
+          'text',
+          'choice',
+          'gametes',
+          'predict',
+          'pick',
+          'go',
+          'multi',
+          'count',
+          'chance',
+          'chisq',
+          'grid',
+          'threepoint',
+          'clones',
+          'target',
+          'screen',
+          'worked',
+          'mission',
+          'reflection',
+        ].includes(s.type),
+        `${id}: step type ${s.type}`,
+      );
+      for (const g of [s.parent, s.mother, s.father, ...(s.diagrams || []).map((d) => d.g)].filter(Boolean))
+        assert.doesNotThrow(() => parseGenotype(g), `${id}: ${g}`);
+      if (s.type === 'multi')
+        assert.ok(s.options.some((o) => o.correct) && s.options.every((o) => o.why), `${id}: multi has answers and notes`);
       if (s.type === 'choice') {
         assert.equal(s.options.filter((o) => o.correct).length, 1, `${id}: one correct option in "${s.question}"`);
-        assert.ok(s.options.every((o) => typeof o.why === 'string' && o.why.trim()), `${id}: each option explains its chromosomes`);
+        assert.ok(
+          s.options.every((o) => typeof o.why === 'string' && o.why.trim()),
+          `${id}: each option explains its chromosomes`,
+        );
       }
-      if (s.type === 'go' && s.action.kind === 'scope') assert.ok(LESSONS.some((l) => l.activity === s.action.activity), `${id}: activity ${s.action.activity}`);
+      if (s.type === 'go' && s.action.kind === 'scope')
+        assert.ok(
+          LESSONS.some((l) => l.activity === s.action.activity),
+          `${id}: activity ${s.action.activity}`,
+        );
     }
   }
 });
 
 test('the learning path is connected, optional and teaches before independent work', () => {
-  const ids = new Set(LESSONS.map(l=>l.id));
+  const ids = new Set(LESSONS.map((l) => l.id));
   for (const part of PATH) for (const id of part.lessons) assert(ids.has(id), id);
-  const visit=(id, stack=[])=>{ assert(!stack.includes(id), `prerequisite cycle: ${id}`); for(const pre of CURRICULUM[id]?.prerequisites||[]){assert(ids.has(pre));visit(pre,[...stack,id]);} };
-  for(const [id, course] of Object.entries(CURRICULUM)) {
-    visit(id); assert(course.objectives.length>=3 && Object.keys(course.terms).length && course.coach.length>=3);
-    const lesson=LESSON_CONTENT[id]; assert(lesson && lesson.curriculum);
-    if(DEMONSTRATIONS[id]) {
-      const demo=lesson.steps.findIndex(s=>s.type==='worked');
-      const firstTask=lesson.steps.findIndex(s=>!['text','worked'].includes(s.type));
-      assert(demo>=0 && demo<firstTask, `${id}: demonstrate before asking`);
-      for(const stage of Object.keys(TEACHING_STAGES)) assert(lesson.steps.some(s=>s.stage===stage), `${id}: ${stage}`);
-      assert(lesson.steps.some(s=>s.stage==='diagnose' && s.type==='choice'));
+  const visit = (id, stack = []) => {
+    assert(!stack.includes(id), `prerequisite cycle: ${id}`);
+    for (const pre of CURRICULUM[id]?.prerequisites || []) {
+      assert(ids.has(pre));
+      visit(pre, [...stack, id]);
+    }
+  };
+  for (const [id, course] of Object.entries(CURRICULUM)) {
+    visit(id);
+    assert(course.objectives.length >= 3 && Object.keys(course.terms).length && course.coach.length >= 3);
+    const lesson = LESSON_CONTENT[id];
+    assert(lesson && lesson.curriculum);
+    if (DEMONSTRATIONS[id]) {
+      const demo = lesson.steps.findIndex((s) => s.type === 'worked');
+      const firstTask = lesson.steps.findIndex((s) => !['text', 'worked'].includes(s.type));
+      assert(demo >= 0 && demo < firstTask, `${id}: demonstrate before asking`);
+      for (const stage of Object.keys(TEACHING_STAGES))
+        assert(
+          lesson.steps.some((s) => s.stage === stage),
+          `${id}: ${stage}`,
+        );
+      assert(lesson.steps.some((s) => s.stage === 'diagnose' && s.type === 'choice'));
     }
   }
 });
 
 test('worked examples use the same inheritance and research models as the exercises', () => {
-  for(const demo of Object.values(DEMONSTRATIONS)) {
-    assert.equal(demo.pages.length,4); assert(demo.pages.every(p=>p.length>60));
-    const model=teachingModel(demo);
-    if(demo.kind==='cross') {
-      assert(near(model.rows.reduce((n,r)=>n+r.p,0),1));
-      for(const gs of [model.eggs,model.sperm]) assert(near(gs.reduce((n,g)=>n+g.p,0),1));
-      if(model.square) for(const gs of [model.eggs,model.sperm]) assert(gs.every(g=>near(g.p,1/gs.length)), 'an equally weighted square requires equally likely gametes');
-      if(demo.recombine) assert.equal(model.square,null,'do not use an equally weighted square for unequal recombinant gametes');
+  for (const demo of Object.values(DEMONSTRATIONS)) {
+    assert.equal(demo.pages.length, 4);
+    assert(demo.pages.every((p) => p.length > 60));
+    const model = teachingModel(demo);
+    if (demo.kind === 'cross') {
+      assert(
+        near(
+          model.rows.reduce((n, r) => n + r.p, 0),
+          1,
+        ),
+      );
+      for (const gs of [model.eggs, model.sperm])
+        assert(
+          near(
+            gs.reduce((n, g) => n + g.p, 0),
+            1,
+          ),
+        );
+      if (model.square)
+        for (const gs of [model.eggs, model.sperm])
+          assert(
+            gs.every((g) => near(g.p, 1 / gs.length)),
+            'an equally weighted square requires equally likely gametes',
+          );
+      if (demo.recombine) assert.equal(model.square, null, 'do not use an equally weighted square for unequal recombinant gametes');
     }
-    if(demo.kind==='statistics') { assert(near(model.test.chi,.8)); assert(model.test.fits); }
-    if(demo.kind==='mapping') assert(model.d1>0 && model.d2>0 && Number.isFinite(model.coc));
-    if(demo.kind==='clones') assert(model.met>=4 && model.summaries.length===8);
-    if(demo.kind==='target') assert(model.checks.every(c=>c.ok));
-    if(demo.kind==='screen') assert(model.selected.hitGene>=.9 && model.selected.multiShare<=.35);
+    if (demo.kind === 'statistics') {
+      assert(near(model.test.chi, 0.8));
+      assert(model.test.fits);
+    }
+    if (demo.kind === 'mapping') assert(model.d1 > 0 && model.d2 > 0 && Number.isFinite(model.coc));
+    if (demo.kind === 'clones') assert(model.met >= 4 && model.summaries.length === 8);
+    if (demo.kind === 'target') assert(model.checks.every((c) => c.ok));
+    if (demo.kind === 'screen') assert(model.selected.hitGene >= 0.9 && model.selected.multiShare <= 0.35);
   }
-  assert.equal(teachingModel(DEMONSTRATIONS.inheritance).dead,.25);
-  assert.equal(teachingModel(DEMONSTRATIONS.balancers).dead,.5);
+  assert.equal(teachingModel(DEMONSTRATIONS.inheritance).dead, 0.25);
+  assert.equal(teachingModel(DEMONSTRATIONS.balancers).dead, 0.5);
 });
 
 test('multi-generation investigations replay decisions without storing hidden genotypes', () => {
-  for(const index of [3,5]) {
-    const s=new PlannerSession(PUZZLES[index]);
-    const keep=(c,want)=>s.keep(c.id,c.classes.findIndex(r=>Object.entries(want).every(([k,v])=>r.pheno[k]===v)));
+  for (const index of [3, 5]) {
+    const s = new PlannerSession(PUZZLES[index]);
+    const keep = (c, want) =>
+      s.keep(
+        c.id,
+        c.classes.findIndex((r) => Object.entries(want).every(([k, v]) => r.pheno[k] === v)),
+      );
     let target;
-    if(index===3) {
-      const a=keep(s.cross('s0','s2'),{curly:false,scutoid:true,humeral:true,stubble:false});
-      const b=keep(s.cross('s1','s2'),{curly:true,scutoid:false,humeral:false,stubble:true});
-      target=keep(s.cross(a.id,b.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'orange'});
+    if (index === 3) {
+      const a = keep(s.cross('s0', 's2'), { curly: false, scutoid: true, humeral: true, stubble: false });
+      const b = keep(s.cross('s1', 's2'), { curly: true, scutoid: false, humeral: false, stubble: true });
+      target = keep(s.cross(a.id, b.id), { curly: true, scutoid: false, humeral: true, stubble: false, eye: 'orange' });
     } else {
-      const trans=keep(s.cross('s1','s2'),{eye:'darkorange'});
-      const reporter=keep(s.cross('s0','s3'),{curly:false,scutoid:true,humeral:true,stubble:false});
-      const recombinant=keep(s.cross(trans.id,'s3'),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
-      target=keep(s.cross(recombinant.id,reporter.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
+      const trans = keep(s.cross('s1', 's2'), { eye: 'darkorange' });
+      const reporter = keep(s.cross('s0', 's3'), { curly: false, scutoid: true, humeral: true, stubble: false });
+      const recombinant = keep(s.cross(trans.id, 's3'), { curly: true, scutoid: false, humeral: true, stubble: false, eye: 'darkorange' });
+      target = keep(s.cross(recombinant.id, reporter.id), {
+        curly: true,
+        scutoid: false,
+        humeral: true,
+        stubble: false,
+        eye: 'darkorange',
+      });
     }
     assert(s.declare(target.id).ok);
-    const saved=JSON.parse(JSON.stringify({puzzle:s.puzzle.id,actions:s.actions}));
+    const saved = JSON.parse(JSON.stringify({ puzzle: s.puzzle.id, actions: s.actions }));
     assert(!JSON.stringify(saved).includes('members'));
-    const restored=replayPlan(s.puzzle,saved);
-    assert.deepEqual(restored.solved,s.solved); assert.deepEqual(restored.vials,s.vials); assert.deepEqual(restored.actions,s.actions);
-    assert.equal(restored.solved.generations,index===3?2:3);
-    assert.throws(()=>replayPlan(s.puzzle,{...saved,actions:[{method:'constructor',args:[]}]}),/Invalid/);
-    assert.throws(()=>replayPlan(s.puzzle,{...saved,puzzle:'other'}),/Unsupported/);
+    const restored = replayPlan(s.puzzle, saved);
+    assert.deepEqual(restored.solved, s.solved);
+    assert.deepEqual(restored.vials, s.vials);
+    assert.deepEqual(restored.actions, s.actions);
+    assert.equal(restored.solved.generations, index === 3 ? 2 : 3);
+    assert.throws(() => replayPlan(s.puzzle, { ...saved, actions: [{ method: 'constructor', args: [] }] }), /Invalid/);
+    assert.throws(() => replayPlan(s.puzzle, { ...saved, puzzle: 'other' }), /Unsupported/);
   }
 });
 
 test('every predicted share is one the learner can choose, and shares add up to one', () => {
   for (const s of steps('predict')) {
     const { rows } = classesFor(s.mother, s.father, { traits: s.traits, bySex: s.bySex });
-    assert.ok(near(rows.reduce((t, r) => t + r.p, 0), 1), `${s.title}: shares sum to 1`);
-    for (const r of rows) assert.ok(FRACTIONS.some((f) => near(f.value, r.p)), `${s.title}: ${r.label} = ${r.p} is selectable`);
+    assert.ok(
+      near(
+        rows.reduce((t, r) => t + r.p, 0),
+        1,
+      ),
+      `${s.title}: shares sum to 1`,
+    );
+    for (const r of rows)
+      assert.ok(
+        FRACTIONS.some((f) => near(f.value, r.p)),
+        `${s.title}: ${r.label} = ${r.p} is selectable`,
+      );
   }
 });
 
@@ -209,7 +327,8 @@ test('the crossover switch only works where crossing over can happen, and says w
   assert.equal(crossoverKey('w/w; +/+; GAL4/UAS-RNAi', '3', 1), '+');
   assert.match(crossoverBlock('w/Y; +/+; GAL4/UAS-RNAi', '3'), /males never cross over/);
   assert.match(crossoverBlock('w/w; +/+; GAL4/TM3', '3'), /balancer/);
-  for (const s of steps('gametes').filter((x) => x.crossover)) assert.ok(canCrossOver(s.parent, '3') || crossoverBlock(s.parent, '3'), s.title);
+  for (const s of steps('gametes').filter((x) => x.crossover))
+    assert.ok(canCrossOver(s.parent, '3') || crossoverBlock(s.parent, '3'), s.title);
 });
 
 test('Punnett squares mark exactly the lethal cells', () => {
@@ -296,7 +415,12 @@ test('progress is saved, suggests the next lesson and keeps the best puzzle resu
   globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)) };
   const events = [];
   globalThis.document = { dispatchEvent: (e) => events.push(e.detail.id) };
-  globalThis.CustomEvent ??= class { constructor(type, init) { this.type = type; this.detail = init.detail; } };
+  globalThis.CustomEvent ??= class {
+    constructor(type, init) {
+      this.type = type;
+      this.detail = init.detail;
+    }
+  };
   assert.equal(nextLesson().id, 'tour');
   progress.complete('tour');
   assert.equal(nextLesson().id, 'flyroom', 'practice lessons are not suggested');
@@ -323,10 +447,18 @@ test('complementation follows shared lethal genes, and the mapping lesson agrees
   assert.equal(complements('Df1', 'Df3'), true, 'non-overlapping deficiencies complement');
   assert.equal(complements('Df1', 'Df2'), false, 'overlapping deficiencies fail');
   // Sampled crosses show straight-winged flies exactly when the pair complements.
-  for (const [a, b] of [['mut', 'mut2'], ['mut', 'Df1'], ['mut2', 'Df3'], ['mut3', 'Df2']]) {
+  for (const [a, b] of [
+    ['mut', 'mut2'],
+    ['mut', 'Df1'],
+    ['mut2', 'Df3'],
+    ['mut3', 'Df2'],
+  ]) {
     assert.equal(complementationCross(a, b, 60, 5).complements, complements(a, b), `${a} × ${b}`);
   }
-  assert.deepEqual(deficiencyMap(['Df1', 'Df2', 'Df3']).dfs.map((d) => d.genes.join('')), ['ab', 'bc', 'cd']);
+  assert.deepEqual(
+    deficiencyMap(['Df1', 'Df2', 'Df3']).dfs.map((d) => d.genes.join('')),
+    ['ab', 'bc', 'cd'],
+  );
 });
 
 test('balancer puzzles are unaffected by the new lethal rules', () => {
@@ -344,14 +476,26 @@ test('GAL4/UAS expression needs both halves', () => {
 });
 
 test('sampling is reproducible and chi-square matches standard tables', () => {
-  const rows = [{ label: 'a', p: 0.5 }, { label: 'b', p: 0.5 }];
+  const rows = [
+    { label: 'a', p: 0.5 },
+    { label: 'b', p: 0.5 },
+  ];
   assert.deepEqual(sampleCounts(rows, 100, rng(4)), sampleCounts(rows, 100, rng(4)));
-  assert.equal(sampleCounts(rows, 250, rng(9)).reduce((t, r) => t + r.n, 0), 250);
+  assert.equal(
+    sampleCounts(rows, 250, rng(9)).reduce((t, r) => t + r.n, 0),
+    250,
+  );
   assert.ok(Math.abs(chiSquareP(3.841, 1) - 0.05) < 1e-3);
   assert.ok(Math.abs(chiSquareP(5.991, 2) - 0.05) < 1e-3);
   assert.ok(Math.abs(chiSquareP(9.488, 4) - 0.05) < 1e-3);
   const step = LESSON_CONTENT.chance.steps.find((s) => s.type === 'chisq');
-  const verdict = step.hypotheses.map((h) => chiSquare(step.observed.map((o) => o.n), h.shares).fits);
+  const verdict = step.hypotheses.map(
+    (h) =>
+      chiSquare(
+        step.observed.map((o) => o.n),
+        h.shares,
+      ).fits,
+  );
   assert.deepEqual(verdict, [false, true, false], 'only 2:1 fits the Curly × Curly vial');
 });
 
@@ -365,11 +509,22 @@ test('the recombination counting step has a sensible, reproducible answer', () =
 test('the bench handles every preset, and practice problems are answerable', () => {
   for (const p of PRESETS) {
     const r = benchCross(p.F, p.M);
-    assert.ok(r.motherOk && r.fatherOk && near(r.rows.reduce((t, x) => t + x.p, 0), 1), p.name);
+    assert.ok(
+      r.motherOk &&
+        r.fatherOk &&
+        near(
+          r.rows.reduce((t, x) => t + x.p, 0),
+          1,
+        ),
+      p.name,
+    );
   }
   assert.equal(benchCross('w/w; mut/mut; +/+', 'w/Y; +/+; +/+').motherOk, false, 'lethal parent is flagged');
   const v = countVial(benchCross('w/w; CyO/+; +/+', 'w/Y; +/+; +/+').rows, 200, 3);
-  assert.equal(v.counts.reduce((t, c) => t + c.n, 0), 200);
+  assert.equal(
+    v.counts.reduce((t, c) => t + c.n, 0),
+    200,
+  );
   assert.ok(v.test && v.test.df === 1);
   for (let seed = 1; seed <= 300; seed++) {
     for (const level of [1, 2]) {
@@ -381,13 +536,15 @@ test('the bench handles every preset, and practice problems are answerable', () 
   }
 });
 
-
 // ---- research techniques ---------------------------------------------------------------
 
 test('research section exposes technique and strategy lessons with model notes', () => {
   assert.ok(SECTIONS.some((s) => s.id === 'research'));
   const lessons = LESSONS.filter((l) => l.section === 'research');
-  assert.deepEqual(lessons.map((l) => l.id), ['threepoint', 'mosaics', 'target', 'screens', 'strategies']);
+  assert.deepEqual(
+    lessons.map((l) => l.id),
+    ['threepoint', 'mosaics', 'target', 'screens', 'strategies'],
+  );
   for (const l of lessons) {
     assert.equal(l.kind, 'lesson');
     assert.ok(LESSON_CONTENT[l.id].model.length, `${l.id}: model assumptions available together`);
@@ -397,22 +554,60 @@ test('research section exposes technique and strategy lessons with model notes',
 
 test('three-point lesson infers gene order and interval distances from sampled chromosomes', () => {
   for (const step of steps('threepoint')) {
-    const theoretical = threePointClasses(step), data = threePointData(step);
-    assert.ok(near(theoretical.reduce((t, c) => t + c.p, 0), 1));
-    assert.ok(near(theoretical.filter((c) => c.kind === 'D').reduce((t, c) => t + c.p, 0), step.coc * step.r[0] * step.r[1]));
+    const theoretical = threePointClasses(step),
+      data = threePointData(step);
+    assert.ok(
+      near(
+        theoretical.reduce((t, c) => t + c.p, 0),
+        1,
+      ),
+    );
+    assert.ok(
+      near(
+        theoretical.filter((c) => c.kind === 'D').reduce((t, c) => t + c.p, 0),
+        step.coc * step.r[0] * step.r[1],
+      ),
+    );
     assert.deepEqual(threePointData(step), data, 'stable counts across Back and notation changes');
-    assert.equal(data.counts.reduce((t, c) => t + c.n, 0), step.n);
+    assert.equal(
+      data.counts.reduce((t, c) => t + c.n, 0),
+      step.n,
+    );
     const byCount = data.counts.map((c, i) => ({ i, n: c.n })).sort((a, b) => a.n - b.n);
-    assert.deepEqual(data.dco.slice().sort(), byCount.slice(0, 2).map((c) => c.i).sort(), 'rare pair is recognisable in this teaching sample');
-    assert.deepEqual(data.parental.slice().sort(), byCount.slice(-2).map((c) => c.i).sort());
-    const middleCandidates = step.shown.filter((gene) => data.dco.every((i) => data.parental.some((j) => step.shown.every((g) => g === gene ? data.counts[i].mutant[g] !== data.counts[j].mutant[g] : data.counts[i].mutant[g] === data.counts[j].mutant[g]))));
+    assert.deepEqual(
+      data.dco.slice().sort(),
+      byCount
+        .slice(0, 2)
+        .map((c) => c.i)
+        .sort(),
+      'rare pair is recognisable in this teaching sample',
+    );
+    assert.deepEqual(
+      data.parental.slice().sort(),
+      byCount
+        .slice(-2)
+        .map((c) => c.i)
+        .sort(),
+    );
+    const middleCandidates = step.shown.filter((gene) =>
+      data.dco.every((i) =>
+        data.parental.some((j) =>
+          step.shown.every((g) =>
+            g === gene ? data.counts[i].mutant[g] !== data.counts[j].mutant[g] : data.counts[i].mutant[g] === data.counts[j].mutant[g],
+          ),
+        ),
+      ),
+    );
     assert.deepEqual(middleCandidates, [data.middle], 'one allele switches between reciprocal parental and DCO chromosomes');
     const recombinantCount = (a, b) => data.counts.filter((c) => c.mutant[a] !== c.mutant[b]).reduce((t, c) => t + c.n, 0);
-    assert.ok(near(data.d1, 100 * recombinantCount(step.order[0], step.order[1]) / step.n));
-    assert.ok(near(data.d2, 100 * recombinantCount(step.order[1], step.order[2]) / step.n));
+    assert.ok(near(data.d1, (100 * recombinantCount(step.order[0], step.order[1])) / step.n));
+    assert.ok(near(data.d2, (100 * recombinantCount(step.order[1], step.order[2])) / step.n));
     const dco = data.dco.reduce((t, i) => t + data.counts[i].n, 0);
-    assert.ok(near(data.d1 + data.d2 - 100 * recombinantCount(step.order[0], step.order[2]) / step.n, 200 * dco / step.n), 'two outer exchanges are hidden from the two-marker score');
-    assert.ok(near(data.coc, dco / (step.n * data.d1 * data.d2 / 10000)));
+    assert.ok(
+      near(data.d1 + data.d2 - (100 * recombinantCount(step.order[0], step.order[2])) / step.n, (200 * dco) / step.n),
+      'two outer exchanges are hidden from the two-marker score',
+    );
+    assert.ok(near(data.coc, dco / ((step.n * data.d1 * data.d2) / 10000)));
     assert.ok(Math.abs(data.coc - step.coc) > 0.02, 'sampled coefficient must be calculated, not copied from the model preset');
   }
 });
@@ -431,8 +626,14 @@ test('clone goals are achievable and model lineages are reciprocal, seeded chrom
   assert.deepEqual(cloneTissue({ round: 3, p: 1, seed: 17 }), strong);
   for (const step of steps('clones')) {
     const plans = SHOCK_TIMES.flatMap((t) => SHOCK_LENGTHS.map((l) => cloneTissue({ round: t.round, p: l.p, seed: step.seed })));
-    assert.ok(plans.some((t) => cloneGoalMet(t, step.goal)), `${step.title}: a selectable plan works`);
-    assert.ok(plans.some((t) => !cloneGoalMet(t, step.goal)), `${step.title}: planning matters`);
+    assert.ok(
+      plans.some((t) => cloneGoalMet(t, step.goal)),
+      `${step.title}: a selectable plan works`,
+    );
+    assert.ok(
+      plans.some((t) => !cloneGoalMet(t, step.goal)),
+      `${step.title}: planning matters`,
+    );
     assert.equal(cloneGoalMet(untreated, step.goal), false);
     for (const tissue of plans) {
       assert.equal(tissue.cells.length, tissue.size ** 2);
@@ -444,12 +645,15 @@ test('clone goals are achievable and model lineages are reciprocal, seeded chrom
 
 test('TARGET goals respect stage windows, temperature-dependent development and protein perdurance', () => {
   const schedule = (temp) => Object.fromEntries(STAGES.map((s) => [s.id, temp]));
-  const cold = simulateTarget(schedule(18)), warm = simulateTarget(schedule(29));
+  const cold = simulateTarget(schedule(18)),
+    warm = simulateTarget(schedule(29));
   assert.ok(cold.points.every((p) => p.gal4 === 0 && p.protein === 1));
   assert.ok(cold.eclosion > warm.eclosion, 'colder development takes longer');
   assert.ok(warm.points.at(-1).protein < 0.11);
   for (const step of steps('target')) {
-    const feasible = Array.from({ length: 64 }, (_, bits) => Object.fromEntries(STAGES.map((s, i) => [s.id, bits & (1 << i) ? 29 : 18]))).filter((t) => targetChecks(simulateTarget(t), step.goal).every((c) => c.ok));
+    const feasible = Array.from({ length: 64 }, (_, bits) =>
+      Object.fromEntries(STAGES.map((s, i) => [s.id, bits & (1 << i) ? 29 : 18])),
+    ).filter((t) => targetChecks(simulateTarget(t), step.goal).every((c) => c.ok));
     assert.ok(feasible.length > 0, step.title);
     assert.ok(!targetChecks(cold, step.goal).every((c) => c.ok), 'no induction fails the knockdown objective');
     for (const temps of feasible) {
@@ -459,7 +663,12 @@ test('TARGET goals respect stage windows, temperature-dependent development and 
         const window = sim.points.filter((p) => check.stages.includes(p.stage));
         const end = window.at(-1).t;
         const selected = check.last ? window.filter((p) => p.t > end - check.last) : window;
-        assert.equal(targetChecks(sim, { checks: [check] })[0].ok, selected.every((p) => (check.min === undefined || p[check.measure] >= check.min) && (check.max === undefined || p[check.measure] <= check.max)));
+        assert.equal(
+          targetChecks(sim, { checks: [check] })[0].ok,
+          selected.every(
+            (p) => (check.min === undefined || p[check.measure] >= check.min) && (check.max === undefined || p[check.measure] <= check.max),
+          ),
+        );
       }
     }
   }
@@ -471,20 +680,32 @@ test('TARGET goals respect stage windows, temperature-dependent development and 
 
 test('screen plans balance independent chromosomes, conditional multiple-hit share and capacity', () => {
   for (const dose of DOSES) {
-    const a = screenStats(dose.mM, 1000), b = screenStats(dose.mM, 2000);
+    const a = screenStats(dose.mM, 1000),
+      b = screenStats(dose.mM, 2000);
     assert.ok(b.hitGene > a.hitGene);
     assert.equal(a.multiShare, b.multiShare, 'more lines cannot change per-chromosome mutation burden');
     assert.equal(b.vials, 4000);
     assert.ok(near(a.hitGene, 1 - (1 - dose.lambda * PER_GENE) ** 1000));
-    assert.ok(near(a.multiShare * (1 - Math.exp(-dose.lambda)), 1 - Math.exp(-dose.lambda) * (1 + dose.lambda)), 'denominator is chromosomes with at least one lethal hit');
+    assert.ok(
+      near(a.multiShare * (1 - Math.exp(-dose.lambda)), 1 - Math.exp(-dose.lambda) * (1 + dose.lambda)),
+      'denominator is chromosomes with at least one lethal hit',
+    );
   }
   for (const step of steps('screen')) {
-    const plans = DOSES.map((dose) => ({ dose: dose.mM, n: Math.ceil(Math.log(1 - step.goal.minHit) / Math.log(1 - dose.lambda * PER_GENE)) }));
+    const plans = DOSES.map((dose) => ({
+      dose: dose.mM,
+      n: Math.ceil(Math.log(1 - step.goal.minHit) / Math.log(1 - dose.lambda * PER_GENE)),
+    }));
     const feasible = plans.filter((p) => screenChecks(p.dose, p.n, step.goal).every((c) => c.ok));
     assert.ok(feasible.length, `${step.title}: feasible preset and integer line count`);
     assert.ok(feasible.length < DOSES.length, `${step.title}: dose/capacity constraints exclude alternatives`);
-    for (const p of feasible) assert.equal(screenChecks(p.dose, p.n - 1, step.goal)[0].ok, false, 'rounding below the minimum misses coverage');
-    assert.equal(screenChecks(15, step.goal.maxLines + 1, step.goal).at(-1).ok, false, 'over-capacity plans fail even if coverage is sufficient');
+    for (const p of feasible)
+      assert.equal(screenChecks(p.dose, p.n - 1, step.goal)[0].ok, false, 'rounding below the minimum misses coverage');
+    assert.equal(
+      screenChecks(15, step.goal.maxLines + 1, step.goal).at(-1).ok,
+      false,
+      'over-capacity plans fail even if coverage is sufficient',
+    );
   }
 });
 
@@ -498,7 +719,13 @@ test('drafts preserve unchecked input and plans without storing derived model ar
   assert.deepEqual(restored.state[2], { temps: { adult: 29 }, ran: true, assisted: true, value: '0.123' });
   restored.state[2].temps.adult = 18;
   assert.equal(draft.state[2].temps.adult, 29);
-  for (const bad of [{ ...draft, version: 0 }, { ...draft, index: -1 }, { ...draft, state: [] }, { ...draft, types: ['text'] }]) assert.equal(restoreDraft(lesson, bad), null);
+  for (const bad of [
+    { ...draft, version: 0 },
+    { ...draft, index: -1 },
+    { ...draft, state: [] },
+    { ...draft, types: ['text'] },
+  ])
+    assert.equal(restoreDraft(lesson, bad), null);
 });
 
 test('supported completion and independent fresh-case practice are distinct, persistent results', () => {
@@ -510,27 +737,50 @@ test('supported completion and independent fresh-case practice are distinct, per
   assert.deepEqual(progress.get().results.threepoint, { assisted: true, independentPractice: false });
   progress.complete('threepoint', { independentPractice: true });
   progress.complete('threepoint', { assisted: true });
-  assert.deepEqual(progress.get().results.threepoint, { assisted: false, independentPractice: true }, 'later supported revision does not erase independent practice');
-  progress.reset(); assert.deepEqual(progress.get().results, {});
+  assert.deepEqual(
+    progress.get().results.threepoint,
+    { assisted: false, independentPractice: true },
+    'later supported revision does not erase independent practice',
+  );
+  progress.reset();
+  assert.deepEqual(progress.get().results, {});
 });
 
 test('fresh mapping cases preserve real locus order while changing phase and sampled offspring', () => {
   const step = steps('threepoint')[0];
   for (const seed of [7948, 15867, 23786, 31705]) {
-    const fresh = threePointPractice(step, seed), data = threePointData(fresh);
+    const fresh = threePointPractice(step, seed),
+      data = threePointData(fresh);
     assert.deepEqual(fresh.order, ['y', 'cv', 'v']);
     assert.deepEqual(threePointPractice(step, seed), fresh);
-    assert.notDeepEqual(data.counts.map((c) => c.n), threePointData(step).counts.map((c) => c.n));
+    assert.notDeepEqual(
+      data.counts.map((c) => c.n),
+      threePointData(step).counts.map((c) => c.n),
+    );
     assert(data.expectedDco > 0 && Number.isFinite(data.coc));
     const sorted = data.counts.map((c, i) => ({ i, n: c.n })).sort((a, b) => a.n - b.n);
-    assert.deepEqual(sorted.slice(0, 2).map((c) => c.i).sort(), data.dco.slice().sort());
-    assert.deepEqual(sorted.slice(-2).map((c) => c.i).sort(), data.parental.slice().sort());
+    assert.deepEqual(
+      sorted
+        .slice(0, 2)
+        .map((c) => c.i)
+        .sort(),
+      data.dco.slice().sort(),
+    );
+    assert.deepEqual(
+      sorted
+        .slice(-2)
+        .map((c) => c.i)
+        .sort(),
+      data.parental.slice().sort(),
+    );
   }
 });
 
 test('clone plans succeed across independent discs, with multiple feasible plans for each goal', () => {
   for (const step of steps('clones')) {
-    const plans = SHOCK_TIMES.flatMap((t) => SHOCK_LENGTHS.map((l) => cloneCohort({ round: t.round, p: l.p, seed: step.seed, goal: step.goal })));
+    const plans = SHOCK_TIMES.flatMap((t) =>
+      SHOCK_LENGTHS.map((l) => cloneCohort({ round: t.round, p: l.p, seed: step.seed, goal: step.goal })),
+    );
     assert(plans.filter((c) => c.met >= 4).length > 1, 'avoid one lucky seed as the only solution');
     assert(plans.some((c) => c.met < 4));
     for (const cohort of plans) {
@@ -559,6 +809,7 @@ test('research arguments survive completion and progress reset without automatic
   assert(progress.get().learningNotes['research-project'].hypothesis.includes('timed depletion'));
   progress.reset();
   assert(progress.get().learningNotes['research-project'].hypothesis.includes('timed depletion'));
-  const noteStep=LESSON_CONTENT['research-project'].steps.find(s=>s.type==='reflection');
-  assert.equal(noteStep.stage,'diagnose'); assert.equal(Object.keys(noteStep.prompts).length,3);
+  const noteStep = LESSON_CONTENT['research-project'].steps.find((s) => s.type === 'reflection');
+  assert.equal(noteStep.stage, 'diagnose');
+  assert.equal(Object.keys(noteStep.prompts).length, 3);
 });

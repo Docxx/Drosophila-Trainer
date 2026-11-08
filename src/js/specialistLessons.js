@@ -1,22 +1,153 @@
 // Source-aligned teaching beyond the scored stock-building engine.
-const q=(question,options,stage)=>({type:'choice',stage,question,options:options.map(([text,why,correct])=>({text,why,correct:!!correct}))});
-export const SPECIALIST_LESSONS={
- flyroom:{title:'From a vial to a reliable cross',steps:[
-  {type:'text',visual:'life-cycle',title:'Recognise the generation in the vial',body:['Flies pass through egg, three larval instars, pupa and adult. Larvae feed in the food; later larvae leave it and pupate. New adults eclose from pupae.','The timetable depends on temperature, genotype, density and culture conditions. Distinguish adults that were already present from offspring that eclose after a documented clearing. A vial that has no new adults yet can still contain developing offspring.']},
-  {type:'text',visual:'life-cycle',title:'A stock is also a record',body:['Keep a unique vial identity, the original genotype description, source/stock identifier, dates, conditions and observed problems. Preserve donor notes even when you use a shorter daily label.','Maintain labelled backups and inspect cultures under your laboratory’s routine. Record which vial supplied virgin females and which supplied males, including clearing and collection times. Do not silently replace an uncertain history with a confident label.']},
-  q('A vial has larvae but no newly emerged adults. Does this show the cross failed?', [['No: development can be proceeding before adult eclosion.','The life-cycle stage matters. Adult scoring must wait for the appropriate generation and conditions.',true],['Yes: successful crosses immediately produce adults.','Eggs develop through larval and pupal stages before adult eclosion.']]),
-  {type:'text',visual:'sex-gametes',title:'Sex and virginity answer different questions',body:['Use anatomy to identify sex. Use reliable source history and appropriate collection conditions to support virgin collection. A young appearance alone does not establish every female’s mating history.','For a cross with uncertain maternal history, stored sperm can change offspring parentage. The microscope exercise lets you set uncertain flies aside; the First cross activity also lets you discard and re-clear an uncertain source.']},
-  q('Two females look equally pale, but only one has a trusted source-vial record. What is established?', [['Appearance alone does not give both the same documented mating history.','The chromosome prediction depends on parentage, so source evidence must be tracked separately from outward appearance.',true],['Matching colour proves matching virginity.','Colour is an age-related cue, not a record of mating.']]),
-  {type:'text',visual:'life-cycle',title:'Separate parents from the scored offspring',body:['Label the generations and keep the planned cross direction with the vial. Removing parents at a recorded stage prevents them being mistaken for newly emerged F1 adults.','The trainer uses fixed events for its First cross mission. In the laboratory, follow the local protocol and actual development rather than assuming that every line follows the model’s schedule.']},
- ]},
- strategies:{title:'Choose the genetic strategy for the question',model:['These mechanism diagrams explain research strategies; they do not simulate transgenesis, construct recovery or every form of clone segregation. The scored stock builder supports the chromosome catalogue presented in its shelf.'],steps:[
-  {type:'text',visual:'screens',title:'Start with the question, not the favourite tool',body:['Forward genetics begins with a phenotype and searches for the genetic change responsible. Reverse genetics begins with a chosen gene and perturbs it to test a consequence. Both require chromosome identity, controls and causal validation.','Loss of function reduces or removes a gene’s activity; gain of function can increase, relocate or alter activity. Dominant versus recessive describes inheritance of an effect, not a universal molecular classification.']},
-  {type:'text',visual:'gal4uas',title:'What exactly does the fluorescent signal report?',body:['An enhancer/reporter construct tests a selected regulatory fragment. An enhancer trap can report regulatory activity near its insertion. A protein trap or endogenous tag follows a tagged gene product, subject to validation of its function and regulation.','A UAS reporter driven by GAL4 reports the driver’s activity; it is not automatically the endogenous localisation pattern of a protein of interest. Ask whether the tool reports regulatory activity, protein position, a cell lineage or a biological outcome.']},
-  q('You need to observe where an endogenous protein accumulates. Which distinction matters most?', [['A validated tag of the endogenous protein addresses localisation more directly than a generic driver-driven GFP pattern.','Reporter activity and protein localisation are different readouts; both need validation of what the construct changes.',true],['Any GFP signal proves the endogenous protein has that localisation.','A driver-driven reporter can mark cells without being attached to the protein of interest.']]),
-  {type:'text',visual:'marcm',title:'Why a repressible clone marker helps',body:['In a MARCM design, GAL80 initially represses GAL4-driven marker expression. An informative FLP/FRT exchange and segregation can produce mutant cells that lose GAL80 while a reciprocal lineage retains it.','Where the driver is active, the de-repressed mutant clone can become fluorescently identifiable. You must still check the genotype design, marker dynamics, appropriate control clones and the biological readout; fluorescence alone does not prove a gene’s function.']},
-  q('A GFP-marked mutant clone is smaller than neighbouring tissue. Is a growth requirement established?', [['Not yet: compare matched control clones and multiple independent tissues, considering induction, survival and position.','The marker identifies a designed lineage. It does not remove the other explanations for its size.',true],['Yes: a fluorescent marker eliminates every lineage-history effect.','Marker expression does not force equal histories or equal survival.']]),
-  {type:'text',visual:'maternal',title:'A mutant embryo can inherit functional maternal product',body:['A mother can deposit RNA or protein into eggs. An embryo that inherits two mutant alleles may initially retain functional product supplied by its mother, masking an early requirement.','Germline-clone strategies can separate maternal supply from zygotic genotype. Follow the mother’s germline genotype, the allele in the egg and the paternal allele separately; also establish that the relevant eggs and embryos can be produced and survive long enough to score.']},
-  q('Early m/m embryos from heterozygous mothers look normal. What remains plausible?', [['Maternal product could mask an early defect; compare maternal supply and later zygotic contributions.','An early phenotype depends on more than the embryo’s DNA genotype alone.',true],['The absence of an early phenotype proves the gene has no developmental role.','Maternal supply, timing, redundancy and the readout can all limit that conclusion.']]),
-  {type:'text',visual:'complementation',title:'From candidate to a causal argument',body:['Mapping connects a phenotype to a region or candidate. Independent alleles, rescue, molecular identity, matched backgrounds and direct readouts can test different competing explanations. A single manipulation is rarely a complete argument.','Plan the strongest discriminating follow-up rather than accumulating repetitions of the same ambiguous observation. Read the source record and original evidence for every tool; a short stock label is not a complete biological guarantee.']},
- ]},
+// A multiple-choice step: options are [text, why, correct?].
+const choice = (question, options, stage) => ({
+  type: 'choice',
+  stage,
+  question,
+  options: options.map(([text, why, correct]) => ({ text, why, correct: !!correct })),
+});
+export const SPECIALIST_LESSONS = {
+  flyroom: {
+    title: 'From a vial to a reliable cross',
+    steps: [
+      {
+        type: 'text',
+        visual: 'life-cycle',
+        title: 'Recognise the generation in the vial',
+        body: [
+          'Flies pass through egg, three larval instars, pupa and adult. Larvae feed in the food; later larvae leave it and pupate. New adults eclose from pupae.',
+          'The timetable depends on temperature, genotype, density and culture conditions. Distinguish adults that were already present from offspring that eclose after a documented clearing. A vial that has no new adults yet can still contain developing offspring.',
+        ],
+      },
+      {
+        type: 'text',
+        visual: 'life-cycle',
+        title: 'A stock is also a record',
+        body: [
+          'Keep a unique vial identity, the original genotype description, source/stock identifier, dates, conditions and observed problems. Preserve donor notes even when you use a shorter daily label.',
+          'Maintain labelled backups and inspect cultures under your laboratory’s routine. Record which vial supplied virgin females and which supplied males, including clearing and collection times. Do not silently replace an uncertain history with a confident label.',
+        ],
+      },
+      choice('A vial has larvae but no newly emerged adults. Does this show the cross failed?', [
+        [
+          'No: development can be proceeding before adult eclosion.',
+          'The life-cycle stage matters. Adult scoring must wait for the appropriate generation and conditions.',
+          true,
+        ],
+        ['Yes: successful crosses immediately produce adults.', 'Eggs develop through larval and pupal stages before adult eclosion.'],
+      ]),
+      {
+        type: 'text',
+        visual: 'sex-gametes',
+        title: 'Sex and virginity answer different questions',
+        body: [
+          'Use anatomy to identify sex. Use reliable source history and appropriate collection conditions to support virgin collection. A young appearance alone does not establish every female’s mating history.',
+          'For a cross with uncertain maternal history, stored sperm can change offspring parentage. The microscope exercise lets you set uncertain flies aside; the First cross activity also lets you discard and re-clear an uncertain source.',
+        ],
+      },
+      choice('Two females look equally pale, but only one has a trusted source-vial record. What is established?', [
+        [
+          'Appearance alone does not give both the same documented mating history.',
+          'The chromosome prediction depends on parentage, so source evidence must be tracked separately from outward appearance.',
+          true,
+        ],
+        ['Matching colour proves matching virginity.', 'Colour is an age-related cue, not a record of mating.'],
+      ]),
+      {
+        type: 'text',
+        visual: 'life-cycle',
+        title: 'Separate parents from the scored offspring',
+        body: [
+          'Label the generations and keep the planned cross direction with the vial. Removing parents at a recorded stage prevents them being mistaken for newly emerged F1 adults.',
+          'The trainer uses fixed events for its First cross mission. In the laboratory, follow the local protocol and actual development rather than assuming that every line follows the model’s schedule.',
+        ],
+      },
+    ],
+  },
+  strategies: {
+    title: 'Choose the genetic strategy for the question',
+    model: [
+      'These mechanism diagrams explain research strategies; they do not simulate transgenesis, construct recovery or every form of clone segregation. The scored stock builder supports the chromosome catalogue presented in its shelf.',
+    ],
+    steps: [
+      {
+        type: 'text',
+        visual: 'screens',
+        title: 'Start with the question, not the favourite tool',
+        body: [
+          'Forward genetics begins with a phenotype and searches for the genetic change responsible. Reverse genetics begins with a chosen gene and perturbs it to test a consequence. Both require chromosome identity, controls and causal validation.',
+          'Loss of function reduces or removes a gene’s activity; gain of function can increase, relocate or alter activity. Dominant versus recessive describes inheritance of an effect, not a universal molecular classification.',
+        ],
+      },
+      {
+        type: 'text',
+        visual: 'gal4uas',
+        title: 'What exactly does the fluorescent signal report?',
+        body: [
+          'An enhancer/reporter construct tests a selected regulatory fragment. An enhancer trap can report regulatory activity near its insertion. A protein trap or endogenous tag follows a tagged gene product, subject to validation of its function and regulation.',
+          'A UAS reporter driven by GAL4 reports the driver’s activity; it is not automatically the endogenous localisation pattern of a protein of interest. Ask whether the tool reports regulatory activity, protein position, a cell lineage or a biological outcome.',
+        ],
+      },
+      choice('You need to observe where an endogenous protein accumulates. Which distinction matters most?', [
+        [
+          'A validated tag of the endogenous protein addresses localisation more directly than a generic driver-driven GFP pattern.',
+          'Reporter activity and protein localisation are different readouts; both need validation of what the construct changes.',
+          true,
+        ],
+        [
+          'Any GFP signal proves the endogenous protein has that localisation.',
+          'A driver-driven reporter can mark cells without being attached to the protein of interest.',
+        ],
+      ]),
+      {
+        type: 'text',
+        visual: 'marcm',
+        title: 'Why a repressible clone marker helps',
+        body: [
+          'In a MARCM design, GAL80 initially represses GAL4-driven marker expression. An informative FLP/FRT exchange and segregation can produce mutant cells that lose GAL80 while a reciprocal lineage retains it.',
+          'Where the driver is active, the de-repressed mutant clone can become fluorescently identifiable. You must still check the genotype design, marker dynamics, appropriate control clones and the biological readout; fluorescence alone does not prove a gene’s function.',
+        ],
+      },
+      choice('A GFP-marked mutant clone is smaller than neighbouring tissue. Is a growth requirement established?', [
+        [
+          'Not yet: compare matched control clones and multiple independent tissues, considering induction, survival and position.',
+          'The marker identifies a designed lineage. It does not remove the other explanations for its size.',
+          true,
+        ],
+        [
+          'Yes: a fluorescent marker eliminates every lineage-history effect.',
+          'Marker expression does not force equal histories or equal survival.',
+        ],
+      ]),
+      {
+        type: 'text',
+        visual: 'maternal',
+        title: 'A mutant embryo can inherit functional maternal product',
+        body: [
+          'A mother can deposit RNA or protein into eggs. An embryo that inherits two mutant alleles may initially retain functional product supplied by its mother, masking an early requirement.',
+          'Germline-clone strategies can separate maternal supply from zygotic genotype. Follow the mother’s germline genotype, the allele in the egg and the paternal allele separately; also establish that the relevant eggs and embryos can be produced and survive long enough to score.',
+        ],
+      },
+      choice('Early m/m embryos from heterozygous mothers look normal. What remains plausible?', [
+        [
+          'Maternal product could mask an early defect; compare maternal supply and later zygotic contributions.',
+          'An early phenotype depends on more than the embryo’s DNA genotype alone.',
+          true,
+        ],
+        [
+          'The absence of an early phenotype proves the gene has no developmental role.',
+          'Maternal supply, timing, redundancy and the readout can all limit that conclusion.',
+        ],
+      ]),
+      {
+        type: 'text',
+        visual: 'complementation',
+        title: 'From candidate to a causal argument',
+        body: [
+          'Mapping connects a phenotype to a region or candidate. Independent alleles, rescue, molecular identity, matched backgrounds and direct readouts can test different competing explanations. A single manipulation is rarely a complete argument.',
+          'Plan the strongest discriminating follow-up rather than accumulating repetitions of the same ambiguous observation. Read the source record and original evidence for every tool; a short stock label is not a complete biological guarantee.',
+        ],
+      },
+    ],
+  },
 };

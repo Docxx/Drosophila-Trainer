@@ -162,7 +162,13 @@ function keyFor(chrom, hap) {
 /** Gametes for one chromosome pair: [{ key, p }]. */
 export function chromGametes(chrom, pair, female) {
   const [a, b] = pair;
-  const plain = a === b ? [{ key: a, p: 1 }] : [{ key: a, p: 0.5 }, { key: b, p: 0.5 }];
+  const plain =
+    a === b
+      ? [{ key: a, p: 1 }]
+      : [
+          { key: a, p: 0.5 },
+          { key: b, p: 0.5 },
+        ];
   if (!female || a === b) return plain;
   const ha = haplotype(chrom, a);
   const hb = haplotype(chrom, b);

@@ -20,8 +20,11 @@ const types = {
 http
   .createServer((req, res) => {
     let urlPath;
-    try { urlPath = decodeURIComponent(req.url.split('?')[0]); }
-    catch { return res.writeHead(400).end(); }
+    try {
+      urlPath = decodeURIComponent(req.url.split('?')[0]);
+    } catch {
+      return res.writeHead(400).end();
+    }
     // Preserve the document's base URL so its CSS, modules and models resolve.
     if (urlPath === '/') return res.writeHead(302, { Location: '/src/index.html' }).end();
     const file = path.join(root, urlPath);

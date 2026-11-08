@@ -25,12 +25,15 @@ export const PRESETS = [
 
 /** Everything the bench shows for a cross. */
 export function benchCross(mother, father, { bySex = false } = {}) {
-  const m = parseGenotype(mother), f = parseGenotype(father);
+  const m = parseGenotype(mother),
+    f = parseGenotype(father);
   const out = { motherOk: isViable(m), fatherOk: isViable(f) };
   if (!out.motherOk || !out.fatherOk) return out;
   const { rows, dead } = classesFor(mother, father, { traits: ALL_TRAITS, bySex, terse: true });
   return {
-    ...out, rows, dead,
+    ...out,
+    rows,
+    dead,
     eggs: gametesFor(mother, ['X', '2', '3']).length,
     sperm: gametesFor(father, ['X', '2', '3']).length,
   };
@@ -39,7 +42,13 @@ export function benchCross(mother, father, { bySex = false } = {}) {
 /** Count a vial and test it against the expected ratio. */
 export function countVial(rows, n, seed) {
   const counts = sampleCounts(rows, n, rng(seed));
-  const test = rows.length > 1 ? chiSquare(counts.map((c) => c.n), rows.map((r) => r.p)) : null;
+  const test =
+    rows.length > 1
+      ? chiSquare(
+          counts.map((c) => c.n),
+          rows.map((r) => r.p),
+        )
+      : null;
   const lowExpected = rows.some((r) => r.p * n < 5);
   return { counts, test, lowExpected };
 }
@@ -63,20 +72,31 @@ export function practiceProblem(seed, level = 1) {
   const pick = (xs) => xs[Math.floor(r() * xs.length)];
   for (let attempt = 0; attempt < 50; attempt++) {
     const focus = level === 2 ? ['2', '3'] : [pick(['X', '2', '3'])];
-    const F = { X: 'w/w', 2: '+/+', 3: '+/+' }, M = { X: 'w/Y', 2: '+/+', 3: '+/+' };
+    const F = { X: 'w/w', 2: '+/+', 3: '+/+' },
+      M = { X: 'w/Y', 2: '+/+', 3: '+/+' };
     for (const c of focus) {
-      if (c === 'X') { F.X = pick(POOL.X.F); M.X = pick(POOL.X.M); }
-      else { F[c] = pick(POOL[c]); M[c] = pick(POOL[c]); }
+      if (c === 'X') {
+        F.X = pick(POOL.X.F);
+        M.X = pick(POOL.X.M);
+      } else {
+        F[c] = pick(POOL[c]);
+        M[c] = pick(POOL[c]);
+      }
     }
-    const mother = `${F.X}; ${F[2]}; ${F[3]}`, father = `${M.X}; ${M[2]}; ${M[3]}`;
+    const mother = `${F.X}; ${F[2]}; ${F[3]}`,
+      father = `${M.X}; ${M[2]}; ${M[3]}`;
     if (!isViable(parseGenotype(mother)) || !isViable(parseGenotype(father))) continue;
     const bySex = focus.includes('X') && r() < 0.7;
     const { rows } = classesFor(mother, father, { traits: ALL_TRAITS, bySex, terse: true });
     if (rows.length < 2) continue;
     const row = pick(rows);
     if (!COMMON.some((x) => near(x, row.p)) && level === 1) continue;
-    const distractors = COMMON.filter((x) => !near(x, row.p) && x > 0).sort((a, b) => Math.abs(a - row.p) - Math.abs(b - row.p)).slice(0, 5);
-    const options = [row.p, ...distractors.sort(() => r() - 0.5).slice(0, 3)].sort((a, b) => b - a).map((p) => ({ p, label: ratioText(p) }));
+    const distractors = COMMON.filter((x) => !near(x, row.p) && x > 0)
+      .sort((a, b) => Math.abs(a - row.p) - Math.abs(b - row.p))
+      .slice(0, 5);
+    const options = [row.p, ...distractors.sort(() => r() - 0.5).slice(0, 3)]
+      .sort((a, b) => b - a)
+      .map((p) => ({ p, label: ratioText(p) }));
     return { mother, father, bySex, focus, label: row.label, answer: row.p, options, rows };
   }
   return practiceProblem(seed + 1, level);

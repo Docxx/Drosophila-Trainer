@@ -54,7 +54,8 @@ export function threePointData(step) {
     parental: counts.map((c, i) => (c.kind === 'P' ? i : -1)).filter((i) => i >= 0),
     dco: counts.map((c, i) => (c.kind === 'D' ? i : -1)).filter((i) => i >= 0),
     middle: step.order[1],
-    d1, d2,
+    d1,
+    d2,
     coc: sum(['D']) / expectedDco,
     expectedDco,
   };
@@ -75,7 +76,11 @@ export function threePointPractice(step, seed) {
  */
 export const SHOCK_TIMES = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => ({ round: k + 2, hours: 24 + 12 * (k - 1) }));
 /** Heat-shock length → chance that one dividing cell recombines at its FRTs. */
-export const SHOCK_LENGTHS = [{ minutes: 10, p: 0.05 }, { minutes: 30, p: 0.15 }, { minutes: 60, p: 0.35 }];
+export const SHOCK_LENGTHS = [
+  { minutes: 10, p: 0.05 },
+  { minutes: 30, p: 0.15 },
+  { minutes: 60, p: 0.35 },
+];
 
 /**
  * A disc of `size`² cells grown by repeated division from one founder. Each
@@ -94,12 +99,14 @@ export function cloneTissue({ round, p, seed = 1, size = 32 }) {
   function grow(patch, depth, geno, event) {
     if (patch.length === 1) {
       const [x, y] = patch[0];
-      const dx = (x + 0.5) / size - 0.5, dy = (y + 0.5) / size - 0.5;
+      const dx = (x + 0.5) / size - 0.5,
+        dy = (y + 0.5) / size - 0.5;
       cells[y * size + x] = { geno, event, inside: (dx / 0.5) ** 2 + (dy / 0.36) ** 2 <= 1 };
       return;
     }
     // Split along the longer side, a little off-centre, as real divisions are.
-    const xs = patch.map((c) => c[0]), ys = patch.map((c) => c[1]);
+    const xs = patch.map((c) => c[0]),
+      ys = patch.map((c) => c[1]);
     const axis = Math.max(...xs) - Math.min(...xs) >= Math.max(...ys) - Math.min(...ys) ? 0 : 1;
     const sorted = [...patch].sort((a, b) => a[axis] - b[axis] || a[1 - axis] - b[1 - axis]);
     const cut = Math.max(1, Math.min(sorted.length - 1, Math.round(sorted.length * (0.4 + 0.2 * random()))));
@@ -121,7 +128,9 @@ export function cloneTissue({ round, p, seed = 1, size = 32 }) {
   for (const c of cells) if (c.inside && c.geno === 0) sizes.set(c.event, (sizes.get(c.event) || 0) + 1);
   const cloneSizes = [...sizes.values()];
   return {
-    size, cells, events,
+    size,
+    cells,
+    events,
     clones: cloneSizes.length,
     meanSize: cloneSizes.length ? cloneSizes.reduce((t, n) => t + n, 0) / cloneSizes.length : 0,
     largest: cloneSizes.length ? Math.max(...cloneSizes) : 0,
@@ -131,10 +140,12 @@ export function cloneTissue({ round, p, seed = 1, size = 32 }) {
 
 /** Does a dissected disc meet a goal? Goal: { minClones, maxClones, minLargest, maxMean }. */
 export function cloneGoalMet(t, goal) {
-  return (goal.minClones === undefined || t.clones >= goal.minClones)
-    && (goal.maxClones === undefined || t.clones <= goal.maxClones)
-    && (goal.minLargest === undefined || t.largest >= goal.minLargest)
-    && (goal.maxMean === undefined || (t.clones > 0 && t.meanSize <= goal.maxMean));
+  return (
+    (goal.minClones === undefined || t.clones >= goal.minClones) &&
+    (goal.maxClones === undefined || t.clones <= goal.maxClones) &&
+    (goal.minLargest === undefined || t.largest >= goal.minLargest) &&
+    (goal.maxMean === undefined || (t.clones > 0 && t.meanSize <= goal.maxMean))
+  );
 }
 
 /** Independent discs, reproducible when a saved experiment is reopened. */
@@ -164,10 +175,10 @@ export const STAGES = [
   { id: 'adult', label: 'Adult', days: 6, fixed: true },
 ];
 export const RATE = { 18: 0.5, 29: 1.1 };
-const TAU_ON = 6;     // hours for GAL80ts to let go at 29 °C and GAL4 targets to come up
-const TAU_OFF = 24;   // hours for GAL80ts to re-accumulate and shut GAL4 off at 18 °C
+const TAU_ON = 6; // hours for GAL80ts to let go at 29 °C and GAL4 targets to come up
+const TAU_OFF = 24; // hours for GAL80ts to re-accumulate and shut GAL4 off at 18 °C
 const TAU_PROTEIN = 24; // hours for the target protein to turn over (perdurance)
-const KNOCKDOWN = 0.9;  // RNAi removes 90% of new protein synthesis at full GAL4 activity
+const KNOCKDOWN = 0.9; // RNAi removes 90% of new protein synthesis at full GAL4 activity
 
 /**
  * Simulate one temperature schedule ({ stageId: 18 | 29 }). Returns hourly points
@@ -176,7 +187,9 @@ const KNOCKDOWN = 0.9;  // RNAi removes 90% of new protein synthesis at full GAL
 export function simulateTarget(temps) {
   const points = [];
   const bounds = [];
-  let t = 0, gal4 = 0, protein = 1;
+  let t = 0,
+    gal4 = 0,
+    protein = 1;
   for (const st of STAGES) {
     const temp = temps[st.id];
     const hours = Math.round((st.fixed ? st.days : st.days / RATE[temp]) * 24);
@@ -184,7 +197,7 @@ export function simulateTarget(temps) {
     for (let h = 0; h < hours; h++) {
       const on = temp === 29 ? 1 : 0;
       gal4 += (on - gal4) / (on ? TAU_ON : TAU_OFF);
-      protein += ((1 - KNOCKDOWN * gal4) - protein) / TAU_PROTEIN;
+      protein += (1 - KNOCKDOWN * gal4 - protein) / TAU_PROTEIN;
       points.push({ t: ++t, stage: st.id, temp, gal4, protein });
     }
   }
@@ -199,7 +212,8 @@ export function targetChecks(sim, goal) {
   return goal.checks.map((c) => {
     const pts = targetWindow(sim, c);
     const vals = pts.map((pt) => pt[c.measure]);
-    const ok = vals.length > 0 && (c.max === undefined || Math.max(...vals) <= c.max) && (c.min === undefined || Math.min(...vals) >= c.min);
+    const ok =
+      vals.length > 0 && (c.max === undefined || Math.max(...vals) <= c.max) && (c.min === undefined || Math.min(...vals) >= c.min);
     return { text: c.text, ok };
   });
 }

@@ -16,11 +16,13 @@ if (snapshotArg) {
   app.setPath('userData', profile);
 }
 const sizeArg = snapshotArg && process.argv.find((a) => a.startsWith('--snapshot-size='));
-const snapshotSize = sizeArg?.split('=')[1].match(/^(\d+)x(\d+)$/)?.slice(1).map(Number);
+const snapshotSize = sizeArg
+  ?.split('=')[1]
+  .match(/^(\d+)x(\d+)$/)
+  ?.slice(1)
+  .map(Number);
 
-protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } },
-]);
+protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -62,12 +64,17 @@ function createWindow() {
           console.log(`setup: ${await win.webContents.executeJavaScript(snapshotJs)}`);
           await new Promise((r) => setTimeout(r, 500));
         }
-        const state = await win.webContents.executeJavaScript('JSON.stringify({q: window.scope?.holder?.quaternion.toArray(), y: window.scope?.holder?.position.y})');
+        const state = await win.webContents.executeJavaScript(
+          'JSON.stringify({q: window.scope?.holder?.quaternion.toArray(), y: window.scope?.holder?.position.y})',
+        );
         console.log(`fly state ${state}`);
         fs.writeFileSync(out, (await win.webContents.capturePage()).toPNG());
         console.log(`snapshot saved to ${out}`);
         app.quit();
-      })().catch((error) => { console.error(error); app.exit(1); });
+      })().catch((error) => {
+        console.error(error);
+        app.exit(1);
+      });
     });
   }
 }

@@ -158,10 +158,20 @@ export const MIDLINE_Z = 4.04;
 // found as pits in the mesh. Mirrored about the notum's own midline (file y).
 const NOTUM_MID_Y = 41.55;
 const BRISTLE_PITS = [
-  [106.3, 29.7, 20.1], [61.3, 36.6, 39.2], [93.1, 34.5, 39.2], [84.1, 20.8, 37.4],
-  [67.9, 12.8, 31.5], [116.7, 34.6, 30.6], [103.9, 30, 28.2], [47.1, 14.4, 25.9],
-  [55.9, 9.3, 22.5], [44.7, 10.9, 18.9], [38.6, 14.7, 13.6], [46.3, 9.5, 13.3],
-  [21.9, 24.2, 16.2], [12.3, 24.8, 15.5],
+  [106.3, 29.7, 20.1],
+  [61.3, 36.6, 39.2],
+  [93.1, 34.5, 39.2],
+  [84.1, 20.8, 37.4],
+  [67.9, 12.8, 31.5],
+  [116.7, 34.6, 30.6],
+  [103.9, 30, 28.2],
+  [47.1, 14.4, 25.9],
+  [55.9, 9.3, 22.5],
+  [44.7, 10.9, 18.9],
+  [38.6, 14.7, 13.6],
+  [46.3, 9.5, 13.3],
+  [21.9, 24.2, 16.2],
+  [12.3, 24.8, 15.5],
 ];
 
 export const EYE_COLOURS = {
@@ -255,10 +265,14 @@ function paintBodyHalf(mesh, { sex, stage, meconium }) {
   const abdomen = PALE[stage]?.abdomen || PALETTE.abdomen;
   const young = stage !== 'mature';
   for (let i = 0; i < N; i++) {
-    const x = wp[i * 3], y = wp[i * 3 + 1], z = wp[i * 3 + 2];
+    const x = wp[i * 3],
+      y = wp[i * 3 + 1],
+      z = wp[i * 3 + 2];
     let band = rim[i];
     if (x > 130 && x < 210) {
-      const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL), cz = Math.floor(z / CELL);
+      const cx = Math.floor(x / CELL),
+        cy = Math.floor(y / CELL),
+        cz = Math.floor(z / CELL);
       for (let a = 0; a <= Math.ceil(BAND / CELL); a++)
         for (let b = -1; b <= 1; b++)
           for (let c = -1; c <= 1; c++) {
@@ -332,7 +346,10 @@ function buildSexComb(leg, joints, mirror, material) {
     const idx = right.index.array;
     for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
     right.computeVertexNormals();
-    for (const [side, geometry] of [['l', g], ['r', right]]) {
+    for (const [side, geometry] of [
+      ['l', g],
+      ['r', right],
+    ]) {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = `sex-comb-${side}-${tooth}`;
       mesh.castShadow = true;
@@ -353,9 +370,13 @@ function unexpandedWing(source) {
   const v = new THREE.Vector3();
   for (let i = 0; i < p.count; i++) {
     v.fromBufferAttribute(p, i).sub(hinge);
-    const l = v.dot(L), a = v.dot(A), n = v.z;
+    const l = v.dot(L),
+      a = v.dot(A),
+      n = v.z;
     const fold = 2.4 * Math.sin(l * 0.16) * Math.cos(a * 0.22) + 1.2 * Math.sin(a * 0.5 + l * 0.05);
-    v.copy(hinge).addScaledVector(L, l * 0.36).addScaledVector(A, a * 0.48);
+    v.copy(hinge)
+      .addScaledVector(L, l * 0.36)
+      .addScaledVector(A, a * 0.48);
     v.z += n + fold * THREE.MathUtils.smoothstep(l, 4, 30);
     p.setXYZ(i, v.x, v.y, v.z);
   }
@@ -383,7 +404,10 @@ function buildBristles(notum, { lengthScale = 1, thickness = 1 } = {}) {
   const g = notum.geometry;
   const pos = g.attributes.position.array;
   const nor = g.attributes.normal.array;
-  const pits = BRISTLE_PITS.flatMap(([x, y, z]) => [[x, y, z], [x, 2 * NOTUM_MID_Y - y, z]]);
+  const pits = BRISTLE_PITS.flatMap(([x, y, z]) => [
+    [x, y, z],
+    [x, 2 * NOTUM_MID_Y - y, z],
+  ]);
   const mat = new THREE.MeshStandardMaterial({ color: PALETTE.bristle, roughness: 0.35 });
   const group = new THREE.Group();
   group.name = 'bristles';
@@ -391,13 +415,20 @@ function buildBristles(notum, { lengthScale = 1, thickness = 1 } = {}) {
   for (const pit of pits) {
     const sum = new THREE.Vector3();
     for (let i = 0; i < pos.length; i += 3) {
-      if (Math.hypot(pos[i] - pit[0], pos[i + 1] - pit[1], pos[i + 2] - pit[2]) < 5) sum.add(new THREE.Vector3(nor[i], nor[i + 1], nor[i + 2]));
+      if (Math.hypot(pos[i] - pit[0], pos[i + 1] - pit[1], pos[i + 2] - pit[2]) < 5)
+        sum.add(new THREE.Vector3(nor[i], nor[i + 1], nor[i + 2]));
     }
     const base = new THREE.Vector3(...pit).applyMatrix4(notum.matrixWorld);
     const N = sum.transformDirection(notum.matrixWorld).normalize();
     const back = new THREE.Vector3(1, 0, 0);
-    const tangent = back.clone().sub(N.clone().multiplyScalar(back.dot(N))).normalize();
-    const dir = tangent.multiplyScalar(Math.cos(0.45)).add(N.clone().multiplyScalar(Math.sin(0.45))).normalize();
+    const tangent = back
+      .clone()
+      .sub(N.clone().multiplyScalar(back.dot(N)))
+      .normalize();
+    const dir = tangent
+      .multiplyScalar(Math.cos(0.45))
+      .add(N.clone().multiplyScalar(Math.sin(0.45)))
+      .normalize();
     const onHead = base.x < 45;
     const m = new THREE.Mesh(bristleGeometry((onHead ? 26 : 38) * lengthScale, 0.75 * thickness), mat);
     m.position.copy(base);
@@ -427,7 +458,10 @@ export async function buildFly({ sex = 'F', stage = 'mature', meconium = false, 
   if (!STAGES.includes(stage)) throw new Error(`Unknown developmental stage: ${stage}`);
   const teneral = stage === 'teneral';
   // Unexpanded wings lie close along the body rather than being held up.
-  if (teneral) { wingSpread = 14; wingRaise = 22; }
+  if (teneral) {
+    wingSpread = 14;
+    wingRaise = 22;
+  }
   const raw = new THREE.Group(); // in print units, fly frame
   const ids = Object.keys(ASSEMBLY);
   const geoms = await Promise.all(ids.map((id) => loadPart(id, base)));
@@ -442,7 +476,14 @@ export async function buildFly({ sex = 'F', stage = 'mature', meconium = false, 
   });
   const wingMat = teneral
     ? // Folded, still-wet wing pads are milky and nearly opaque.
-      new THREE.MeshPhysicalMaterial({ color: 0xd9d2bf, roughness: 0.45, transparent: true, opacity: 0.85, sheen: 0.3, side: THREE.DoubleSide })
+      new THREE.MeshPhysicalMaterial({
+        color: 0xd9d2bf,
+        roughness: 0.45,
+        transparent: true,
+        opacity: 0.85,
+        sheen: 0.3,
+        side: THREE.DoubleSide,
+      })
     : new THREE.MeshPhysicalMaterial({
         color: 0xd6d2c4,
         roughness: 0.15,
@@ -510,14 +551,18 @@ export async function buildFly({ sex = 'F', stage = 'mature', meconium = false, 
     const M = legRestMatrix(id);
     const joints = LEG_JOINTS[id].map((j) => new THREE.Vector3(...j).applyMatrix4(M));
     const rest = closeSlit(legGeoms[i].clone(), id).applyMatrix4(M);
-    if (id === 'leg1_l' && sex === 'M') raw.add(buildSexComb(rest, joints, mirror, new THREE.MeshStandardMaterial({ color: PALETTE.bristle, roughness: 0.5 })));
+    if (id === 'leg1_l' && sex === 'M')
+      raw.add(buildSexComb(rest, joints, mirror, new THREE.MeshStandardMaterial({ color: PALETTE.bristle, roughness: 0.5 })));
     const left = poseLeg(rest, joints, KO_POSE[id]);
     const right = left.clone().applyMatrix4(mirror);
     // A mirror flips triangle winding; swap two corners to keep faces outward.
     const idx = right.index.array;
     for (let t = 0; t < idx.length; t += 3) [idx[t + 1], idx[t + 2]] = [idx[t + 2], idx[t + 1]];
     right.computeVertexNormals();
-    for (const [side, g] of [['l', left], ['r', right]]) {
+    for (const [side, g] of [
+      ['l', left],
+      ['r', right],
+    ]) {
       const mesh = new THREE.Mesh(g, legMat);
       mesh.name = id.replace(/_l$/, `_${side}`);
       mesh.castShadow = mesh.receiveShadow = true;
@@ -567,7 +612,10 @@ export function applyTransform(obj, t) {
   if (t.mirror) {
     // Reflect the whole placed part across the plane z = MIDLINE_Z.
     obj.updateMatrix();
-    const m = new THREE.Matrix4().makeTranslation(0, 0, 2 * MIDLINE_Z).multiply(new THREE.Matrix4().makeScale(1, 1, -1)).multiply(obj.matrix);
+    const m = new THREE.Matrix4()
+      .makeTranslation(0, 0, 2 * MIDLINE_Z)
+      .multiply(new THREE.Matrix4().makeScale(1, 1, -1))
+      .multiply(obj.matrix);
     m.decompose(obj.position, obj.quaternion, obj.scale);
   }
 }

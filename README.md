@@ -200,6 +200,7 @@ available in the left panel. No timing, injury or CO2 fertility penalties apply.
 
 - `npm run check`: actual mesh builds plus collection, experiment, notebook, lesson, planner and progress tests.
 - `npm run check:genetics`: verify the retained genetics engine's six cross puzzles.
+- `npm run format` / `npm run format:check`: Prettier (settings in `.prettierrc.json`) for all JavaScript. Run it before committing, whichever assistant made the change.
 - `npm run serve`: local browser preview at http://127.0.0.1:5180.
 - `npm run snapshot`: hidden Electron snapshot, saved as `snapshot.png`.
 - `npx electron . --snapshot=tmp/course.png --snapshot-js=tools/review-course.js`:

@@ -41,7 +41,9 @@ function readStl(file) {
   for (let t = 0; t < n; t++) {
     for (let v = 0; v < 3; v++) {
       const o = 84 + t * 50 + 12 + v * 12;
-      const x = b.readFloatLE(o), y = b.readFloatLE(o + 4), z = b.readFloatLE(o + 8);
+      const x = b.readFloatLE(o),
+        y = b.readFloatLE(o + 4),
+        z = b.readFloatLE(o + 8);
       const key = `${Math.round(x * 1e4)},${Math.round(y * 1e4)},${Math.round(z * 1e4)}`;
       let i = map.get(key);
       if (i === undefined) {

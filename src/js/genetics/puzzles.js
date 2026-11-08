@@ -2,7 +2,11 @@
 // (the fewest generations that can produce a class made only of target flies).
 // Par values are checked by tools/check-puzzles.mjs.
 
-const DB = { text: 'w; Sco/CyO; TM3/TM6B', name: 'Double balancer', note: 'Balancers on 2 and 3, each over a marked chromosome. The workhorse for building stocks.' };
+const DB = {
+  text: 'w; Sco/CyO; TM3/TM6B',
+  name: 'Double balancer',
+  note: 'Balancers on 2 and 3, each over a marked chromosome. The workhorse for building stocks.',
+};
 
 export const PUZZLES = [
   {
@@ -16,7 +20,11 @@ export const PUZZLES = [
     par: 1,
     stocks: [
       { text: 'w; UAS-GFP; +', name: 'UAS-GFP', note: 'Homozygous transgene on chromosome 2, marked by mini-white.' },
-      { text: 'w; Sco/CyO; +', name: 'Sco/CyO', note: 'Chromosome-2 balancer stock. Sco/Sco and CyO/CyO both die, so every fly is Sco/CyO.' },
+      {
+        text: 'w; Sco/CyO; +',
+        name: 'Sco/CyO',
+        note: 'Chromosome-2 balancer stock. Sco/Sco and CyO/CyO both die, so every fly is Sco/CyO.',
+      },
     ],
     hints: [
       'Cross UAS-GFP virgins to Sco/CyO males (or the other way round).',

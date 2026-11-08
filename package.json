@@ -10,14 +10,17 @@
     "snapshot": "electron . --snapshot=snapshot.png",
     "check": "node tools/check-models.mjs && node --test tools/collection.test.mjs tools/experiment.test.mjs tools/course.test.mjs",
     "convert-model": "node tools/convert-model.mjs",
-    "check:genetics": "node tools/check-puzzles.mjs"
+    "check:genetics": "node tools/check-puzzles.mjs",
+    "format": "prettier --write \"src/js/**/*.js\" \"tools/**/*.{js,mjs}\" main.cjs",
+    "format:check": "prettier --check \"src/js/**/*.js\" \"tools/**/*.{js,mjs}\" main.cjs"
   },
   "dependencies": {
     "three": "^0.169.0"
   },
   "devDependencies": {
     "electron": "^33.2.1",
-    "meshoptimizer": "^0.21.0"
+    "meshoptimizer": "^0.21.0",
+    "prettier": "3.3.3"
   },
   "description": "Offline 3D trainer for Drosophila handling and genetics."
 }

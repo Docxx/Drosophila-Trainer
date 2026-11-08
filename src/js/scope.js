@@ -111,7 +111,9 @@ function restoreSession() {
       const saved = JSON.parse(raw);
       return new CollectionSession({ seed: saved.seed, saved });
     }
-  } catch { persistenceWarning = 'The previous notebook could not be restored. A fresh batch is open.'; }
+  } catch {
+    persistenceWarning = 'The previous notebook could not be restored. A fresh batch is open.';
+  }
   return new CollectionSession();
 }
 let session = restoreSession();
@@ -120,14 +122,20 @@ function restoreCross() {
   try {
     const raw = localStorage.getItem(CROSS_STORAGE_KEY);
     if (raw) return new CrossSession({ saved: JSON.parse(raw) });
-  } catch { persistenceWarning = 'The previous cross notebook could not be restored. A fresh cross batch is open.'; }
+  } catch {
+    persistenceWarning = 'The previous cross notebook could not be restored. A fresh cross batch is open.';
+  }
   return new CrossSession();
 }
 let crossSession = restoreCross();
 let crossPage = 0;
 let mode = 'exercise';
-function activeSession() { return mode === 'cross' ? crossSession : session; }
-function isCollecting() { return mode === 'exercise' || mode === 'cross' && crossSession.snapshot().phase === 'collecting'; }
+function activeSession() {
+  return mode === 'cross' ? crossSession : session;
+}
+function isCollecting() {
+  return mode === 'exercise' || (mode === 'cross' && crossSession.snapshot().phase === 'collecting');
+}
 let busy = false;
 let generation = 0;
 let selected = null;
@@ -137,11 +145,63 @@ let drag = null;
 let helpVisits = 0;
 const specimens = [];
 const references = [
-  { id: 'reference-female', label: 'Mature female', sex: 'F', stage: 'mature', x: -3.05, z: -1.5, heading: -1.25, rest: 'left', note: 'The pointed abdomen with separate pigment bands. Females have no sex combs on the forelegs.' },
-  { id: 'reference-male', label: 'Mature male', sex: 'M', stage: 'mature', x: 0, z: -1.5, heading: -1.25, rest: 'left', note: 'A shorter abdomen with a dark tip. Zoom in on the first tarsal segment of each foreleg to see the sex combs.' },
-  { id: 'reference-teneral-female', label: 'Just-eclosed female', sex: 'F', stage: 'teneral', meconium: true, x: 3.05, z: -1.5, heading: -1.25, rest: 'left', note: 'Under an hour old: very pale, wings still folded and unexpanded, and the dark meconium in the abdomen. All signs she eclosed very recently.' },
-  { id: 'reference-pale-female', label: 'Pale female', sex: 'F', stage: 'fresh', meconium: true, x: -1.65, z: 1.5, heading: -1.25, rest: 'left', note: 'A few hours old: wings expanded but still pale, with the meconium showing through the underside of the abdomen.' },
-  { id: 'reference-pale-male', label: 'Pale male', sex: 'M', stage: 'fresh', x: 1.65, z: 1.5, heading: -1.25, rest: 'left', note: 'A young male: little abdominal pigment yet, so he can pass for a female from above. The sex combs on his forelegs give him away.' },
+  {
+    id: 'reference-female',
+    label: 'Mature female',
+    sex: 'F',
+    stage: 'mature',
+    x: -3.05,
+    z: -1.5,
+    heading: -1.25,
+    rest: 'left',
+    note: 'The pointed abdomen with separate pigment bands. Females have no sex combs on the forelegs.',
+  },
+  {
+    id: 'reference-male',
+    label: 'Mature male',
+    sex: 'M',
+    stage: 'mature',
+    x: 0,
+    z: -1.5,
+    heading: -1.25,
+    rest: 'left',
+    note: 'A shorter abdomen with a dark tip. Zoom in on the first tarsal segment of each foreleg to see the sex combs.',
+  },
+  {
+    id: 'reference-teneral-female',
+    label: 'Just-eclosed female',
+    sex: 'F',
+    stage: 'teneral',
+    meconium: true,
+    x: 3.05,
+    z: -1.5,
+    heading: -1.25,
+    rest: 'left',
+    note: 'Under an hour old: very pale, wings still folded and unexpanded, and the dark meconium in the abdomen. All signs she eclosed very recently.',
+  },
+  {
+    id: 'reference-pale-female',
+    label: 'Pale female',
+    sex: 'F',
+    stage: 'fresh',
+    meconium: true,
+    x: -1.65,
+    z: 1.5,
+    heading: -1.25,
+    rest: 'left',
+    note: 'A few hours old: wings expanded but still pale, with the meconium showing through the underside of the abdomen.',
+  },
+  {
+    id: 'reference-pale-male',
+    label: 'Pale male',
+    sex: 'M',
+    stage: 'fresh',
+    x: 1.65,
+    z: 1.5,
+    heading: -1.25,
+    rest: 'left',
+    note: 'A young male: little abdominal pigment yet, so he can pass for a female from above. The sex combs on his forelegs give him away.',
+  },
 ];
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -150,7 +210,8 @@ const Y_AXIS = new THREE.Vector3(0, 1, 0);
 // How a knocked-out fly lies: on its left side (left side up), right side or back.
 const REST_ROLL = { left: -Math.PI / 2, right: Math.PI / 2, back: Math.PI };
 function startingRotation(heading, rest = 'left') {
-  return new THREE.Quaternion().setFromAxisAngle(Y_AXIS, heading)
+  return new THREE.Quaternion()
+    .setFromAxisAngle(Y_AXIS, heading)
     .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), REST_ROLL[rest] ?? REST_ROLL.left));
 }
 function save() {
@@ -158,7 +219,9 @@ function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session.serialize()));
     localStorage.setItem(CROSS_STORAGE_KEY, JSON.stringify(crossSession.serialize()));
     persistenceWarning = '';
-  } catch { persistenceWarning = 'Notebook is in memory only: local saving is unavailable. Export it before closing.'; }
+  } catch {
+    persistenceWarning = 'Notebook is in memory only: local saving is unavailable. Export it before closing.';
+  }
   document.getElementById('save-status').textContent = persistenceWarning || 'Notebook saved on this computer';
 }
 function record(action, detail) {
@@ -167,10 +230,14 @@ function record(action, detail) {
   save();
 }
 function destination(specimen) {
-  if (mode === 'reference' || mode === 'cross' && !isCollecting()) return 'pad';
-  return activeSession().snapshot().flies.find((f) => f.id === specimen.reference.id)?.destination;
+  if (mode === 'reference' || (mode === 'cross' && !isCollecting())) return 'pad';
+  return activeSession()
+    .snapshot()
+    .flies.find((f) => f.id === specimen.reference.id)?.destination;
 }
-function canHandle() { return selected && destination(selected) === 'pad' && !busy; }
+function canHandle() {
+  return selected && destination(selected) === 'pad' && !busy;
+}
 function samplePoints(root) {
   const pts = [];
   root.updateMatrixWorld(true);
@@ -190,8 +257,10 @@ function settle(specimen) {
   for (const point of specimen.samples) min = Math.min(min, v.copy(point).applyQuaternion(specimen.holder.quaternion).y);
   specimen.holder.position.y = -min;
 }
-const ring = new THREE.Mesh(new THREE.RingGeometry(1.38, 1.4, 96),
-  new THREE.MeshBasicMaterial({ color: 0x9d6d27, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false }));
+const ring = new THREE.Mesh(
+  new THREE.RingGeometry(1.38, 1.4, 96),
+  new THREE.MeshBasicMaterial({ color: 0x9d6d27, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false }),
+);
 ring.rotation.x = -Math.PI / 2;
 ring.position.y = 0.008;
 ring.visible = false;
@@ -206,10 +275,14 @@ function renderInventory() {
     button.type = 'button';
     button.dataset.specimen = specimens.indexOf(specimen);
     const place = destination(specimen);
-    button.textContent = specimen.reference.label + (mode !== 'reference' && place !== 'pad' ? ` · ${place === 'collection' ? 'in vial' : 'set aside'}` : '');
+    button.textContent =
+      specimen.reference.label + (mode !== 'reference' && place !== 'pad' ? ` · ${place === 'collection' ? 'in vial' : 'set aside'}` : '');
     button.classList.toggle('on', specimen === selected);
     button.setAttribute('aria-pressed', String(specimen === selected));
-    button.addEventListener('click', () => { select(specimen); if (place === 'pad') focusSelected(); });
+    button.addEventListener('click', () => {
+      select(specimen);
+      if (place === 'pad') focusSelected();
+    });
     shelf.append(button);
     specimen.holder.visible = place === 'pad';
   }
@@ -228,26 +301,37 @@ function select(specimen, log = true) {
   selected = specimen;
   const onPad = specimen && destination(specimen) === 'pad';
   ring.visible = !!onPad;
-  document.getElementById('specimen-name').textContent = specimen?.reference.label || (mode === 'cross' && crossSession.snapshot().phase === 'developing' ? 'Cross in progress' : 'Select a fly');
-  document.getElementById('specimen-note').textContent = mode === 'reference'
-    ? specimen?.reference.note || 'Choose a reference specimen.'
-    : mode === 'cross' && crossSession.snapshot().phase === 'developing' ? 'The vial is developing in the incubator. Advance to the next event using the timeline.'
-    : mode === 'cross' && !isCollecting() ? 'Record eye colour and sex. Use Uncertain if the view does not support a confident identification.'
-    : !specimen ? 'Inspect a fly, then collect it or set it aside. No answer is given until you submit.'
-    : onPad ? 'Inspect the abdomen and forelegs from different angles. Use the source-vial record when deciding whether to collect.'
-    : 'Return this fly to the pad if you want to inspect it again.';
-  document.querySelectorAll('[data-needs-selection]').forEach((b) => b.disabled = !onPad || busy);
+  document.getElementById('specimen-name').textContent =
+    specimen?.reference.label ||
+    (mode === 'cross' && crossSession.snapshot().phase === 'developing' ? 'Cross in progress' : 'Select a fly');
+  document.getElementById('specimen-note').textContent =
+    mode === 'reference'
+      ? specimen?.reference.note || 'Choose a reference specimen.'
+      : mode === 'cross' && crossSession.snapshot().phase === 'developing'
+        ? 'The vial is developing in the incubator. Advance to the next event using the timeline.'
+        : mode === 'cross' && !isCollecting()
+          ? 'Record eye colour and sex. Use Uncertain if the view does not support a confident identification.'
+          : !specimen
+            ? 'Inspect a fly, then collect it or set it aside. No answer is given until you submit.'
+            : onPad
+              ? 'Inspect the abdomen and forelegs from different angles. Use the source-vial record when deciding whether to collect.'
+              : 'Return this fly to the pad if you want to inspect it again.';
+  document.querySelectorAll('[data-needs-selection]').forEach((b) => (b.disabled = !onPad || busy));
   const locked = !isCollecting() || activeSession().snapshot().submitted || busy;
-  document.querySelectorAll('[data-transfer]').forEach((b) => b.disabled = locked || !specimen || b.dataset.transfer === destination(specimen));
+  document
+    .querySelectorAll('[data-transfer]')
+    .forEach((b) => (b.disabled = locked || !specimen || b.dataset.transfer === destination(specimen)));
   document.querySelectorAll('[data-specimen]').forEach((b) => {
     const on = Number(b.dataset.specimen) === specimens.indexOf(specimen);
-    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
   });
   if (log && specimen && mode !== 'reference') {
     record('inspect', `Inspected ${specimen.reference.label}.`);
     helpVisits++;
     if (helpVisits === 4 && document.getElementById('supervisor-enabled').checked)
-      document.getElementById('supervisor-note').textContent = 'Try the underside view at higher magnification: the forelegs show sex combs, and the abdomen shows any meconium.';
+      document.getElementById('supervisor-note').textContent =
+        'Try the underside view at higher magnification: the forelegs show sex combs, and the abdomen shows any meconium.';
   }
   renderCrossControls();
 }
@@ -256,10 +340,14 @@ async function loadActivity(nextMode) {
   busy = true;
   window.scope.ready = false;
   window.scope.error = null;
-  drag = null; tween = null;
+  drag = null;
+  tween = null;
   canvas.classList.remove('dragging');
   select(null, false);
-  for (const s of specimens) { scene.remove(s.holder); s.fly.dispose(); }
+  for (const s of specimens) {
+    scene.remove(s.holder);
+    s.fly.dispose();
+  }
   specimens.length = 0;
   document.getElementById('specimens').replaceChildren();
   document.querySelector('[data-act="submit"]').disabled = true;
@@ -267,37 +355,64 @@ async function loadActivity(nextMode) {
   document.body.dataset.mode = mode;
   document.body.dataset.phase = mode === 'cross' ? crossSession.snapshot().phase : '';
   renderCrossControls();
-  document.querySelectorAll('[data-mode]').forEach((b) => { b.disabled = true; b.classList.toggle('on', b.dataset.mode === mode); b.setAttribute('aria-pressed', String(b.dataset.mode === mode)); });
-  document.getElementById('mode-label').textContent = mode === 'exercise' ? 'Virgin collection' : mode === 'cross' ? 'First genetic cross' : 'Reference bench';
+  document.querySelectorAll('[data-mode]').forEach((b) => {
+    b.disabled = true;
+    b.classList.toggle('on', b.dataset.mode === mode);
+    b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+  });
+  document.getElementById('mode-label').textContent =
+    mode === 'exercise' ? 'Virgin collection' : mode === 'cross' ? 'First genetic cross' : 'Reference bench';
   const loading = document.querySelector('.loading');
   loading.classList.remove('done');
   const population = mode === 'exercise' ? session.appearance : mode === 'cross' ? crossSession.specimens(crossPage) : references;
   const count = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'].at(population.length) || String(population.length);
-  document.getElementById('inventory-title').textContent = mode === 'exercise' ? `Your batch · ${count} flies` : mode === 'cross' ? (isCollecting() ? `White-eyed stock · ${count} flies` : crossSession.snapshot().phase === 'developing' ? 'Cross vial · developing' : `F1 sample · page ${crossPage + 1}`) : 'Known reference specimens';
+  document.getElementById('inventory-title').textContent =
+    mode === 'exercise'
+      ? `Your batch · ${count} flies`
+      : mode === 'cross'
+        ? isCollecting()
+          ? `White-eyed stock · ${count} flies`
+          : crossSession.snapshot().phase === 'developing'
+            ? 'Cross vial · developing'
+            : `F1 sample · page ${crossPage + 1}`
+        : 'Known reference specimens';
   for (const reference of population) {
     loading.textContent = `Preparing flies ${specimens.length + 1}/${population.length}…`;
     const fly = await buildFly(reference);
-    if (load !== generation) { fly.dispose(); return; }
-    const holder = new THREE.Group(); holder.add(fly.object);
+    if (load !== generation) {
+      fly.dispose();
+      return;
+    }
+    const holder = new THREE.Group();
+    holder.add(fly.object);
     holder.position.set(reference.x, 0, reference.z);
     scene.add(holder);
-    const specimen = { reference, holder, fly, samples: samplePoints(holder), start: startingRotation(reference.heading, reference.rest), side: startingRotation(reference.heading, 'left') };
+    const specimen = {
+      reference,
+      holder,
+      fly,
+      samples: samplePoints(holder),
+      start: startingRotation(reference.heading, reference.rest),
+      side: startingRotation(reference.heading, 'left'),
+    };
     holder.quaternion.copy(specimen.start);
-    settle(specimen); specimens.push(specimen);
+    settle(specimen);
+    specimens.push(specimen);
   }
   busy = false;
   renderInventory();
   select(specimens.find((s) => destination(s) === 'pad') || null, false);
   overview();
   loading.classList.add('done');
-  document.querySelectorAll('[data-mode]').forEach((b) => b.disabled = false);
+  document.querySelectorAll('[data-mode]').forEach((b) => (b.disabled = false));
   window.scope.ready = true;
   if (mode === 'reference' && document.body.dataset.view === 'scope') progress.complete('reference');
   save();
 }
 function startActivity(nextMode) {
   return loadActivity(nextMode).catch((error) => {
-    console.error(error); window.scope.error = error.message;
+    console.error(error);
+    window.scope.error = error.message;
     document.querySelector('.loading').textContent = 'The flies could not be loaded. Restart Fly Trainer to try again.';
   });
 }
@@ -311,78 +426,135 @@ function transferSelected(place) {
     selected.holder.position.set(selected.reference.x, 0, selected.reference.z);
     settle(selected);
   }
-  renderInventory(); select(selected, false); save();
+  renderInventory();
+  select(selected, false);
+  save();
   if (place === 'pad') focusSelected();
-  document.getElementById('activity-status').textContent = `${selected.reference.label}: ${place === 'pad' ? 'returned to pad' : place === 'collection' ? 'moved to collection vial' : 'set aside'}.`;
+  document.getElementById('activity-status').textContent =
+    `${selected.reference.label}: ${place === 'pad' ? 'returned to pad' : place === 'collection' ? 'moved to collection vial' : 'set aside'}.`;
 }
 function cast(e) {
   const bounds = canvas.getBoundingClientRect();
-  pointer.set((e.clientX - bounds.left) / bounds.width * 2 - 1, -(e.clientY - bounds.top) / bounds.height * 2 + 1);
-  scene.updateMatrixWorld(true); camera.updateMatrixWorld();
+  pointer.set(((e.clientX - bounds.left) / bounds.width) * 2 - 1, (-(e.clientY - bounds.top) / bounds.height) * 2 + 1);
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld();
   raycaster.setFromCamera(pointer, camera);
 }
 function hitSpecimen(e) {
   cast(e);
-  const hits = raycaster.intersectObjects(specimens.filter((s) => s.holder.visible).map((s) => s.holder), true);
+  const hits = raycaster.intersectObjects(
+    specimens.filter((s) => s.holder.visible).map((s) => s.holder),
+    true,
+  );
   if (!hits.length) return null;
   let node = hits[0].object;
   while (node && !specimens.some((s) => s.holder === node)) node = node.parent;
   return specimens.find((s) => s.holder === node) || null;
 }
-function onPad(e) { cast(e); return raycaster.ray.intersectPlane(padPlane, new THREE.Vector3()); }
+function onPad(e) {
+  cast(e);
+  return raycaster.ray.intersectPlane(padPlane, new THREE.Vector3());
+}
 function setTool(next) {
-  tool = next; canvas.dataset.tool = tool;
-  document.querySelectorAll('[data-tool]').forEach((b) => { b.classList.toggle('on', b.dataset.tool === tool); b.setAttribute('aria-pressed', String(b.dataset.tool === tool)); });
+  tool = next;
+  canvas.dataset.tool = tool;
+  document.querySelectorAll('[data-tool]').forEach((b) => {
+    b.classList.toggle('on', b.dataset.tool === tool);
+    b.setAttribute('aria-pressed', String(b.dataset.tool === tool));
+  });
 }
 function rotateWorld(axis, angle) {
   if (!canHandle()) return;
   tween = null;
-  selected.holder.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(axis, angle)); settle(selected);
+  selected.holder.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(axis, angle));
+  settle(selected);
 }
 function animateTo(q, ms = 400) {
   if (canHandle()) tween = { specimen: selected, from: selected.holder.quaternion.clone(), to: q, t0: performance.now(), ms };
 }
-function turn(deg = 90) { rotateWorld(Y_AXIS, THREE.MathUtils.degToRad(deg)); }
+function turn(deg = 90) {
+  rotateWorld(Y_AXIS, THREE.MathUtils.degToRad(deg));
+}
 function flipOver() {
-  if (canHandle()) animateTo(selected.holder.quaternion.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)));
+  if (canHandle())
+    animateTo(selected.holder.quaternion.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)));
 }
 function focusSelected() {
   if (!canHandle()) return;
-  view.x = selected.holder.position.x; view.z = selected.holder.position.z; view.mag = 32; updateCamera();
+  view.x = selected.holder.position.x;
+  view.z = selected.holder.position.z;
+  view.mag = 32;
+  updateCamera();
 }
-function overview() { view.x = view.z = 0; view.mag = mode === 'reference' ? 16 : 12; updateCamera(); }
+function overview() {
+  view.x = view.z = 0;
+  view.mag = mode === 'reference' ? 16 : 12;
+  updateCamera();
+}
 
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('pointerdown', (e) => {
   if (![0, 1, 2].includes(e.button) || busy || document.querySelector('dialog[open]')) return;
-  const hit = hitSpecimen(e), pan = e.button !== 0 || !hit;
+  const hit = hitSpecimen(e),
+    pan = e.button !== 0 || !hit;
   if (!pan) select(hit);
-  const point = onPad(e); if (!point) return;
-  tween = null; canvas.setPointerCapture(e.pointerId); canvas.classList.add('dragging');
-  drag = { id: e.pointerId, x: e.clientX, y: e.clientY, point, pan, moved: false,
-    rotate: !pan && (tool === 'rotate' || e.altKey), turn: e.shiftKey, origin: selected?.holder.position.clone() };
+  const point = onPad(e);
+  if (!point) return;
+  tween = null;
+  canvas.setPointerCapture(e.pointerId);
+  canvas.classList.add('dragging');
+  drag = {
+    id: e.pointerId,
+    x: e.clientX,
+    y: e.clientY,
+    point,
+    pan,
+    moved: false,
+    rotate: !pan && (tool === 'rotate' || e.altKey),
+    turn: e.shiftKey,
+    origin: selected?.holder.position.clone(),
+  };
 });
 canvas.addEventListener('pointermove', (e) => {
   if (!drag || drag.id !== e.pointerId) return;
-  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-  drag.x = e.clientX; drag.y = e.clientY; drag.moved ||= Math.abs(dx) + Math.abs(dy) > 0;
+  const dx = e.clientX - drag.x,
+    dy = e.clientY - drag.y;
+  drag.x = e.clientX;
+  drag.y = e.clientY;
+  drag.moved ||= Math.abs(dx) + Math.abs(dy) > 0;
   if (drag.pan) {
     const mmPerPx = fieldOfViewMm(view.mag) / canvas.clientHeight;
-    view.x -= dx * mmPerPx; view.z -= dy * mmPerPx; updateCamera();
+    view.x -= dx * mmPerPx;
+    view.z -= dy * mmPerPx;
+    updateCamera();
   } else if (drag.rotate) {
     if (drag.turn || e.shiftKey) turn(-dx * 0.7);
-    else { rotateWorld(new THREE.Vector3(0, 0, -1), dx * 0.01); rotateWorld(new THREE.Vector3(1, 0, 0), dy * 0.01); }
+    else {
+      rotateWorld(new THREE.Vector3(0, 0, -1), dx * 0.01);
+      rotateWorld(new THREE.Vector3(1, 0, 0), dy * 0.01);
+    }
   } else {
-    const point = onPad(e); if (!point) return;
+    const point = onPad(e);
+    if (!point) return;
     const proposed = drag.origin.clone().add(point.sub(drag.point));
-    proposed.x = THREE.MathUtils.clamp(proposed.x, -20, 20); proposed.z = THREE.MathUtils.clamp(proposed.z, -20, 20);
-    if (specimens.some((s) => s !== selected && s.holder.visible && Math.hypot(s.holder.position.x - proposed.x, s.holder.position.z - proposed.z) < 2.7)) return;
-    selected.holder.position.x = proposed.x; selected.holder.position.z = proposed.z; settle(selected);
+    proposed.x = THREE.MathUtils.clamp(proposed.x, -20, 20);
+    proposed.z = THREE.MathUtils.clamp(proposed.z, -20, 20);
+    if (
+      specimens.some(
+        (s) => s !== selected && s.holder.visible && Math.hypot(s.holder.position.x - proposed.x, s.holder.position.z - proposed.z) < 2.7,
+      )
+    )
+      return;
+    selected.holder.position.x = proposed.x;
+    selected.holder.position.z = proposed.z;
+    settle(selected);
   }
 });
 function endDrag(e) {
   if (!drag || drag.id !== e.pointerId) return;
-  const completed = drag; drag = null; canvas.classList.remove('dragging');
+  const completed = drag;
+  drag = null;
+  canvas.classList.remove('dragging');
   if (completed.moved && !completed.pan) {
     const drop = e.type === 'pointerup' && !completed.rotate && document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-drop]');
     if (drop && isCollecting() && !activeSession().snapshot().submitted) transferSelected(drop.dataset.drop);
@@ -392,20 +564,37 @@ function endDrag(e) {
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
 canvas.addEventListener('lostpointercapture', endDrag);
-canvas.addEventListener('dblclick', (e) => { const hit = hitSpecimen(e); if (hit && !busy) { select(hit); focusSelected(); } });
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault(); view.mag = THREE.MathUtils.clamp(Math.round(view.mag * Math.exp(-e.deltaY * 0.0012)), 8, 50); updateCamera();
-}, { passive: false });
-document.getElementById('mag').addEventListener('input', (e) => { view.mag = Number(e.target.value); updateCamera(); });
+canvas.addEventListener('dblclick', (e) => {
+  const hit = hitSpecimen(e);
+  if (hit && !busy) {
+    select(hit);
+    focusSelected();
+  }
+});
+canvas.addEventListener(
+  'wheel',
+  (e) => {
+    e.preventDefault();
+    view.mag = THREE.MathUtils.clamp(Math.round(view.mag * Math.exp(-e.deltaY * 0.0012)), 8, 50);
+    updateCamera();
+  },
+  { passive: false },
+);
+document.getElementById('mag').addEventListener('input', (e) => {
+  view.mag = Number(e.target.value);
+  updateCamera();
+});
 
 // ---- Notebook and delayed review --------------------------------------------
 const notebook = document.getElementById('notebook');
 const review = document.getElementById('review');
 function renderNotebook() {
   const state = activeSession().snapshot();
-  document.getElementById('notebook-context').textContent = mode === 'cross' ? 'White-eyed stock · First genetic cross' : 'Canton-S · First collection';
+  document.getElementById('notebook-context').textContent =
+    mode === 'cross' ? 'White-eyed stock · First genetic cross' : 'Canton-S · First collection';
   for (const field of ['prediction', 'conclusion']) document.getElementById(field).value = state.notes[field];
-  const history = document.getElementById('history'); history.replaceChildren();
+  const history = document.getElementById('history');
+  history.replaceChildren();
   for (const event of [...state.events].reverse()) {
     const item = document.createElement('li');
     const time = new Date(event.at);
@@ -413,22 +602,35 @@ function renderNotebook() {
     history.append(item);
   }
 }
-for (const field of ['prediction', 'conclusion']) document.getElementById(field).addEventListener('input', (e) => { activeSession().setNote(field, e.target.value); save(); });
+for (const field of ['prediction', 'conclusion'])
+  document.getElementById(field).addEventListener('input', (e) => {
+    activeSession().setNote(field, e.target.value);
+    save();
+  });
 function showReview() {
   if (busy || mode !== 'exercise') return;
-  const result = session.submit(); save(); select(selected, false); renderInventory();
+  const result = session.submit();
+  save();
+  select(selected, false);
+  renderInventory();
   if (result.success) progress.complete('collection');
   document.getElementById('review-title').textContent = result.success ? 'Collection ready' : 'Review your collection';
   document.getElementById('review-summary').textContent = result.success
     ? `You collected ${result.females} virgin females and nothing else.`
-    : result.errors ? `Your vial contains ${result.errors} ${result.errors === 1 ? 'fly that does' : 'flies that do'} not belong in a virgin collection. See why below, then try again.`
-    : `You collected ${result.females} female flies. The objective is at least ${SOURCE_RECORD.target}; you can return set-aside flies to the pad and inspect them again.`;
-  const rows = document.getElementById('review-rows'); rows.replaceChildren();
+    : result.errors
+      ? `Your vial contains ${result.errors} ${result.errors === 1 ? 'fly that does' : 'flies that do'} not belong in a virgin collection. See why below, then try again.`
+      : `You collected ${result.females} female flies. The objective is at least ${SOURCE_RECORD.target}; you can return set-aside flies to the pad and inspect them again.`;
+  const rows = document.getElementById('review-rows');
+  rows.replaceChildren();
   for (const row of result.rows) {
-    const item = document.createElement('li'); item.className = row.correct ? 'review-good' : 'review-error';
-    const title = document.createElement('strong'); title.textContent = row.label;
-    const reason = document.createElement('p'); reason.textContent = row.reason;
-    item.append(title, reason); rows.append(item);
+    const item = document.createElement('li');
+    item.className = row.correct ? 'review-good' : 'review-error';
+    const title = document.createElement('strong');
+    title.textContent = row.label;
+    const reason = document.createElement('p');
+    reason.textContent = row.reason;
+    item.append(title, reason);
+    rows.append(item);
   }
   if (!review.open) review.showModal();
 }
@@ -439,36 +641,59 @@ function renderCrossControls() {
     empty.hidden = true;
     document.getElementById('scope-heading').textContent = 'Dissecting microscope';
     document.getElementById('scope-context').textContent = 'CO₂ pad · practice time is paused';
-    tip.textContent = mode === 'reference' ? 'Compare known specimens from different angles.' : 'Select a fly to inspect it. Drag onto a destination or use the collection buttons.';
+    tip.textContent =
+      mode === 'reference'
+        ? 'Compare known specimens from different angles.'
+        : 'Select a fly to inspect it. Drag onto a destination or use the collection buttons.';
     return;
   }
   const state = crossSession.snapshot();
   document.getElementById('scope-heading').textContent = state.phase === 'developing' ? 'Cross vial' : 'Dissecting microscope';
-  document.getElementById('scope-context').textContent = state.phase === 'developing' ? `Incubator · 25 °C · day ${state.day}` : `CO₂ pad · experiment day ${state.day}`;
-  tip.textContent = state.phase === 'collecting' ? 'Choose candidate parents. Their identities are not assessed before this cross.' : state.phase === 'developing' ? 'Advance to the next event using the timeline on the left.' : 'Inspect F1 flies, then record eye colour and sex on the right. View both pages.';
+  document.getElementById('scope-context').textContent =
+    state.phase === 'developing' ? `Incubator · 25 °C · day ${state.day}` : `CO₂ pad · experiment day ${state.day}`;
+  tip.textContent =
+    state.phase === 'collecting'
+      ? 'Choose candidate parents. Their identities are not assessed before this cross.'
+      : state.phase === 'developing'
+        ? 'Advance to the next event using the timeline on the left.'
+        : 'Inspect F1 flies, then record eye colour and sex on the right. View both pages.';
   document.body.dataset.phase = state.phase;
   document.getElementById('cross-source-title').textContent = state.source.title;
   document.getElementById('cross-source-record').textContent = state.source.clearing;
   document.getElementById('cross-source-evidence').textContent = state.source.evidence;
   document.getElementById('cross-day').textContent = `Day ${state.day}`;
   const labels = state.flies.filter((f) => f.destination === 'collection').map((f) => f.label);
-  document.getElementById('cross-parents').textContent = labels.length ? `Parent vial: ${labels.join(', ')}${state.phase === 'collecting' ? '' : ' + two verified Canton-S males'}.` : 'No candidate parents collected yet.';
+  document.getElementById('cross-parents').textContent = labels.length
+    ? `Parent vial: ${labels.join(', ')}${state.phase === 'collecting' ? '' : ' + two verified Canton-S males'}.`
+    : 'No candidate parents collected yet.';
   const reclear = document.querySelector('[data-act="cross-reclear"]');
-  reclear.hidden = !state.canReclear; reclear.disabled = busy;
-  document.getElementById('cross-progress').textContent = state.phase === 'collecting'
-    ? (state.recleared ? `Re-cleared vial: ${state.delayHours} hours spent waiting for new flies. ` : '') + 'Choose candidate females, record a prediction, then set up the cross.'
-    : state.phase === 'developing' ? state.day === 0 ? 'Cross set up. Next event: remove all parents on day 2.' : 'Parents removed. Next event: examine an F1 sample on day 12.'
-    : state.phase === 'review' ? 'Evidence reviewed. You can revisit your observations or start another batch.'
-    : `Record each F1 fly by eye colour and sex: ${state.scored}/${state.offspringCount} observations. Uncertain is an acceptable observation.`;
+  reclear.hidden = !state.canReclear;
+  reclear.disabled = busy;
+  document.getElementById('cross-progress').textContent =
+    state.phase === 'collecting'
+      ? (state.recleared ? `Re-cleared vial: ${state.delayHours} hours spent waiting for new flies. ` : '') +
+        'Choose candidate females, record a prediction, then set up the cross.'
+      : state.phase === 'developing'
+        ? state.day === 0
+          ? 'Cross set up. Next event: remove all parents on day 2.'
+          : 'Parents removed. Next event: examine an F1 sample on day 12.'
+        : state.phase === 'review'
+          ? 'Evidence reviewed. You can revisit your observations or start another batch.'
+          : `Record each F1 fly by eye colour and sex: ${state.scored}/${state.offspringCount} observations. Uncertain is an acceptable observation.`;
   const prediction = document.getElementById('cross-prediction');
-  prediction.value = state.prediction; prediction.disabled = state.phase !== 'collecting' || busy;
+  prediction.value = state.prediction;
+  prediction.disabled = state.phase !== 'collecting' || busy;
   const interpretation = document.getElementById('cross-interpretation');
-  interpretation.value = state.interpretation; interpretation.disabled = state.phase !== 'scoring' || busy;
+  interpretation.value = state.interpretation;
+  interpretation.disabled = state.phase !== 'scoring' || busy;
   document.querySelector('[data-act="cross-start"]').disabled = !labels.length || state.phase !== 'collecting' || busy;
   document.querySelector('[data-act="cross-advance"]').disabled = state.phase !== 'developing' || busy;
-  document.querySelector('[data-act="cross-advance"]').textContent = state.day === 0 ? 'Advance to day 2 · remove parents' : 'Advance to day 12 · examine F1';
-  document.querySelector('[data-act="cross-submit"]').disabled = busy || !['scoring', 'review'].includes(state.phase) || state.scored !== state.offspringCount;
-  document.querySelector('[data-act="cross-submit"]').textContent = state.phase === 'review' ? 'View evidence review' : 'Review my observations';
+  document.querySelector('[data-act="cross-advance"]').textContent =
+    state.day === 0 ? 'Advance to day 2 · remove parents' : 'Advance to day 12 · examine F1';
+  document.querySelector('[data-act="cross-submit"]').disabled =
+    busy || !['scoring', 'review'].includes(state.phase) || state.scored !== state.offspringCount;
+  document.querySelector('[data-act="cross-submit"]').textContent =
+    state.phase === 'review' ? 'View evidence review' : 'Review my observations';
   document.querySelector('[data-act="cross-new"]').disabled = busy;
   document.querySelector('[data-act="cross-previous"]').disabled = busy || crossPage === 0;
   document.querySelector('[data-act="cross-next"]').disabled = busy || (crossPage + 1) * 6 >= (state.offspringCount || 0);
@@ -476,62 +701,131 @@ function renderCrossControls() {
   document.querySelectorAll('[data-score]').forEach((button) => {
     button.disabled = busy || state.phase !== 'scoring' || !selected;
     const on = !!selected && state.scores[selected.reference.id] === button.dataset.score;
-    button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on));
+    button.classList.toggle('on', on);
+    button.setAttribute('aria-pressed', String(on));
   });
-  const tally = document.getElementById('cross-tally'); tally.replaceChildren();
+  const tally = document.getElementById('cross-tally');
+  tally.replaceChildren();
   for (const [category, label] of Object.entries(SCORE_CLASSES)) {
     const row = document.createElement('div');
     row.textContent = `${label}: ${Object.values(state.scores).filter((score) => score === category).length}`;
     tally.append(row);
   }
   empty.hidden = state.phase !== 'developing' && !(state.phase !== 'collecting' && state.offspringCount === 0);
-  document.getElementById('experiment-empty-title').textContent = state.phase === 'developing' ? `Cross vial · day ${state.day}` : 'No F1 adults observed';
-  document.getElementById('experiment-empty-note').textContent = state.phase === 'developing' ? state.day === 0 ? 'Egg laying · next, remove the parent flies' : 'Larvae and pupae developing · parent flies removed' : 'Use the vial history and parent-selection record to consider possible causes.';
+  document.getElementById('experiment-empty-title').textContent =
+    state.phase === 'developing' ? `Cross vial · day ${state.day}` : 'No F1 adults observed';
+  document.getElementById('experiment-empty-note').textContent =
+    state.phase === 'developing'
+      ? state.day === 0
+        ? 'Egg laying · next, remove the parent flies'
+        : 'Larvae and pupae developing · parent flies removed'
+      : 'Use the vial history and parent-selection record to consider possible causes.';
 }
 function showCrossReview() {
   if (busy || mode !== 'cross') return;
-  const report = crossSession.submit(); save(); renderCrossControls();
+  const report = crossSession.submit();
+  save();
+  renderCrossControls();
   progress.complete('first-cross');
   document.getElementById('cross-review-summary').textContent = report.explanation;
-  document.getElementById('cross-review-learning').textContent = `Identification: ${report.correct}/${report.total} observations match; ${report.uncertain} marked uncertain. ${report.interpretation === 'unknown' ? 'You requested more evidence.' : report.interpretationSupported ? 'Your interpretation is supported by these observations.' : 'Reconsider your interpretation using the observed counts below.'} ${crossSession.snapshot().prediction === 'unknown' ? 'No definite prediction recorded.' : report.predictionCorrect ? 'Your prediction for the intended cross was correct.' : 'For the intended cross, daughters receive a normal paternal X; sons receive the paternal Y.'}`;
-  const counts = document.getElementById('cross-review-counts'); counts.replaceChildren();
+  document.getElementById('cross-review-learning').textContent =
+    `Identification: ${report.correct}/${report.total} observations match; ${report.uncertain} marked uncertain. ${report.interpretation === 'unknown' ? 'You requested more evidence.' : report.interpretationSupported ? 'Your interpretation is supported by these observations.' : 'Reconsider your interpretation using the observed counts below.'} ${crossSession.snapshot().prediction === 'unknown' ? 'No definite prediction recorded.' : report.predictionCorrect ? 'Your prediction for the intended cross was correct.' : 'For the intended cross, daughters receive a normal paternal X; sons receive the paternal Y.'}`;
+  const counts = document.getElementById('cross-review-counts');
+  counts.replaceChildren();
   for (const [category, count] of Object.entries(report.counts)) {
-    const row = document.createElement('div'); row.textContent = `${SCORE_CLASSES[category]}: ${count}`; counts.append(row);
+    const row = document.createElement('div');
+    row.textContent = `${SCORE_CLASSES[category]}: ${count}`;
+    counts.append(row);
   }
-  const corrections = document.getElementById('cross-review-corrections'); corrections.replaceChildren();
+  const corrections = document.getElementById('cross-review-corrections');
+  corrections.replaceChildren();
   for (const row of report.rows.filter((row) => !row.correct)) {
     const item = document.createElement('li');
     item.textContent = `${row.label}: recorded ${SCORE_CLASSES[row.observed] || 'unscored'}; review observation ${SCORE_CLASSES[row.actual].toLowerCase()}.`;
     corrections.append(item);
   }
   document.getElementById('cross-review-limitations').textContent = report.limitations;
-  const dialog = document.getElementById('cross-review'); if (!dialog.open) dialog.showModal();
+  const dialog = document.getElementById('cross-review');
+  if (!dialog.open) dialog.showModal();
 }
-document.getElementById('cross-prediction').addEventListener('change', (event) => { crossSession.setPrediction(event.target.value); save(); });
-document.getElementById('cross-interpretation').addEventListener('change', (event) => { crossSession.setInterpretation(event.target.value); save(); });
-document.querySelector('[data-act="cross-rescore"]').addEventListener('click', () => { document.getElementById('cross-review').close(); crossSession.retryScoring(); save(); renderInventory(); select(selected, false); });
-document.querySelector('[data-act="next-cross"]').addEventListener('click', () => { review.close(); crossPage = 0; startActivity('cross'); });
+document.getElementById('cross-prediction').addEventListener('change', (event) => {
+  crossSession.setPrediction(event.target.value);
+  save();
+});
+document.getElementById('cross-interpretation').addEventListener('change', (event) => {
+  crossSession.setInterpretation(event.target.value);
+  save();
+});
+document.querySelector('[data-act="cross-rescore"]').addEventListener('click', () => {
+  document.getElementById('cross-review').close();
+  crossSession.retryScoring();
+  save();
+  renderInventory();
+  select(selected, false);
+});
+document.querySelector('[data-act="next-cross"]').addEventListener('click', () => {
+  review.close();
+  crossPage = 0;
+  startActivity('cross');
+});
 function exportNotebook() {
   const state = activeSession().snapshot();
-  const lines = [mode === 'cross' ? 'Fly Trainer · First genetic cross' : 'Fly Trainer · Virgin collection',
-    mode === 'cross' ? `Source: white-eyed maternal stock; ${state.source.title}; ${state.source.clearing}` : `Source: ${SOURCE_RECORD.stock}, cleared ${SOURCE_RECORD.clearedAt}, collected ${SOURCE_RECORD.collectedAt}, ${SOURCE_RECORD.temperature}`,
-    '\nPrediction', state.notes.prediction || '(not recorded)', '\nConclusion', state.notes.conclusion || '(not recorded)', '\nAction history', ...state.events.map((e) => `${e.at} ${e.detail}`)];
+  const lines = [
+    mode === 'cross' ? 'Fly Trainer · First genetic cross' : 'Fly Trainer · Virgin collection',
+    mode === 'cross'
+      ? `Source: white-eyed maternal stock; ${state.source.title}; ${state.source.clearing}`
+      : `Source: ${SOURCE_RECORD.stock}, cleared ${SOURCE_RECORD.clearedAt}, collected ${SOURCE_RECORD.collectedAt}, ${SOURCE_RECORD.temperature}`,
+    '\nPrediction',
+    state.notes.prediction || '(not recorded)',
+    '\nConclusion',
+    state.notes.conclusion || '(not recorded)',
+    '\nAction history',
+    ...state.events.map((e) => `${e.at} ${e.detail}`),
+  ];
   if (mode === 'cross') {
-    lines.push('\nCross record', `Day ${state.day}; ${state.phase}`, `Prediction: ${CROSS_PREDICTIONS[state.prediction]}`, `Interpretation: ${CROSS_INTERPRETATIONS[state.interpretation]}`,
-      ...Object.entries(state.scores).map(([id, score]) => `${id}: ${SCORE_CLASSES[score]}`));
+    lines.push(
+      '\nCross record',
+      `Day ${state.day}; ${state.phase}`,
+      `Prediction: ${CROSS_PREDICTIONS[state.prediction]}`,
+      `Interpretation: ${CROSS_INTERPRETATIONS[state.interpretation]}`,
+      ...Object.entries(state.scores).map(([id, score]) => `${id}: ${SCORE_CLASSES[score]}`),
+    );
     if (state.report) lines.push('\nEvidence review', state.report.explanation, state.report.limitations);
-  } else lines.push('\nReview', state.report ? `${state.report.success ? 'Ready' : 'Needs review'}; females ${state.report.females}; males ${state.report.errors}` : 'Not submitted',
-    ...(state.report?.rows.map((row) => `${row.label}: ${row.reason}`) || []));
+  } else
+    lines.push(
+      '\nReview',
+      state.report
+        ? `${state.report.success ? 'Ready' : 'Needs review'}; females ${state.report.females}; males ${state.report.errors}`
+        : 'Not submitted',
+      ...(state.report?.rows.map((row) => `${row.label}: ${row.reason}`) || []),
+    );
   const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }));
-  const link = document.createElement('a'); link.href = url; link.download = mode === 'cross' ? 'fly-trainer-cross-notebook.txt' : 'fly-trainer-notebook.txt'; link.click();
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = mode === 'cross' ? 'fly-trainer-cross-notebook.txt' : 'fly-trainer-notebook.txt';
+  link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 document.querySelector('.bench').addEventListener('click', (e) => {
-  const button = e.target.closest('button'); if (!button || button.disabled) return;
-  if (button.dataset.mode) { crossPage = 0; startActivity(button.dataset.mode); return; }
+  const button = e.target.closest('button');
+  if (!button || button.disabled) return;
+  if (button.dataset.mode) {
+    crossPage = 0;
+    startActivity(button.dataset.mode);
+    return;
+  }
   if (button.dataset.tool) setTool(button.dataset.tool);
-  if (button.dataset.transfer) { transferSelected(button.dataset.transfer); return; }
-  if (button.dataset.score && mode === 'cross' && selected && !busy) { crossSession.score(selected.reference.id, button.dataset.score); save(); renderInventory(); select(selected, false); return; }
+  if (button.dataset.transfer) {
+    transferSelected(button.dataset.transfer);
+    return;
+  }
+  if (button.dataset.score && mode === 'cross' && selected && !busy) {
+    crossSession.score(selected.reference.id, button.dataset.score);
+    save();
+    renderInventory();
+    select(selected, false);
+    return;
+  }
   const act = button.dataset.act;
   if (act === 'flip') flipOver();
   else if (act === 'turn') turn();
@@ -543,56 +837,140 @@ document.querySelector('.bench').addEventListener('click', (e) => {
   else if (act === 'lateral' && selected) animateTo(selected.side.clone());
   else if (act === 'ventral') animateTo(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI));
   else if (act === 'reset') {
-    for (const s of specimens) { s.holder.position.set(s.reference.x, 0, s.reference.z); s.holder.quaternion.copy(s.start); settle(s); }
-    tween = null; overview(); record('reset', 'Reset pad positions and inspection angles; collection decisions retained.');
+    for (const s of specimens) {
+      s.holder.position.set(s.reference.x, 0, s.reference.z);
+      s.holder.quaternion.copy(s.start);
+      settle(s);
+    }
+    tween = null;
+    overview();
+    record('reset', 'Reset pad positions and inspection angles; collection decisions retained.');
   } else if (act === 'submit') showReview();
-  else if (act === 'notebook') { renderNotebook(); notebook.showModal(); }
-  else if (act === 'cross-start') { crossSession.start(); crossPage = 0; save(); startActivity('cross'); }
-  else if (act === 'cross-advance') { crossSession.advance(); crossPage = 0; save(); startActivity('cross'); }
-  else if (act === 'cross-submit') showCrossReview();
-  else if (act === 'cross-previous' || act === 'cross-next') { crossPage += act === 'cross-next' ? 1 : -1; startActivity('cross'); }
-  else if (act === 'cross-reclear') { crossSession.reclear(); crossPage = 0; save(); startActivity('cross'); }
-  else if (act === 'cross-new') { crossSession = new CrossSession({ scenario: document.getElementById('cross-scenario').value }); crossPage = 0; save(); startActivity('cross'); }
-  else if (act === 'hint') {
-    document.getElementById('supervisor-note').textContent = mode === 'cross'
-      ? (crossSession.snapshot().canReclear ? 'You cannot tell from looking whether these females have mated. When a vial’s history is unreliable, many people discard everything and clear it again.' : 'Predict daughters and sons separately: daughters get their father’s X, sons his Y. A white-eyed daughter means a white-eyed father.')
-      : 'Use the trusted complete clearing record for virginity and foreleg anatomy for sex. Females may already be darkened and have expanded wings; colour cannot prove virginity.';
+  else if (act === 'notebook') {
+    renderNotebook();
+    notebook.showModal();
+  } else if (act === 'cross-start') {
+    crossSession.start();
+    crossPage = 0;
+    save();
+    startActivity('cross');
+  } else if (act === 'cross-advance') {
+    crossSession.advance();
+    crossPage = 0;
+    save();
+    startActivity('cross');
+  } else if (act === 'cross-submit') showCrossReview();
+  else if (act === 'cross-previous' || act === 'cross-next') {
+    crossPage += act === 'cross-next' ? 1 : -1;
+    startActivity('cross');
+  } else if (act === 'cross-reclear') {
+    crossSession.reclear();
+    crossPage = 0;
+    save();
+    startActivity('cross');
+  } else if (act === 'cross-new') {
+    crossSession = new CrossSession({ scenario: document.getElementById('cross-scenario').value });
+    crossPage = 0;
+    save();
+    startActivity('cross');
+  } else if (act === 'hint') {
+    document.getElementById('supervisor-note').textContent =
+      mode === 'cross'
+        ? crossSession.snapshot().canReclear
+          ? 'You cannot tell from looking whether these females have mated. When a vial’s history is unreliable, many people discard everything and clear it again.'
+          : 'Predict daughters and sons separately: daughters get their father’s X, sons his Y. A white-eyed daughter means a white-eyed father.'
+        : 'Use the trusted complete clearing record for virginity and foreleg anatomy for sex. Females may already be darkened and have expanded wings; colour cannot prove virginity.';
     record('hint', 'Requested a supervisor hint.');
   }
-  if (['flip', 'turn', 'roll-left', 'roll-right', 'dorsal', 'lateral', 'ventral'].includes(act) && canHandle()) record('rotate', `${selected.reference.label}: inspected ${button.textContent.trim().toLowerCase()}.`);
+  if (['flip', 'turn', 'roll-left', 'roll-right', 'dorsal', 'lateral', 'ventral'].includes(act) && canHandle())
+    record('rotate', `${selected.reference.label}: inspected ${button.textContent.trim().toLowerCase()}.`);
 });
-document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
-document.querySelector('[data-act="retry"]').addEventListener('click', () => { review.close(); session.retry(); save(); renderInventory(); select(selected, false); });
-document.querySelector('[data-act="new-batch"]').addEventListener('click', () => { review.close(); session = new CollectionSession(); helpVisits = 0; save(); startActivity('exercise'); });
+document
+  .querySelectorAll('[data-close]')
+  .forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
+document.querySelector('[data-act="retry"]').addEventListener('click', () => {
+  review.close();
+  session.retry();
+  save();
+  renderInventory();
+  select(selected, false);
+});
+document.querySelector('[data-act="new-batch"]').addEventListener('click', () => {
+  review.close();
+  session = new CollectionSession();
+  helpVisits = 0;
+  save();
+  startActivity('exercise');
+});
 document.querySelector('[data-act="export"]').addEventListener('click', exportNotebook);
 addEventListener('keydown', (e) => {
-  if (document.querySelector('dialog[open]') || (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (
+    document.querySelector('dialog[open]') ||
+    (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) ||
+    e.ctrlKey ||
+    e.metaKey ||
+    e.altKey
+  )
+    return;
   const key = e.key.toLowerCase();
   if (key === 'q') turn(-15);
   else if (key === 'e') turn(15);
   else if (key === 'f') flipOver();
   else if (key === 'g') setTool('move');
   else if (key === 'r') setTool('rotate');
-  else if (e.key === 'Escape') { tween = null; overview(); }
-  if (['q', 'e', 'f'].includes(key) && canHandle()) record('rotate', `${selected.reference.label}: used the ${key.toUpperCase()} inspection shortcut.`);
+  else if (e.key === 'Escape') {
+    tween = null;
+    overview();
+  }
+  if (['q', 'e', 'f'].includes(key) && canHandle())
+    record('rotate', `${selected.reference.label}: used the ${key.toUpperCase()} inspection shortcut.`);
 });
 function frame(now) {
   if (tween) {
     const t = Math.min(1, (now - tween.t0) / tween.ms);
-    tween.specimen.holder.quaternion.slerpQuaternions(tween.from, tween.to, t * t * (3 - 2 * t)); settle(tween.specimen);
+    tween.specimen.holder.quaternion.slerpQuaternions(tween.from, tween.to, t * t * (3 - 2 * t));
+    settle(tween.specimen);
     if (t === 1) tween = null;
   }
   if (selected && selected.holder.visible) {
-    ring.position.x = selected.holder.position.x; ring.position.z = selected.holder.position.z;
+    ring.position.x = selected.holder.position.x;
+    ring.position.z = selected.holder.position.z;
     key.target.position.set(selected.holder.position.x, 0, selected.holder.position.z);
   }
-  renderer.render(scene, camera); requestAnimationFrame(frame);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
 }
-resize(); updateCamera(); setTool('move');
-window.scope = { THREE, scene, camera, view, updateCamera, specimens, select, setTool, focusSelected, overview, flipOver, turn,
-  get holder() { return selected?.holder; }, getFly: () => selected?.fly, ready: false,
-  get selectedId() { return selected?.reference.id || null; }, get mode() { return mode; }, selectById: (id) => select(specimens.find((s) => s.reference.id === id) || null),
+resize();
+updateCamera();
+setTool('move');
+window.scope = {
+  THREE,
+  scene,
+  camera,
+  view,
+  updateCamera,
+  specimens,
+  select,
+  setTool,
+  focusSelected,
+  overview,
+  flipOver,
+  turn,
+  get holder() {
+    return selected?.holder;
+  },
+  getFly: () => selected?.fly,
+  ready: false,
+  get selectedId() {
+    return selected?.reference.id || null;
+  },
+  get mode() {
+    return mode;
+  },
+  selectById: (id) => select(specimens.find((s) => s.reference.id === id) || null),
   // Development/test controls return the same public session snapshot as the UI.
-  startActivity, getSession: () => activeSession().snapshot() };
+  startActivity,
+  getSession: () => activeSession().snapshot(),
+};
 startActivity(mode);
 requestAnimationFrame(frame);

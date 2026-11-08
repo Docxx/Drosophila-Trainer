@@ -19,7 +19,10 @@ test('batches: six flies from a trusted clearing, reproducible', () => {
     assert.deepEqual(makePopulation(seed), flies);
     assert.equal(new Set(flies.map((f) => `${f.x},${f.z}`)).size, 6, 'Every fly has its own spot on the pad');
   }
-  assert.notDeepEqual(makePopulation(1).map((f) => f.sex), makePopulation(19).map((f) => f.sex));
+  assert.notDeepEqual(
+    makePopulation(1).map((f) => f.sex),
+    makePopulation(19).map((f) => f.sex),
+  );
 });
 
 test('appearance follows age: unexpanded wings in the first hour, meconium for a few hours', () => {
@@ -31,10 +34,11 @@ test('appearance follows age: unexpanded wings in the first hour, meconium for a
 
 test('resting pose is random and unrelated to sex', () => {
   const seen = { F: new Set(), M: new Set() };
-  for (let seed = 0; seed < 60; seed++) for (const f of makePopulation(seed)) {
-    assert(RESTS.includes(f.rest));
-    seen[f.sex].add(f.rest);
-  }
+  for (let seed = 0; seed < 60; seed++)
+    for (const f of makePopulation(seed)) {
+      assert(RESTS.includes(f.rest));
+      seen[f.sex].add(f.rest);
+    }
   assert.deepEqual([...seen.F].sort(), [...RESTS].sort());
   assert.deepEqual([...seen.M].sort(), [...RESTS].sort());
 });
@@ -112,7 +116,9 @@ test('notebook round trip retains decisions, notes, review and history; stored s
   const restored = new CollectionSession({ seed: saved.seed, saved });
   assert.deepEqual(restored.snapshot(), session.snapshot());
   assert.equal(restored.snapshot().report.success, false);
-  const copy = restored.snapshot(); copy.flies[0].destination = 'collection'; copy.notes.prediction = 'changed';
+  const copy = restored.snapshot();
+  copy.flies[0].destination = 'collection';
+  copy.notes.prediction = 'changed';
   assert.notDeepEqual(copy, restored.snapshot(), 'Public snapshots must not mutate the session');
 });
 
@@ -120,7 +126,8 @@ test('invalid saved decisions and unsupported notebook versions are rejected', (
   const session = new CollectionSession({ seed: 2 });
   assert.throws(() => session.move('missing', 'collection'), /Invalid/);
   assert.throws(() => session.move('fly-1', 'missing'), /Invalid/);
-  const saved = session.serialize(); saved.destinations['fly-1'] = 'missing';
+  const saved = session.serialize();
+  saved.destinations['fly-1'] = 'missing';
   assert.throws(() => new CollectionSession({ seed: 2, saved }), /Invalid/);
   assert.throws(() => new CollectionSession({ seed: 2, saved: { version: 1, seed: 2 } }), /Unsupported/);
 });

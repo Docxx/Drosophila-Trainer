@@ -10,7 +10,8 @@ export const SOURCE_RECORD = Object.freeze({
   collectedAt: '17:00',
   temperature: '25 °C',
   clearing: 'All adults removed at 09:00.',
-  evidence: 'Every fly that eclosed since the clearing is under 8 hours old, so its females are virgins. Adults can darken within this interval. Appearance cannot establish virginity; use the trusted clearing record.',
+  evidence:
+    'Every fly that eclosed since the clearing is under 8 hours old, so its females are virgins. Adults can darken within this interval. Appearance cannot establish virginity; use the trusted clearing record.',
   target: 2,
 });
 
@@ -30,17 +31,20 @@ export const RESTS = ['left', 'right', 'back'];
 
 function generator(seed) {
   return () => {
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
 // Pad layout: a row of four above a row of three (or two rows of three).
 function layout(count) {
   const rows = count > 6 ? [4, count - 4] : [3, count - 3];
-  return rows.flatMap((n, r) => Array.from({ length: n }, (_, i) => ({ x: (i - (n - 1) / 2) * (n > 3 ? 2.7 : 3.05), z: (r ? 1 : -1) * 1.85 })));
+  return rows.flatMap((n, r) =>
+    Array.from({ length: n }, (_, i) => ({ x: (i - (n - 1) / 2) * (n > 3 ? 2.7 : 3.05), z: (r ? 1 : -1) * 1.85 })),
+  );
 }
 
 /**
@@ -57,7 +61,12 @@ export function makePopulation(seed, { holdover = false } = {}) {
   if (holdover) {
     const sex = random() < 0.5 ? 'F' : 'M';
     const mated = random() < 0.75;
-    flies.push({ sex, ageMinutes: 2880 + Math.floor(random() * 2880), matingHistory: sex === 'F' ? (mated ? 'mated' : 'unmated') : null, holdover: true });
+    flies.push({
+      sex,
+      ageMinutes: 2880 + Math.floor(random() * 2880),
+      matingHistory: sex === 'F' ? (mated ? 'mated' : 'unmated') : null,
+      holdover: true,
+    });
   }
   for (let i = flies.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
@@ -65,8 +74,10 @@ export function makePopulation(seed, { holdover = false } = {}) {
   }
   const spots = layout(flies.length);
   return flies.map((fly, i) => ({
-    id: `fly-${i + 1}`, label: `Fly ${String.fromCharCode(65 + i)}`,
-    ...fly, ...appearanceForAge(fly.ageMinutes),
+    id: `fly-${i + 1}`,
+    label: `Fly ${String.fromCharCode(65 + i)}`,
+    ...fly,
+    ...appearanceForAge(fly.ageMinutes),
     ...spots.at(i),
     heading: random() * Math.PI * 2,
     rest: RESTS.at(Math.floor(random() * RESTS.length)),
@@ -82,7 +93,13 @@ export class CollectionSession {
   #notes = { prediction: '', conclusion: '' };
   #submitted = false;
   #report = null;
-  constructor({ seed = Math.floor(Math.random() * 4294967296), saved = null, now = () => new Date().toISOString(), startDetail = 'Opened the virgin-collection exercise.', population = null } = {}) {
+  constructor({
+    seed = Math.floor(Math.random() * 4294967296),
+    saved = null,
+    now = () => new Date().toISOString(),
+    startDetail = 'Opened the virgin-collection exercise.',
+    population = null,
+  } = {}) {
     this.seed = seed >>> 0;
     this.now = now;
     this.#population = population || makePopulation(this.seed);
@@ -100,9 +117,16 @@ export class CollectionSession {
     for (const field of ['prediction', 'conclusion']) {
       if (typeof saved.notes?.[field] === 'string') this.#notes[field] = saved.notes[field].slice(0, 5000);
     }
-    this.#events = Array.isArray(saved.events) ? saved.events.filter((e) => e && typeof e.action === 'string' && typeof e.detail === 'string' && typeof e.at === 'string').slice(-200) : [];
+    this.#events = Array.isArray(saved.events)
+      ? saved.events
+          .filter((e) => e && typeof e.action === 'string' && typeof e.detail === 'string' && typeof e.at === 'string')
+          .slice(-200)
+      : [];
     // Recompute any review from decisions; never trust a stored success flag.
-    if (saved.submitted === true) { this.#submitted = true; this.#report = this.#assess(); }
+    if (saved.submitted === true) {
+      this.#submitted = true;
+      this.#report = this.#assess();
+    }
   }
   get appearance() {
     // What a learner could see: no mating history, exact age or holdover flag.
@@ -112,13 +136,21 @@ export class CollectionSession {
     return {
       seed: this.seed,
       flies: this.#population.map(({ id, label }) => ({ id, label, destination: this.#destinations[id] })),
-      notes: { ...this.#notes }, events: this.#events.map((e) => ({ ...e })),
+      notes: { ...this.#notes },
+      events: this.#events.map((e) => ({ ...e })),
       submitted: this.#submitted,
       report: this.#report ? structuredClone(this.#report) : null,
     };
   }
   serialize() {
-    return { version: NOTEBOOK_VERSION, seed: this.seed, destinations: { ...this.#destinations }, notes: { ...this.#notes }, events: this.#events.map((e) => ({ ...e })), submitted: this.#submitted };
+    return {
+      version: NOTEBOOK_VERSION,
+      seed: this.seed,
+      destinations: { ...this.#destinations },
+      notes: { ...this.#notes },
+      events: this.#events.map((e) => ({ ...e })),
+      submitted: this.#submitted,
+    };
   }
   /** Put earlier notebook entries (e.g. from a discarded batch) ahead of this one's. */
   restoreHistory(events) {
@@ -136,7 +168,11 @@ export class CollectionSession {
     if (!fly || !DESTINATIONS.includes(destination)) throw new Error('Invalid collection decision');
     if (this.#destinations[id] === destination) return;
     this.#destinations[id] = destination;
-    const description = { pad: 'Returned to the pad', collection: 'Moved to the collection vial', rejected: 'Set aside for reconsideration' }[destination];
+    const description = {
+      pad: 'Returned to the pad',
+      collection: 'Moved to the collection vial',
+      rejected: 'Set aside for reconsideration',
+    }[destination];
     this.log('transfer', id, `${fly.label}: ${description.toLowerCase()}.`);
   }
   setNote(field, value) {
@@ -144,8 +180,10 @@ export class CollectionSession {
     this.#notes[field] = value.slice(0, 5000);
   }
   #reason(f) {
-    if (f.holdover) return 'The source history does not establish this fly as a virgin. Colour and expanded wings cannot establish age or mating history.';
-    if (f.sex === 'M') return 'Male: sex combs on the first tarsal segment of the forelegs. Pale young males can look female from the abdomen alone.';
+    if (f.holdover)
+      return 'The source history does not establish this fly as a virgin. Colour and expanded wings cannot establish age or mating history.';
+    if (f.sex === 'M')
+      return 'Male: sex combs on the first tarsal segment of the forelegs. Pale young males can look female from the abdomen alone.';
     return 'Female: no foreleg sex combs. The trusted clearing record supports collecting her as a virgin, whether she is pale or already darkened. Body colour, expanded wings and absence of meconium do not prove mating history.';
   }
   #assess() {
@@ -157,7 +195,9 @@ export class CollectionSession {
     const errors = collected.length - females;
     return {
       success: females >= SOURCE_RECORD.target && errors === 0,
-      females, errors, collected: collected.length,
+      females,
+      errors,
+      collected: collected.length,
       rows: collected.map((f) => ({ id: f.id, label: f.label, correct: eligible(f), reason: this.#reason(f) })),
     };
   }

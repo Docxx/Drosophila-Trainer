@@ -2,7 +2,9 @@
 // Exercise the rendered reference controls before capturing a focused male.
 (async () => {
   await window.scope.startActivity('reference');
-  const assert = (condition, message) => { if (!condition) throw new Error(message); };
+  const assert = (condition, message) => {
+    if (!condition) throw new Error(message);
+  };
   const click = (selector) => {
     const button = document.querySelector(selector);
     assert(button && !button.disabled, `Missing or disabled control: ${selector}`);
@@ -12,7 +14,10 @@
   assert(window.scope.ready && window.scope.specimens.length === 5, 'Five reference specimens must be ready');
   for (let i = 0; i < 5; i++) {
     click(`[data-specimen="${i}"]`);
-    assert(document.querySelector(`[data-specimen="${i}"]`).getAttribute('aria-pressed') === 'true', 'Selected reference must be announced');
+    assert(
+      document.querySelector(`[data-specimen="${i}"]`).getAttribute('aria-pressed') === 'true',
+      'Selected reference must be announced',
+    );
     assert(window.scope.holder === window.scope.specimens[i].holder, 'Selection must choose the correct individual');
     for (const angle of ['dorsal', 'lateral', 'ventral']) {
       click(`[data-act="${angle}"]`);
@@ -27,7 +32,10 @@
   assert(document.getElementById('scope').dataset.tool === 'move', 'Move tool did not activate');
   click('[data-act="reset"]');
   for (const specimen of window.scope.specimens) {
-    assert(specimen.holder.position.x === specimen.reference.x && specimen.holder.position.z === specimen.reference.z, 'Reset must restore specimen position');
+    assert(
+      specimen.holder.position.x === specimen.reference.x && specimen.holder.position.z === specimen.reference.z,
+      'Reset must restore specimen position',
+    );
   }
   const before = window.scope.holder.quaternion.clone();
   window.dispatchEvent(new KeyboardEvent('keydown', { key: 'q' }));

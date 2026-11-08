@@ -19,12 +19,17 @@ const KIND = { tour: 'Microscope · guided', scope: 'Microscope', lesson: 'Inter
 function setView(view) {
   document.body.dataset.view = view;
   desk.hidden = view !== 'desk';
-  if (view === 'desk') { window.scrollTo(0, 0); desk.scrollTop = 0; }
+  if (view === 'desk') {
+    window.scrollTo(0, 0);
+    desk.scrollTop = 0;
+  }
 }
 
 function hub() {
   current?.destroy?.();
-  tour?.stop(); tour = null; current = null;
+  tour?.stop();
+  tour = null;
+  current = null;
   setView('desk');
   const p = progress.get();
   const next = nextLesson(p.done);
@@ -39,33 +44,62 @@ function hub() {
         ${fresh ? `<p class="secondary">Done some fly work before? The quick check suggests where to start.</p>` : ''}</div>
       <div class="progress-ring" style="--done:${LESSONS.filter((l) => p.done.includes(l.id)).length / LESSONS.length}"><strong>${LESSONS.filter((l) => p.done.includes(l.id)).length}/${LESSONS.length}</strong><span>done</span></div>
     </section>
-    <section class="learning-path"><h3>Your learning path</h3><p>Learn the idea → watch a worked demonstration → try with guidance → practise independently → investigate unexpected results. Skip ahead when ready; prerequisites are recommendations.</p><div class="path-stages">${PATH.map((part)=>`<section><span class="eyebrow">${esc(part.level)}</span><h4>${esc(part.title)}</h4><p>${esc(part.goal)}</p><div>${part.lessons.map(id=>`<button class="link" type="button" data-open="${id}">${p.done.includes(id)?'✓ ':''}${esc(LESSONS.find(l=>l.id===id)?.title||id)}${id==='planner'?' · start with puzzles 1–2':''}</button>`).join('')}</div><small>${part.lessons.filter(id=>p.done.includes(id)).length}/${part.lessons.length} modules completed</small></section>`).join('')}</div><p class="secondary">Completion records activity in this trainer. Independent construction and real laboratory competence require their own evidence.</p></section>
-    ${SECTIONS.map((s) => `<section class="hub-section"><h3>${esc(s.title)}</h3><p class="secondary">${esc(s.blurb)}</p><div class="cards">${
-      LESSONS.filter((l) => l.section === s.id).map((l) => {
-        const done = p.done.includes(l.id);
-        const puzzles = l.id === 'planner' ? Object.keys(p.puzzles).length : 0;
-        return `<button type="button" class="card ${done ? 'done' : ''} ${next?.id === l.id ? 'next' : ''}" data-open="${l.id}">
+    <section class="learning-path"><h3>Your learning path</h3><p>Learn the idea → watch a worked demonstration → try with guidance → practise independently → investigate unexpected results. Skip ahead when ready; prerequisites are recommendations.</p><div class="path-stages">${PATH.map((part) => `<section><span class="eyebrow">${esc(part.level)}</span><h4>${esc(part.title)}</h4><p>${esc(part.goal)}</p><div>${part.lessons.map((id) => `<button class="link" type="button" data-open="${id}">${p.done.includes(id) ? '✓ ' : ''}${esc(LESSONS.find((l) => l.id === id)?.title || id)}${id === 'planner' ? ' · start with puzzles 1–2' : ''}</button>`).join('')}</div><small>${part.lessons.filter((id) => p.done.includes(id)).length}/${part.lessons.length} modules completed</small></section>`).join('')}</div><p class="secondary">Completion records activity in this trainer. Independent construction and real laboratory competence require their own evidence.</p></section>
+    ${SECTIONS.map(
+      (s) =>
+        `<section class="hub-section"><h3>${esc(s.title)}</h3><p class="secondary">${esc(s.blurb)}</p><div class="cards">${LESSONS.filter(
+          (l) => l.section === s.id,
+        )
+          .map((l) => {
+            const done = p.done.includes(l.id);
+            const puzzles = l.id === 'planner' ? Object.keys(p.puzzles).length : 0;
+            return `<button type="button" class="card ${done ? 'done' : ''} ${next?.id === l.id ? 'next' : ''}" data-open="${l.id}">
           <span class="eyebrow">${CURRICULUM[l.id]?.level || KIND[l.kind]}${l.practice ? ' · practice' : ''}</span><strong>${esc(l.title)}</strong><span>${esc(l.summary)}</span>
           <span class="meta">${done ? (p.results[l.id]?.independentPractice ? '✓ Independent fresh-case practice' : p.results[l.id]?.assisted ? '✓ Completed with support' : '✓ Completed') : p.drafts[l.id] ? 'Resume saved lesson' : next?.id === l.id ? 'Suggested next' : l.minutes ? `${l.minutes} min` : 'Open any time'}${puzzles ? ` · ${puzzles}/6 puzzles` : ''}</span></button>`;
-      }).join('')}</div></section>`).join('')}
+          })
+          .join('')}</div></section>`,
+    ).join('')}
     <p class="secondary hub-foot">Progress is saved on this computer. <button type="button" class="link" data-reset>Reset course progress</button></p>
   </div>`;
 }
 
 function open(id) {
-  current?.destroy?.(); current = null;
-  tour?.stop(); tour = null;
+  current?.destroy?.();
+  current = null;
+  tour?.stop();
+  tour = null;
   if (id === DIAGNOSTIC.id) return lesson(id);
   const l = LESSONS.find((x) => x.id === id);
   if (!l) return hub();
   if (l.kind === 'lesson') return lesson(id);
-  if (l.kind === 'planner') { setView('desk'); current = mountPlanner(stage, { onExit: hub }); return; }
-  if (l.kind === 'sandbox') { setView('desk'); current = mountSandbox(stage, { onExit: hub }); progress.complete('sandbox'); return; }
+  if (l.kind === 'planner') {
+    setView('desk');
+    current = mountPlanner(stage, { onExit: hub });
+    return;
+  }
+  if (l.kind === 'sandbox') {
+    setView('desk');
+    current = mountSandbox(stage, { onExit: hub });
+    progress.complete('sandbox');
+    return;
+  }
   setView('scope');
-  if (l.kind === 'scope') { window.scope.startActivity(l.activity); return; }
+  if (l.kind === 'scope') {
+    window.scope.startActivity(l.activity);
+    return;
+  }
   // Guided tour runs on the reference bench.
   window.scope.startActivity('reference').then(() => {
-    tour = startTour({ onDone: () => { progress.complete('tour'); tour = null; open('collection'); }, onExit: () => { tour = null; } });
+    tour = startTour({
+      onDone: () => {
+        progress.complete('tour');
+        tour = null;
+        open('collection');
+      },
+      onExit: () => {
+        tour = null;
+      },
+    });
   });
 }
 
@@ -84,24 +118,50 @@ function lesson(id) {
 // Notation switch: diagram, notation or both, everywhere on the desk.
 const notation = document.getElementById('notation');
 function syncNotation() {
-  notation.querySelectorAll('button').forEach((b) => { const on = b.dataset.notation === progress.notation; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  notation.querySelectorAll('button').forEach((b) => {
+    const on = b.dataset.notation === progress.notation;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
 }
 notation.addEventListener('click', (e) => {
-  const b = e.target.closest('[data-notation]'); if (!b) return;
-  progress.notation = b.dataset.notation; syncNotation(); current?.rerender();
+  const b = e.target.closest('[data-notation]');
+  if (!b) return;
+  progress.notation = b.dataset.notation;
+  syncNotation();
+  current?.rerender();
 });
 
 stage.addEventListener('click', (e) => {
-  const b = e.target.closest('button'); if (!b) return;
+  const b = e.target.closest('button');
+  if (!b) return;
   if (b.dataset.open) open(b.dataset.open);
-  else if (b.hasAttribute('data-reset') && confirm('Reset course progress? Lesson completion and puzzle results are cleared; notebooks are kept.')) { progress.reset(); hub(); }
+  else if (
+    b.hasAttribute('data-reset') &&
+    confirm('Reset course progress? Lesson completion and puzzle results are cleared; notebooks are kept.')
+  ) {
+    progress.reset();
+    hub();
+  }
 });
 document.querySelectorAll('button[data-view="desk"]').forEach((b) => b.addEventListener('click', hub));
 document.getElementById('desk-home').addEventListener('click', hub);
-document.addEventListener('flytrainer:progress', () => { if (document.body.dataset.view === 'desk' && !current) hub(); });
+document.addEventListener('flytrainer:progress', () => {
+  if (document.body.dataset.view === 'desk' && !current) hub();
+});
 
 syncNotation();
 const start = new URLSearchParams(location.search).get('open');
-if (start) open(start); else hub();
+if (start) open(start);
+else hub();
 
-window.course = { hub, open, get tour() { return tour; }, get current() { return current; } };
+window.course = {
+  hub,
+  open,
+  get tour() {
+    return tour;
+  },
+  get current() {
+    return current;
+  },
+};

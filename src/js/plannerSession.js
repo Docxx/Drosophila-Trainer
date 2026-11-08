@@ -16,7 +16,15 @@ export class PlannerSession {
   constructor(puzzle) {
     this.puzzle = puzzle;
     this.target = parseTarget(puzzle.target);
-    this.vials = puzzle.stocks.map((s, i) => ({ id: `s${i}`, name: s.name, note: s.note, text: s.text, generation: 0, stock: true, ...parseStock(s.text) }));
+    this.vials = puzzle.stocks.map((s, i) => ({
+      id: `s${i}`,
+      name: s.name,
+      note: s.note,
+      text: s.text,
+      generation: 0,
+      stock: true,
+      ...parseStock(s.text),
+    }));
     this.crosses = [];
     this.hintsUsed = 0;
     this.solved = null;
@@ -25,17 +33,24 @@ export class PlannerSession {
     this.actions = [];
   }
 
-  vial(id) { return this.vials.find((v) => v.id === id); }
+  vial(id) {
+    return this.vials.find((v) => v.id === id);
+  }
 
   /** Cross virgin females from one vial to males from another. */
   cross(femaleVial, maleVial) {
-    const f = this.vial(femaleVial), m = this.vial(maleVial);
+    const f = this.vial(femaleVial),
+      m = this.vial(maleVial);
     if (!f?.F) throw new Error('That vial has no females.');
     if (!m?.M) throw new Error('That vial has no males.');
     const { mix, dead } = crossMixes(f.F, m.M);
     const cross = {
-      id: `c${this.next++}`, mother: f.id, father: m.id, generation: Math.max(f.generation, m.generation) + 1,
-      dead, classes: phenoClasses(mix).map((row) => ({ ...row, label: classLabel(row.pheno), sexes: ['F', 'M'].filter((s) => row[s]) })),
+      id: `c${this.next++}`,
+      mother: f.id,
+      father: m.id,
+      generation: Math.max(f.generation, m.generation) + 1,
+      dead,
+      classes: phenoClasses(mix).map((row) => ({ ...row, label: classLabel(row.pheno), sexes: ['F', 'M'].filter((s) => row[s]) })),
     };
     this.crosses.push(cross);
     this.actions.push({ method: 'cross', args: [femaleVial, maleVial] });
@@ -47,10 +62,18 @@ export class PlannerSession {
   keep(crossId, rowIndex, name) {
     const cross = this.crosses.find((c) => c.id === crossId);
     const row = cross.classes[rowIndex];
-    const f = this.vial(cross.mother), m = this.vial(cross.father);
+    const f = this.vial(cross.mother),
+      m = this.vial(cross.father);
     const vial = {
-      id: `v${this.next++}`, name: name || row.label.split(' · ')[0], note: `Generation ${cross.generation}, from ${f.name} ♀ × ${m.name} ♂. ${row.label}.`,
-      generation: cross.generation, stock: false, F: row.F?.members || null, M: row.M?.members || null, from: crossId, pheno: row.pheno,
+      id: `v${this.next++}`,
+      name: name || row.label.split(' · ')[0],
+      note: `Generation ${cross.generation}, from ${f.name} ♀ × ${m.name} ♂. ${row.label}.`,
+      generation: cross.generation,
+      stock: false,
+      F: row.F?.members || null,
+      M: row.M?.members || null,
+      from: crossId,
+      pheno: row.pheno,
     };
     this.vials.push(vial);
     this.actions.push({ method: 'keep', args: [crossId, rowIndex, name || null] });
@@ -67,7 +90,10 @@ export class PlannerSession {
 
   hint() {
     const h = this.puzzle.hints[this.hintsUsed];
-    if (h) { this.hintsUsed++; this.actions.push({ method: 'hint', args: [] }); }
+    if (h) {
+      this.hintsUsed++;
+      this.actions.push({ method: 'hint', args: [] });
+    }
     return h || null;
   }
 
@@ -83,7 +109,9 @@ export class PlannerSession {
     const pure = ['F', 'M'].some((s) => v[s] && isPure(v[s], t));
     if (pure) {
       this.solved = { vial: v.id, generations: v.generation, par: this.puzzle.par, hints: this.hintsUsed };
-      this.log.push(`Declared “${v.name}”: target stock built in ${v.generation} generation${v.generation === 1 ? '' : 's'} (par ${this.puzzle.par}).`);
+      this.log.push(
+        `Declared “${v.name}”: target stock built in ${v.generation} generation${v.generation === 1 ? '' : 's'} (par ${this.puzzle.par}).`,
+      );
       return { ok: true, ...this.solved };
     }
     const members = [...(v.F || []), ...(v.M || [])];
@@ -93,10 +121,14 @@ export class PlannerSession {
     const some = containsTarget(members, t);
     this.log.push(`Declared “${v.name}”: not the target.`);
     return {
-      ok: false, some, chroms: wrongChroms,
-      message: v.stock ? 'That is one of the starting stocks. You need to build the target with crosses.'
-        : some ? `Some flies in this vial are the target, but not all: you cannot tell them apart by looking. Check chromosome ${wrongChroms.join(' and ')}: which markers would prove what each fly carries?`
-        : `None of these flies is the target. Chromosome ${wrongChroms.join(' and ')} ${wrongChroms.length === 1 ? 'is' : 'are'} not what the target needs.`,
+      ok: false,
+      some,
+      chroms: wrongChroms,
+      message: v.stock
+        ? 'That is one of the starting stocks. You need to build the target with crosses.'
+        : some
+          ? `Some flies in this vial are the target, but not all: you cannot tell them apart by looking. Check chromosome ${wrongChroms.join(' and ')}: which markers would prove what each fly carries?`
+          : `None of these flies is the target. Chromosome ${wrongChroms.join(' and ')} ${wrongChroms.length === 1 ? 'is' : 'are'} not what the target needs.`,
     };
   }
 }
@@ -109,10 +141,12 @@ export const label = (chrom, key) => CHROMS[chrom][key].label;
 
 /** Restore decisions, not hidden genotypes or an untrusted success flag. */
 export function replayPlan(puzzle, saved) {
-  if (!saved || saved.puzzle !== puzzle.id || !Array.isArray(saved.actions) || saved.actions.length > 2000) throw new Error('Unsupported saved construction');
+  if (!saved || saved.puzzle !== puzzle.id || !Array.isArray(saved.actions) || saved.actions.length > 2000)
+    throw new Error('Unsupported saved construction');
   const session = new PlannerSession(puzzle);
   for (const action of saved.actions) {
-    if (!action || !['cross', 'keep', 'discard', 'hint', 'declare'].includes(action.method) || !Array.isArray(action.args)) throw new Error('Invalid saved construction action');
+    if (!action || !['cross', 'keep', 'discard', 'hint', 'declare'].includes(action.method) || !Array.isArray(action.args))
+      throw new Error('Invalid saved construction action');
     session[action.method](...action.args);
   }
   return session;
