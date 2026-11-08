@@ -31,7 +31,7 @@ export const LESSONS = [
     kind: 'tour',
     title: 'Meet the fly',
     minutes: 8,
-    summary: 'A guided tour of the microscope: zoom, turn a fly over, and find the sex combs and the meconium.',
+    summary: 'Learn to zoom and turn a fly. Find sex combs on male forelegs and the meconium, a dark gut deposit in newly emerged flies.',
   },
   {
     id: 'reference',
@@ -40,7 +40,7 @@ export const LESSONS = [
     activity: 'reference',
     title: 'Reference bench',
     minutes: 5,
-    summary: 'Five known flies to compare at your own pace. Nothing is assessed.',
+    summary: 'Compare five known flies at your own pace, without assessment.',
     practice: true,
   },
   {
@@ -49,7 +49,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'From a vial to a reliable cross',
     minutes: 15,
-    summary: 'Follow the life cycle, distinguish generations and keep source, collection and stock records.',
+    summary: 'Follow the fly life cycle and learn to label generations and keep vial records.',
   },
   {
     id: 'collection',
@@ -58,7 +58,7 @@ export const LESSONS = [
     activity: 'exercise',
     title: 'Virgin collection',
     minutes: 10,
-    summary: 'Use a trusted clearing record and anatomy to collect virgin females, including adults that have already darkened.',
+    summary: 'Use a complete clearing record and body features to collect virgin females, including females that have already darkened.',
   },
   {
     id: 'foundations',
@@ -66,7 +66,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Start here: the language of genetics',
     minutes: 20,
-    summary: 'Learn cells, chromosomes, genes, alleles, genotype and phenotype with no assumed genetics knowledge.',
+    summary: "Start with cells and chromosomes. Learn what genes and alleles are and how they affect a fly's appearance.",
   },
   {
     id: 'inheritance',
@@ -74,7 +74,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Chromosomes and inheritance',
     minutes: 25,
-    summary: 'Build gametes from a Curly fly, predict its offspring, and discover why some genotypes never appear.',
+    summary: 'Build egg types, predict Curly offspring and see why some chromosome combinations die.',
   },
   {
     id: 'xlinked',
@@ -82,7 +82,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'The X chromosome',
     minutes: 25,
-    summary: 'Why sons and daughters of the same cross can look different, using the white eye-colour gene.',
+    summary: 'Follow the white eye-colour gene on the X to explain differences between sons and daughters.',
   },
   {
     id: 'first-cross',
@@ -91,7 +91,7 @@ export const LESSONS = [
     activity: 'cross',
     title: 'First cross',
     minutes: 15,
-    summary: 'Collect white-eyed females, cross them to red-eyed males and read the result in their offspring.',
+    summary: 'Collect white-eyed females, cross them to red-eyed males and investigate their offspring.',
   },
   {
     id: 'notation',
@@ -99,7 +99,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Read a fly stock and a cross',
     minutes: 20,
-    summary: 'Decode slashes, semicolons, +, Y and marker names before planning a cross.',
+    summary: 'Read slashes, semicolons, +, Y and chromosome marker names before planning a cross.',
   },
   {
     id: 'balancers',
@@ -107,7 +107,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Balancers',
     minutes: 30,
-    summary: 'How CyO, TM3 and TM6B keep mutations in place, and why every fly in a balanced stock looks the same.',
+    summary: 'Use CyO, TM3 and TM6B balancers to maintain mutations and follow the chromosomes through crosses.',
   },
   {
     id: 'planner',
@@ -115,7 +115,7 @@ export const LESSONS = [
     kind: 'planner',
     title: 'Cross planner',
     minutes: 30,
-    summary: 'Six puzzles: plan the crosses that build a target stock, generation by generation.',
+    summary: 'Plan crosses and select offspring to build the target stock across six puzzles.',
   },
   {
     id: 'chance',
@@ -123,7 +123,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Counting and chance',
     minutes: 25,
-    summary: 'Count vials of different sizes, see how far chance moves a ratio, and test counts with χ².',
+    summary: 'Count different-sized samples, explore chance variation and compare counts with predictions using χ².',
   },
   {
     id: 'recombination',
@@ -131,7 +131,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Recombination and mapping',
     minutes: 25,
-    summary: 'Measure the distance between two insertions from real counts, then pick and verify a recombinant.',
+    summary: 'Use offspring counts to estimate the distance between insertions, then keep and check the wanted recombinant chromosome.',
   },
   {
     id: 'gal4uas',
@@ -139,7 +139,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'GAL4/UAS and controls',
     minutes: 30,
-    summary: 'Switch genes on with GAL4/UAS, sort the right offspring, and choose the controls a knockdown needs.',
+    summary: 'Use GAL4/UAS to activate a responder, identify the experimental offspring and choose controls for an RNAi experiment.',
   },
   {
     id: 'complementation',
@@ -147,7 +147,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Complementation and mapping',
     minutes: 30,
-    summary: 'Run a complementation grid, then map three lethal mutations with overlapping deficiencies.',
+    summary: 'Cross three mutant lines to test whether they affect the same gene, then locate them with overlapping chromosome deletions.',
   },
   {
     id: 'threepoint',
@@ -155,7 +155,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Three-point mapping',
     minutes: 30,
-    summary: 'Read three markers on maternal X chromosomes, infer gene order, and count double crossovers and interference.',
+    summary: 'Follow three markers on maternal X chromosomes to work out gene order, double crossovers and interference.',
   },
   {
     id: 'mosaics',
@@ -163,7 +163,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'FLP/FRT clones and twin spots',
     minutes: 25,
-    summary: 'Induce mitotic recombination in a model disc and plan for a few large clones or many small ones.',
+    summary: 'Create mutant cell patches by chromosome exchange, then plan for a few large clones or many small ones.',
   },
   {
     id: 'target',
@@ -171,7 +171,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'GAL80ts: controlling time',
     minutes: 25,
-    summary: 'Plan temperature shifts, protect development, and allow for activation, protein depletion and recovery.',
+    summary: 'Choose temperature shifts to protect development and allow time for target protein to disappear or recover.',
   },
   {
     id: 'screens',
@@ -179,7 +179,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Planning a genetic screen',
     minutes: 25,
-    summary: 'Balance independent lines, gene coverage, multiple-hit chromosomes and fly-room capacity.',
+    summary: 'Balance the chance of finding an allele against extra mutations and the space needed to keep lines.',
   },
   {
     id: 'strategies',
@@ -187,7 +187,8 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Choose the genetic strategy',
     minutes: 30,
-    summary: 'Forward/reverse genetics, reporter versus protein evidence, MARCM, maternal contributions and causal verification.',
+    summary:
+      'Match the tool to the question: choose genetic changes, interpret reporter and clone markers, and test maternal contributions and cause.',
   },
   {
     id: 'investigation',
@@ -195,7 +196,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Do not lose the invisible chromosome',
     minutes: 30,
-    summary: 'Diagnose an ambiguous intermediate and preserve an unmarked lethal through a multi-generation build.',
+    summary: 'Find where a cross plan loses track of an unmarked lethal mutation, then build a stock that retains it.',
   },
   {
     id: 'research-project',
@@ -203,7 +204,7 @@ export const LESSONS = [
     kind: 'lesson',
     title: 'Construct, verify and interpret',
     minutes: 45,
-    summary: 'Build a three-generation research stock, then connect verification, controls and timing to a defensible conclusion.',
+    summary: 'Build a three-generation stock, check its constructs and plan the controls and timing needed to interpret a result.',
   },
   {
     id: 'sandbox',
@@ -211,7 +212,8 @@ export const LESSONS = [
     kind: 'sandbox',
     title: 'Genetics bench',
     minutes: 0,
-    summary: 'Build any two flies, see their gametes and offspring, count vials with a χ² test, and drill unlimited practice problems.',
+    summary:
+      'Choose parents, inspect their egg and sperm types, predict offspring and analyse a sample. Practise with unlimited new problems.',
     practice: true,
   },
 ];
@@ -220,7 +222,7 @@ export const DIAGNOSTIC = {
   id: 'diagnostic',
   title: 'Quick check',
   minutes: 3,
-  summary: 'Six questions to suggest where to start. Optional.',
+  summary: 'Answer six optional questions for a suggested starting point.',
 };
 
 const KEY = 'fly-trainer.progress.v1';

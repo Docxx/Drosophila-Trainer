@@ -259,8 +259,8 @@ export const LESSON_CONTENT = {
         title: 'Genes ride on chromosomes',
         visual: 'chromosomes',
         body: [
-          'A fruit fly has four pairs of chromosomes: the sex chromosomes (XX in usual females, XY in usual males), chromosomes 2 and 3, and a tiny chromosome 4 that we can ignore here.',
-          'Each pair has one chromosome from the mother and one from the father. Here is a fly drawn the way this course draws every fly: one bar per chromosome. Hover over a bar to see what it carries.',
+          'A fruit fly has four chromosome pairs. Females usually have XX sex chromosomes and males XY, alongside chromosomes 2 and 3 and the tiny chromosome 4.',
+          'Each pair contains one chromosome from each parent. Each bar in the diagram is one chromosome. Hover over a bar to see what it carries.',
         ],
         diagrams: [{ g: CURLY_F, caption: 'A female fly' }],
       },
@@ -269,8 +269,8 @@ export const LESSON_CONTENT = {
         title: 'Meet Curly',
         visual: 'dominance',
         body: [
-          'One of her chromosome 2s is called CyO. It carries a dominant mutation, Curly (the Cy tag): a single copy is enough to curl the wings up at the tips.',
-          'Her other chromosome 2 is normal, written +. Because Curly is dominant, she has curly wings.',
+          'One of her chromosome 2s is called CyO. It carries Curly, labelled Cy. Curly is dominant: one copy is enough to curl the wing tips.',
+          'Her other chromosome 2 is normal, written +. She has curly wings because she carries Curly on one chromosome.',
         ],
         diagrams: [{ g: CURLY_F, chroms: ['2'], caption: 'Her chromosome 2 pair' }],
       },
@@ -282,15 +282,15 @@ export const LESSON_CONTENT = {
           {
             text: 'One: one chromosome from each pair',
             correct: true,
-            why: 'Right. Meiosis halves the set, so each gamete carries one chromosome from each pair. Fertilisation restores the pairs.',
+            why: 'Right. Meiosis, the division that makes eggs and sperm, gives each gamete one chromosome from each pair; fertilisation restores the pairs.',
           },
           {
             text: 'Two: the whole pair',
-            why: 'Then the offspring would have four copies. Meiosis halves the set: one chromosome from each pair goes into each gamete.',
+            why: 'If both egg and sperm carried the whole pair, their offspring would have four copies. Each gamete takes just one chromosome from each pair.',
           },
           {
             text: 'It depends on the sex of the fly',
-            why: 'Both eggs and sperm carry one chromosome from each pair. Only the sex chromosomes differ between the sexes.',
+            why: "Both eggs and sperm take one chromosome from each pair. This rule does not change with the parent's sex.",
           },
         ],
       },
@@ -301,7 +301,7 @@ export const LESSON_CONTENT = {
         parent: CURLY_F,
         chroms: ['2'],
         intro: 'Click one chromosome from the pair, then press Make gamete. Find every kind of egg she can make.',
-        done: 'She makes two kinds of egg, CyO or +, in equal numbers: half her eggs carry Curly.',
+        done: 'She makes two egg types: CyO and +. Each is equally likely, so half her eggs carry Curly.',
       },
       {
         type: 'predict',
@@ -312,7 +312,8 @@ export const LESSON_CONTENT = {
         chroms: ['2'],
         traits: ['curly'],
         intro: 'She is crossed to a male with two normal chromosome 2s. What share of their offspring will be Curly?',
-        explain: 'Every sperm carries +. Half the eggs carry CyO, so half the offspring are CyO/+ (Curly) and half are +/+ (straight).',
+        explain:
+          'Every sperm carries +. Half the eggs carry CyO, giving CyO/+ offspring with Curly wings. The rest give +/+ offspring with straight wings.',
       },
       {
         type: 'gametes',
@@ -321,8 +322,8 @@ export const LESSON_CONTENT = {
         parent: 'w/w; CyO/+; TM3/+',
         chroms: ['2', '3'],
         intro:
-          'This female also carries TM3 on chromosome 3, with the dominant marker Stubble (Sb: short, thick bristles). Choose one chromosome 2 and one chromosome 3 for each gamete. How many kinds are there?',
-        done: 'Four kinds, each a quarter. Chromosomes 2 and 3 are sorted into gametes independently of each other (Mendel’s independent assortment).',
+          'This female also carries TM3 on chromosome 3. Its dominant marker is Stubble, labelled Sb: short, thick bristles. Choose one chromosome 2 and one chromosome 3 for each gamete. Find every combination.',
+        done: 'Four types, each with a quarter share. Chromosomes 2 and 3 are sorted separately into eggs. This is called independent assortment.',
       },
       {
         type: 'predict',
@@ -332,21 +333,25 @@ export const LESSON_CONTENT = {
         father: CURLY_M,
         chroms: ['2'],
         traits: ['curly'],
-        intro: 'Now cross two Curly flies (both CyO/+). Think about every combination of egg and sperm before you answer.',
+        intro: 'Both Curly parents are CyO/+. List each egg–sperm combination before you predict the offspring.',
         explain:
-          'The squares give 1 CyO/CyO : 2 CyO/+ : 1 +/+. But CyO/CyO flies die before they hatch: two copies of Curly are lethal. Of the survivors, two-thirds are Curly and one-third are straight.',
+          'The fertilised eggs have a ratio of 1 CyO/CyO : 2 CyO/+ : 1 +/+. CyO/CyO flies die before hatching. Among surviving adults, two-thirds are Curly and one-third are straight.',
       },
       {
         type: 'choice',
         visual: 'lethals',
         question: 'A Curly × Curly vial gives 90 adults. About how many will have curly wings?',
         options: [
-          { text: 'About 60', correct: true, why: 'Yes: two-thirds of the survivors, because the CyO/CyO quarter never hatches.' },
+          {
+            text: 'About 60',
+            correct: true,
+            why: 'Right. Two-thirds of the surviving adults are Curly because the CyO/CyO quarter never hatches.',
+          },
           {
             text: 'About 68',
-            why: 'That is three-quarters, the classic 3:1 ratio. It forgets that CyO/CyO flies die, which leaves 2 Curly : 1 straight.',
+            why: 'Three-quarters gives a 3:1 ratio before removing the lethal CyO/CyO flies. The adults instead have a ratio of 2 Curly : 1 straight.',
           },
-          { text: 'About 45', why: 'That would be a half. Count the squares again: CyO/+ appears twice, +/+ once, and CyO/CyO dies.' },
+          { text: 'About 45', why: 'A half would fit Curly crossed to normal. Here CyO/+ occurs twice, +/+ once, and CyO/CyO dies.' },
         ],
       },
       {
@@ -354,8 +359,8 @@ export const LESSON_CONTENT = {
         title: 'What you have learned',
         visual: 'chromosomes',
         body: [
-          'Each parent passes on one chromosome from each pair, chosen at random. Different pairs are sorted independently.',
-          'Some combinations never appear because they are lethal. That is not a nuisance, it is a tool: the next lessons use it to keep mutations in place.',
+          'Each parent passes on one chromosome from each pair. Different pairs are sorted separately.',
+          'Some chromosome combinations are lethal: the flies die before you score them. The next lessons use this to maintain mutations in a stock.',
         ],
       },
     ],
@@ -369,8 +374,8 @@ export const LESSON_CONTENT = {
         title: 'Females XX, males XY',
         visual: 'x-copies',
         body: [
-          'Female flies have two X chromosomes. Males have one X and a Y. In Drosophila, X-chromosome dosage controls sex determination; the Y is needed for normal male fertility, rather than determining sex. The Y carries no white gene. This lesson models the usual XX and XY flies.',
-          'The white gene sits on the X. Its recessive mutation, w, gives white eyes when a fly has no normal copy. From here on the course also shows the shorthand geneticists write: try the Diagram / Notation / Both switch at the top.',
+          'Female flies have two X chromosomes. Males have one X and a Y. In Drosophila, the number of X chromosomes controls sex determination. The Y is needed for normal male fertility. It carries no white gene.',
+          'The white gene is on the X. Its recessive mutation, w, gives white eyes when no normal copy is present. Try the Diagram / Notation / Both switch to compare chromosome drawings with genetic shorthand.',
         ],
         diagrams: [
           { g: 'w/w; +/+; +/+', chroms: ['X'], caption: 'A white-eyed female: w/w' },
@@ -384,12 +389,12 @@ export const LESSON_CONTENT = {
           {
             text: 'His mother',
             correct: true,
-            why: 'Right. In this XX × XY cross, a son receives his only X from his mother and the Y from his father.',
+            why: 'Right. In this XX × XY cross, a son gets his X from his mother and his Y from his father.',
           },
-          { text: 'His father', why: 'A father who passes on his X has a daughter. Sons get the father’s Y.' },
+          { text: 'His father', why: "A father's X goes to a daughter. A son gets his father's Y." },
           {
             text: 'Either parent, at random',
-            why: 'A sperm carrying the father’s X makes a daughter, so a son’s X must come from his mother.',
+            why: "A son gets his father's Y, so his X must come from his mother.",
           },
         ],
       },
@@ -400,7 +405,7 @@ export const LESSON_CONTENT = {
         parent: '+/Y; +/+; +/+',
         chroms: ['X'],
         intro: 'Find every kind of sperm this red-eyed male makes.',
-        done: 'Half his sperm carry his X (with the normal white gene) and make daughters; half carry the Y and make sons.',
+        done: 'Half his sperm carry his X with the normal white gene; these make daughters. The other half carry Y and make sons.',
       },
       {
         type: 'gametes',
@@ -409,7 +414,7 @@ export const LESSON_CONTENT = {
         parent: 'w/w; +/+; +/+',
         chroms: ['X'],
         intro: 'Now this white-eyed female. How many kinds of egg can she make?',
-        done: 'Just one: both her X chromosomes carry w, so every egg does.',
+        done: 'One type: both her X chromosomes carry w, so every egg carries w.',
       },
       {
         type: 'predict',
@@ -423,7 +428,7 @@ export const LESSON_CONTENT = {
         decoys: ['White eyes: daughters', 'Red eyes: sons'],
         intro: 'Predict each class of offspring as a share of all the adults.',
         explain:
-          'Daughters get w from their mother and + from their father: one normal copy is enough, so they have red eyes. Sons get only their mother’s w and the Y, so they have white eyes.',
+          "Daughters get w from their mother and + from their father, giving red eyes. Sons get their mother's w and their father's Y, giving white eyes.",
       },
       {
         type: 'predict',
@@ -435,26 +440,26 @@ export const LESSON_CONTENT = {
         traits: ['eye'],
         bySex: true,
         decoys: ['White eyes: daughters', 'White eyes: sons'],
-        intro: 'Now a red-eyed female (+/+) with a white-eyed male (w/Y). Does swapping the parents change the result?',
+        intro: 'Now cross a red-eyed female (+/+) to a white-eyed male (w/Y). Does reversing the parents change the offspring?',
         explain:
-          'Every fly gets a normal X from its mother, so all offspring are red-eyed. For an X-linked gene the direction of the cross matters, unlike for chromosome 2 or 3.',
+          'Every offspring gets a normal X from its mother, so all are red-eyed. For an X-linked gene, swapping the parents can change the result; for chromosome 2 or 3 it does not change which sex inherits each allele.',
       },
       {
         type: 'choice',
         question: 'In the first cross (white female × red male) you find a white-eyed daughter. What does that tell you?',
         options: [
           {
-            text: 'Her father had white eyes, so the mother mated with a male you did not intend',
+            text: 'Her father carried w, so the intended red-eyed males were not her father',
             correct: true,
-            why: 'Exactly. A daughter has white eyes only if both her Xs carry w, so her father’s X carried w. Your red-eyed males could not have given it.',
+            why: "Right. A white-eyed daughter needs w on both Xs, so her father's X carried w rather than the normal allele in your red-eyed males.",
           },
           {
             text: 'Nothing: ratios vary by chance',
-            why: 'Chance changes how many red daughters and white sons you see, but this cross cannot make a white-eyed daughter at all.',
+            why: 'Chance changes the counts, but these parents cannot produce a white-eyed daughter. Her paternal X needs a source of w.',
           },
           {
             text: 'The mother was certainly a virgin',
-            why: 'The opposite: it points to a father you did not add, such as a male who mated her before you collected her.',
+            why: 'This points to an unintended father, such as a white-eyed male that mated with her mother before collection.',
           },
         ],
       },
@@ -462,7 +467,7 @@ export const LESSON_CONTENT = {
         type: 'go',
         title: 'Now do it at the bench',
         body: [
-          'The First cross mission uses exactly this cross. You collect the white-eyed females yourself, so whether a white daughter turns up depends on how well you collected.',
+          'The First cross mission uses this cross. Collect the white-eyed females, then inspect their offspring for evidence of unintended mating.',
         ],
         action: { kind: 'scope', activity: 'cross', label: 'Open the First cross' },
       },
@@ -476,8 +481,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'The problem',
         body: [
-          'mut¹ is a recessive lethal mutation on chromosome 2: flies with two copies die, and flies with one copy look completely normal.',
-          'How do you keep a stock of it? A mut¹/+ stock left to itself loses mut¹ over the generations, and you cannot see which flies still carry it.',
+          'mut¹ is a recessive lethal mutation on chromosome 2. Flies with two copies die. Flies with one copy look normal.',
+          'A stock is a population you keep and breed. How can you keep mut¹ when mut¹/+ flies look normal and can pass on either mut¹ or +?',
         ],
         diagrams: [{ g: 'w/w; mut/+; +/+', chroms: ['2'], caption: 'mut¹ over a normal chromosome: invisible' }],
       },
@@ -485,10 +490,10 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'What a balancer is',
         body: [
-          'A balancer is a specially built chromosome with three properties:',
-          '1. A dominant marker you can see: CyO carries Curly, TM3 carries Stubble, TM6B carries Humeral and Tubby.',
-          '2. A recessive lethal: two copies of the same balancer die.',
-          '3. Several inversions (the zig-zag), which strongly suppress recovery of recombinant chromosomes. This teaching model treats the partner chromosome as staying intact.',
+          'A balancer is a chromosome with three useful features:',
+          '1. A visible dominant marker: Curly on CyO, Stubble on TM3, and Humeral and Tubby on TM6B.',
+          '2. A recessive lethal: flies with two copies of the same balancer die.',
+          '3. Inversions, shown by the zig-zag: reversed chromosome segments that make recovered recombinants rare, helping you keep the partner chromosome intact.',
         ],
         diagrams: [{ g: 'w/w; mut/CyO; +/+', chroms: ['2'], caption: 'mut¹ kept over CyO' }],
       },
@@ -502,24 +507,24 @@ export const LESSON_CONTENT = {
         decoys: ['Straight wings'],
         intro: 'Cross mut¹/CyO females to mut¹/CyO males. What share of the adults will be Curly?',
         explain:
-          'mut¹/mut¹ dies (the mutation) and CyO/CyO dies (the balancer). The only survivors are mut¹/CyO: every adult is Curly, generation after generation. The stock breeds true.',
+          'mut¹/mut¹ flies die, as do CyO/CyO flies. Only mut¹/CyO adults survive. Each carries Curly and retains mut¹, so breeding these adults maintains the stock.',
       },
       {
         type: 'choice',
-        question: 'Why does a mut¹/CyO stock keep mut¹ in this model, without you selecting anything?',
+        question: 'Why does breeding a mut¹/CyO stock keep mut¹ without selecting individual flies?',
         options: [
           {
-            text: 'Both homozygotes die, so every survivor still carries mut¹ (over CyO)',
+            text: 'Both two-copy combinations die, leaving mut¹ over CyO in every adult',
             correct: true,
-            why: 'Yes. And because a straight-winged fly could only be mut¹/mut¹, which dies, you never see one.',
+            why: 'Right. The straight-winged mut¹/mut¹ flies die, leaving only Curly adults that still carry mut¹.',
           },
           {
             text: 'Curly flies are healthier',
-            why: 'Curly itself does nothing for health. It is the two lethal homozygotes that leave only mut¹/CyO.',
+            why: 'Both lethal chromosome combinations die. Curly is the marker that lets you recognise the surviving mut¹/CyO flies.',
           },
           {
             text: 'CyO repairs mut¹',
-            why: 'CyO cannot change mut¹. It sits beside it, and its own lethality removes every fly without mut¹.',
+            why: 'CyO does not repair mut¹. Only the flies carrying one of each chromosome survive.',
           },
         ],
       },
@@ -531,8 +536,8 @@ export const LESSON_CONTENT = {
         chroms: ['3'],
         crossover: true,
         intro:
-          'This female has two different insertions on her two chromosome 3s, GAL4 and UAS-RNAi. In her ovary the pair can swap segments (cross over). Find all her egg types; try the Crossover switch.',
-        done: 'Four kinds: the two originals, plus two recombinants, one carrying both insertions and one carrying neither. In this model 30% of eggs are recombinant (15% each).',
+          'GAL4 and UAS-RNAi are DNA insertions on different chromosome 3s in this female. During egg formation, matching chromosomes can exchange segments: a crossover. Find her egg types using the Crossover switch.',
+        done: 'Four types: the two original combinations, plus one with both insertions and one with neither. These new combinations are recombinants. Here 30% of eggs are recombinant, with 15% of each type.',
       },
       {
         type: 'gametes',
@@ -541,8 +546,8 @@ export const LESSON_CONTENT = {
         parent: 'w/Y; +/+; GAL4/UAS-RNAi',
         chroms: ['3'],
         crossover: true,
-        intro: 'Same chromosome 3s, but in a male. Find all his sperm types.',
-        done: 'Only two. Drosophila males do not cross over, which is why recombinants are always made in females.',
+        intro: 'The male has the same chromosome 3 pair. Find every sperm type he can make.',
+        done: 'Two types only. Drosophila males do not have meiotic crossovers, so this male passes on the original combinations.',
       },
       {
         type: 'gametes',
@@ -552,7 +557,7 @@ export const LESSON_CONTENT = {
         chroms: ['3'],
         crossover: true,
         intro: 'Now a female with GAL4 over TM3. Can she make recombinant eggs?',
-        done: 'No: two kinds only. TM3’s inversions suppress recovery of recombinants; this model transmits GAL4 intact. That is the third property of a balancer at work.',
+        done: "Two types only. TM3's inversions suppress recovered recombinants, so you recover intact GAL4 or TM3 chromosomes here.",
       },
       {
         type: 'pick',
@@ -562,9 +567,9 @@ export const LESSON_CONTENT = {
         traits: ['curly', 'scutoid'],
         target: { chrom: '2', pair: ['CyO', 'UAS-GFP'] },
         intro:
-          'UAS-GFP females are crossed to Sco/CyO males. You want flies with UAS-GFP over CyO, so you can follow it by the Curly wings. Which class do you keep?',
-        right: 'Correct: Curly flies got CyO from their father, so their other chromosome 2 must be UAS-GFP from their mother.',
-        wrong: 'Those flies got Sco, not CyO, from their father. Look for the CyO marker.',
+          'Cross UAS-GFP females to Sco/CyO males. You want UAS-GFP paired with CyO. Which offspring can you identify by their Curly wings?',
+        right: 'Right. Curly offspring inherited paternal CyO, so their other chromosome 2 must be maternal UAS-GFP.',
+        wrong: "These flies inherited Sco from their father. Select the flies with CyO's Curly marker.",
       },
       {
         type: 'pick',
@@ -574,14 +579,14 @@ export const LESSON_CONTENT = {
         traits: ['stubble', 'humeral', 'tubby'],
         target: { chrom: '3', pair: ['GAL4', 'TM6B'] },
         intro: 'GAL4 females × TM3/TM6B males. You want GAL4 over TM6B. Which class?',
-        right: 'Right: Humeral and Tubby are TM6B’s markers, so these flies carry GAL4/TM6B.',
-        wrong: 'Stubble is TM3’s marker. You want the TM6B markers: Humeral and Tubby.',
+        right: 'Right. Humeral and Tubby mark TM6B, so these offspring carry GAL4/TM6B.',
+        wrong: 'Stubble marks TM3. You need Humeral and Tubby, the markers on TM6B.',
       },
       {
         type: 'go',
         title: 'Plan your own crosses',
         body: [
-          'You now have the tools of stock building: balancers to follow chromosomes, markers to pick classes, and the rule that only females recombine. The Cross planner puts them together in six puzzles.',
+          "You can now follow chromosomes with markers and balancers, and choose females when you need recombination. Use these skills in the Cross planner's six puzzles.",
         ],
         action: { kind: 'planner', label: 'Open the Cross planner' },
       },
@@ -595,8 +600,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'Ratios are expectations',
         body: [
-          'A 1:1 ratio says what happens on average. Each fly in a vial is a separate draw, so a real vial rarely matches the ratio exactly.',
-          'How far off can a vial be before you should worry? That depends on how many flies you counted. Find out by counting some vials.',
+          'A 1:1 ratio is the expected share over many offspring. Each fly is a separate event, so a vial need not match that ratio exactly.',
+          'How large a difference from the expected ratio should concern you? Count vials of different sizes to see how the sample size matters.',
         ],
       },
       {
@@ -611,7 +616,7 @@ export const LESSON_CONTENT = {
         need: 4,
         seed: 3,
         intro: 'Curly × normal: half the offspring should be Curly. Count vials of different sizes and watch where the results land.',
-        done: 'Small vials scatter widely around 1/2; large counts cluster tightly. The spread shrinks with the square root of the number counted: 100 flies are about twice as precise as 25.',
+        done: 'Small samples vary widely around 1/2; larger samples vary less in proportion. The spread falls with the square root of the sample size: 100 flies are about twice as precise as 25.',
       },
       {
         type: 'choice',
@@ -620,15 +625,15 @@ export const LESSON_CONTENT = {
           {
             text: 'Nothing unusual: splits like this are common in a vial of 20',
             correct: true,
-            why: 'Right. 13:7 is well within what chance gives for 20 flies. You saw splits like it a moment ago.',
+            why: 'Right. A 13:7 split is common enough by chance among 20 flies from this cross.',
           },
           {
             text: 'The father must have carried Curly too',
-            why: 'Then about two-thirds would be Curly, and you could not tell 2/3 from 1/2 with 20 flies. Nothing here demands a different explanation.',
+            why: 'That cross would predict two-thirds Curly, but 20 flies cannot reliably distinguish 2/3 from 1/2. These counts do not require a different father.',
           },
           {
             text: 'Curly flies survive better',
-            why: 'Possibly, but 20 flies cannot show it. A real survival difference needs many more flies, or a formal test.',
+            why: 'A survival difference is possible, but 20 flies do not establish it. Plan a larger sample and test the prediction.',
           },
         ],
       },
@@ -636,9 +641,9 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'Putting a number on it: χ²',
         body: [
-          'The chi-square test asks how surprising your counts are if a hypothesis is true. For each class, compare the observed count O with the expected count E: χ² = sum of (O − E)² / E.',
-          'Degrees of freedom are the number of classes minus one. With two classes (one degree of freedom), χ² above 3.84 means a deviation that large happens less than 5% of the time by chance, so you reject the hypothesis.',
-          'Below the critical value, you cannot reject it. That is not the same as showing it is true.',
+          'First state a hypothesis: the ratio your cross predicts. The chi-square test compares observed counts O with expected counts E, using χ² = sum of (O − E)² / E.',
+          'Degrees of freedom are the number of classes minus one. For two classes, χ² above 3.84 would occur less than 5% of the time if the hypothesis were true. Reject that hypothesis at this threshold.',
+          'Below the threshold, you cannot reject the hypothesis. You have not proved it true.',
         ],
       },
       {
@@ -654,7 +659,8 @@ export const LESSON_CONTENT = {
           { label: '2:1', shares: [2 / 3, 1 / 3] },
           { label: '3:1', shares: [3 / 4, 1 / 4] },
         ],
-        explain: 'Only 2:1 survives: exactly what lethality of CyO/CyO predicts. 3:1 is rejected because the homozygotes are missing.',
+        explain:
+          'Only 2:1 fits at this threshold, as expected when CyO/CyO dies. The counts reject 3:1, which includes those missing flies.',
       },
       {
         type: 'choice',
@@ -664,15 +670,15 @@ export const LESSON_CONTENT = {
           {
             text: 'No: 2:1 fits these counts too. 90 flies cannot separate the two ratios',
             correct: true,
-            why: 'Exactly. Not rejecting a hypothesis is weak evidence when the sample is small. Decide how many flies you need before you count.',
+            why: 'Right. A small sample may fit several ratios, so decide how many flies you need before counting.',
           },
           {
             text: 'Yes: the test accepted 3:1',
-            why: 'A χ² test never accepts. It only says the data are not surprising under 3:1. They are even less surprising under 2:1 (χ² ≈ 0.05).',
+            why: 'The test does not prove 3:1. The same counts fit 2:1 even better (χ² ≈ 0.05).',
           },
           {
             text: 'No: the test is invalid below 100 flies',
-            why: 'The test is valid here (every expected count is above 5). The problem is power: the sample is too small to tell close ratios apart.',
+            why: 'Every expected count is above 5, so this test is valid. It lacks power: the sample cannot reliably distinguish these ratios.',
           },
         ],
       },
@@ -680,8 +686,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'In the lab',
         body: [
-          'Count enough flies to answer your question, and decide that number before you start. Score blind where you can.',
-          'Unexpected classes matter more than slightly-off ratios: a single white-eyed daughter in the First cross is a clear signal, whatever the counts.',
+          'Choose a sample size that can answer your question before you count. Where possible, score flies without knowing their group.',
+          'Check unexpected classes before small ratio differences. In the First cross, a white-eyed daughter needs an explanation even if the overall ratio looks close.',
         ],
       },
     ],
@@ -694,8 +700,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'Crossovers and distance',
         body: [
-          'In a female\u2019s ovary, the two chromosomes of a pair can swap segments: a crossover. Two loci far apart are separated by a crossover often; two close together, rarely.',
-          'The percentage of recombinant offspring measures distance on the genetic map: 1% recombinants is one map unit, or centimorgan (cM).',
+          "During egg formation, matching chromosomes can exchange segments: a crossover. A gene's position is its locus. Crossovers separate distant loci more often than nearby loci.",
+          'Use the recombinant share to estimate genetic distance. For short intervals, 1% recombinants is about one map unit, called a centimorgan (cM).',
         ],
         diagrams: [{ g: 'w/w; +/+; GAL4/UAS-RNAi', chroms: ['3'], caption: 'A female carrying two insertions, one on each chromosome 3' }],
       },
@@ -706,18 +712,18 @@ export const LESSON_CONTENT = {
           {
             text: 'A female (a virgin, so you know her offspring\u2019s father)',
             correct: true,
-            why: 'Right. Drosophila males do not cross over, so only females make recombinants.',
+            why: 'Right. Only females undergo meiotic crossing over in Drosophila, so you need a female to make the recombinant chromosome.',
           },
-          { text: 'A male', why: 'Males pass their chromosomes on intact. Recombinants have to come from females.' },
-          { text: 'Either sex', why: 'Only female meiosis has crossing over in Drosophila.' },
+          { text: 'A male', why: 'Males pass on the original chromosome combinations. Use a female to generate these recombinants.' },
+          { text: 'Either sex', why: 'Only females have meiotic crossovers in Drosophila.' },
         ],
       },
       {
         type: 'text',
         title: 'Seeing recombinants',
         body: [
-          'Cross her to TM3/TM6B males. Every offspring gets one balancer from its father and one maternal chromosome 3, which you read by eye colour.',
-          'Each insertion carries mini-white. In a white (w) background, one copy gives orange eyes, two copies dark orange, none white. So the two recombinant classes are dark orange (both insertions) and white (neither).',
+          'Cross her to TM3/TM6B males. Each offspring gets a paternal balancer and a maternal chromosome 3. Use eye colour to follow the maternal chromosome.',
+          'Each insertion carries the mini-white eye marker. In a white (w) background, one copy gives orange eyes, two give dark orange, and none give white. Dark orange marks both insertions; white marks neither.',
         ],
         diagrams: [{ g: 'w/Y; +/+; TM3/TM6B', chroms: ['3'], caption: 'Tester male: two balancers' }],
       },
@@ -737,9 +743,9 @@ export const LESSON_CONTENT = {
         decimals: 1,
         answer: (counts) =>
           (100 * counts.filter((c) => c.label !== 'Orange eyes').reduce((t, c) => t + c.n, 0)) / counts.reduce((t, c) => t + c.n, 0),
-        hint: 'Recombinants are the dark orange flies (both insertions) plus the white flies (neither). Add them and divide by all 400.',
+        hint: 'Add the dark-orange flies carrying both insertions to the white flies carrying neither. Divide that total by all 400 offspring.',
         explain:
-          'That puts the insertions roughly 30 cM apart (the model uses 30%). Above about 20 cM, double crossovers hide some recombination, so map distances from large values underestimate. Recombination frequency never exceeds 50%.',
+          'This gives roughly 30 cM from a cross with 30% recombination. Above about 20 cM, double crossovers hide some exchanges, so the estimate is too short. Recombination frequency cannot exceed 50%.',
       },
       {
         type: 'pick',
@@ -749,8 +755,8 @@ export const LESSON_CONTENT = {
         traits: ['eye', 'humeral', 'stubble'],
         target: { chrom: '3', pair: ['GAL4,UAS-RNAi', 'TM6B'] },
         intro: 'You want the GAL4, UAS-RNAi recombinant chromosome balanced over TM6B. Which class do you keep?',
-        right: 'Right: dark orange means both insertions; Humeral without Stubble means TM6B from the father.',
-        wrong: 'Look for dark orange eyes (both mini-whites) together with TM6B\u2019s marker, Humeral.',
+        right: 'Right. Dark-orange eyes mark both insertions, and Humeral without Stubble marks the paternal TM6B chromosome.',
+        wrong: 'Choose dark-orange eyes for both insertions and Humeral for TM6B.',
       },
       {
         type: 'choice',
@@ -759,15 +765,15 @@ export const LESSON_CONTENT = {
           {
             text: 'About 200, and in practice several hundred to be safe',
             correct: true,
-            why: 'Right. 1% are recombinant, and half of those carry both insertions: 1 in 200.',
+            why: 'Right. If 1% are recombinant and half carry both insertions, the wanted type occurs about 1 in 200 offspring.',
           },
           {
             text: 'About 20',
-            why: 'That would need 10 cM. At 1 cM only 1 in 100 offspring is recombinant, and only half of those carry both.',
+            why: 'That estimate would fit 10 cM. At 1 cM, only 1 in 100 offspring is recombinant, and only half of those carry both insertions.',
           },
           {
             text: 'About 100',
-            why: '1 in 100 is recombinant, but half of the recombinants carry neither insertion. You need about 1 in 200.',
+            why: 'About 1 in 100 is recombinant, but half carry neither insertion. The type you want occurs about 1 in 200.',
           },
         ],
       },
@@ -776,26 +782,26 @@ export const LESSON_CONTENT = {
         question: 'You found a dark-orange fly. Before relying on it as a recombinant line, what should you do?',
         options: [
           {
-            text: 'Confirm both insertions are there, for example by PCR',
+            text: 'Confirm both insertions are present, for example with a PCR DNA test',
             correct: true,
-            why: 'Eye-colour dosage is a weak signal: orange and dark orange are easy to confuse.',
+            why: 'Right. Orange and dark-orange eyes are easy to confuse, so eye colour alone is not enough.',
           },
           {
-            text: 'Check both still work: GAL4 drives a reporter, and the RNAi gives its phenotype',
+            text: 'Check that GAL4 activates a reporter and that RNAi gives the expected effect',
             correct: true,
-            why: 'A crossover can occasionally disrupt an insertion. Test function, not just presence.',
+            why: 'Right. A crossover can damage an insertion, so test whether both still work.',
           },
           {
             text: 'Keep several independent recombinants',
             correct: true,
-            why: 'Independent lines protect against a single bad event and give you a backup.',
+            why: 'Right. Separately recovered lines reduce the chance of relying on one faulty event and give you a backup.',
           },
           {
             text: 'Nothing: dark orange eyes prove it',
-            why: 'Eye colour can mislead (other mini-white transgenes, variable expression). Always verify.',
+            why: 'Other insertions and expression differences can affect eye colour. Confirm the candidate independently.',
           },
         ],
-        explain: 'Good practice: several independent recombinants, each verified by molecular and functional tests.',
+        explain: 'Keep several separately recovered recombinants. Check their DNA and test that both insertions work.',
       },
       {
         type: 'go',
@@ -813,8 +819,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'Two halves of a switch',
         body: [
-          'GAL4 is a yeast transcription factor. A GAL4 driver line makes it in a pattern set by a fly enhancer: in neurons, in muscle, in the wing.',
-          'A UAS responder line carries a gene (GFP, an RNAi hairpin) behind GAL4 binding sites. On its own it stays silent. Cross the two lines and the offspring express the UAS gene wherever GAL4 is made.',
+          'GAL4 is a yeast protein that activates gene expression. A driver line makes GAL4 in a chosen pattern, such as in neurons. The DNA sequence controlling that pattern is an enhancer.',
+          "A UAS responder carries a gene beside DNA sites that GAL4 binds. The gene might make GFP, a fluorescent protein, or an RNAi molecule that reduces a target gene's activity. Crossing driver and responder brings the two parts together.",
         ],
         diagrams: [
           { g: 'w/w; UAS-GFP/UAS-GFP; +/+', caption: 'Responder: UAS-GFP' },
@@ -828,10 +834,13 @@ export const LESSON_CONTENT = {
           {
             text: 'No: UAS is silent without GAL4',
             correct: true,
-            why: 'Right. That is the point of the system: you choose where expression happens by choosing the driver.',
+            why: 'Right. The responder needs GAL4 to activate GFP, so choosing the driver determines where GFP is made.',
           },
-          { text: 'Yes, everywhere', why: 'UAS has no fly enhancer driving it. Without GAL4 nothing binds the UAS sites.' },
-          { text: 'Only in the eyes', why: 'The mini-white marker colours the eyes, but GFP itself needs GAL4.' },
+          {
+            text: 'Yes, everywhere',
+            why: 'This responder has no GAL4 to activate it. UAS-GFP alone does not give the driver-controlled GFP pattern.',
+          },
+          { text: 'Only in the eyes', why: 'Mini-white affects eye colour. It does not activate GFP, which needs GAL4.' },
         ],
       },
       {
@@ -842,9 +851,10 @@ export const LESSON_CONTENT = {
         chroms: ['3'],
         traits: ['gfp', 'stubble'],
         decoys: ['GFP, Stubble', 'No GFP'],
-        intro: 'Your GAL4 is kept over TM3 (Stubble). Cross these females to homozygous UAS-GFP males. Which offspring glow?',
+        intro:
+          'These females carry GAL4 over TM3, marked by Stubble. Cross them to males carrying UAS-GFP on both matching chromosomes. Which offspring glow?',
         explain:
-          'Every offspring gets UAS-GFP. Half get GAL4 (and glow), half get TM3 (Stubble, no GAL4, no GFP). Stubble tells you which is which without a fluorescence scope.',
+          'Every offspring inherits UAS-GFP. Half inherit GAL4 and glow; half inherit TM3 and are Stubble without GFP. Stubble lets you separate the groups under a normal microscope.',
       },
       {
         type: 'pick',
@@ -854,37 +864,41 @@ export const LESSON_CONTENT = {
         traits: ['gfp', 'stubble'],
         target: { chrom: '3', pair: ['GAL4', '+'] },
         intro: 'You can sort under a normal microscope by bristles. Which class carries GAL4 > UAS-GFP?',
-        right: 'Right: not Stubble means no TM3, so these flies carry GAL4 and express GFP.',
-        wrong: 'Stubble flies carry TM3 instead of GAL4, so they have nothing to switch UAS-GFP on.',
+        right: 'Right. Without Stubble, these offspring lack TM3 and instead carry GAL4, which activates UAS-GFP.',
+        wrong: 'Stubble offspring inherited TM3 instead of GAL4. They lack the activator needed for UAS-GFP.',
       },
       {
         type: 'multi',
         question:
-          'You knock a gene down with GAL4 > UAS-RNAi and see a phenotype. Which controls do you need to claim the gene is responsible?',
+          "GAL4 > UAS-RNAi reduces the target gene's activity and you see a phenotype. Which controls help test whether the target gene caused it?",
         options: [
-          { text: 'GAL4 / + (driver alone)', correct: true, why: 'GAL4 itself, and its insertion, can cause phenotypes.' },
+          {
+            text: 'GAL4 / + (driver alone)',
+            correct: true,
+            why: 'Right. GAL4 or its insertion can affect the phenotype even without the RNAi construct.',
+          },
           {
             text: 'UAS-RNAi / + (responder alone)',
             correct: true,
-            why: 'The insertion site or leaky expression could cause the effect without GAL4.',
+            why: 'Right. The responder insertion or expression without the driver could affect the phenotype on its own.',
           },
           {
             text: 'A second, independent RNAi line against the same gene',
             correct: true,
-            why: 'Off-target effects are specific to one hairpin. Two lines that agree are far more convincing.',
+            why: 'Right. A second RNAi construct helps test whether the phenotype comes from the target rather than another gene affected by one construct.',
           },
           {
             text: 'GAL4 > a neutral UAS (such as UAS-GFP or a control RNAi)',
             correct: true,
-            why: 'Controls for GAL4 being shared between two UAS copies, and for expressing any construct at all.',
+            why: 'Right. This checks the effects of expressing a UAS construct and of sharing GAL4 between two UAS copies.',
           },
           {
             text: 'Wild-type Canton-S only',
-            why: 'A different genetic background from your experimental flies, so it controls for very little.',
+            why: 'Canton-S has a different genetic background, so differences could come from many genes rather than the experimental construct.',
           },
         ],
         explain:
-          'All four belong in a good experiment, ideally in a matched genetic background. Better still, rescue the phenotype or confirm with a mutant.',
+          'Use all four comparisons with matched genetic backgrounds where possible. Add a rescue experiment that restores gene function, or check the result with a mutant allele.',
       },
       {
         type: 'predict',
@@ -904,15 +918,15 @@ export const LESSON_CONTENT = {
           {
             text: 'They share parents, vial and conditions, and carry UAS-RNAi without GAL4',
             correct: true,
-            why: 'Right. A sibling control removes vial and density effects. It is not a complete control: TM6B itself (Tubby) changes body shape.',
+            why: 'Right. These siblings share parents and rearing conditions, but TM6B changes body shape, so use additional controls too.',
           },
           {
             text: 'They are genetically identical to the knockdown flies',
-            why: 'They differ in having TM6B instead of GAL4, which is why they are not the only control you need.',
+            why: 'They carry TM6B instead of GAL4. That genetic difference means they are not an identical control group.',
           },
           {
             text: 'Tubby flies never show phenotypes',
-            why: 'Tubby changes body shape, which can matter for some assays. Use other controls too.',
+            why: 'Tubby itself changes body shape. Check that this does not affect your assay, and include other controls.',
           },
         ],
       },
@@ -920,8 +934,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'What the model leaves out',
         body: [
-          'GAL4 is temperature-sensitive: stronger at 29 °C, weaker at 18 °C. GAL80ts lets you switch it on only in adults.',
-          'Knockdown efficiency varies, so check it (qPCR or an antibody). UAS lines can be leaky, and some GAL4 lines express outside their reported pattern: look at GAL4 > UAS-GFP before trusting a driver.',
+          'GAL4 activity is stronger at 29 °C than at 18 °C. GAL80ts is a temperature-sensitive GAL4 repressor used to control when GAL4 is active.',
+          "Measure knockdown with qPCR, which measures RNA, or with an antibody against the protein. Check the driver's pattern using GAL4 > UAS-GFP before relying on it.",
         ],
       },
       {
@@ -940,8 +954,8 @@ export const LESSON_CONTENT = {
         type: 'text',
         title: 'Same gene or different?',
         body: [
-          'A screen gave you three recessive lethal mutations on chromosome 2: mut¹, mut² and mut³. Each is kept over CyO, and none has a visible phenotype.',
-          'To ask whether two are in the same gene, put them together in one fly. If they hit different genes, each chromosome supplies the gene the other lacks and the fly lives: they complement. If they hit the same gene, the fly has no working copy and dies: they fail to complement.',
+          'A screen found three mutations, mut¹, mut² and mut³, on chromosome 2. Each is kept over CyO. Each is recessive lethal: two copies kill the fly, while one copy has no visible effect.',
+          'Cross two mutant lines so one fly carries both mutant chromosomes. If each supplies the working gene copy the other lacks, the fly lives: the mutations complement. If neither supplies the same essential function, the fly dies: they fail to complement.',
         ],
         diagrams: [
           { g: 'w/w; mut/CyO; +/+', chroms: ['2'], caption: 'mut¹ stock' },
@@ -957,24 +971,24 @@ export const LESSON_CONTENT = {
         traits: ['curly'],
         intro: 'Suppose mut¹ and mut² are in different genes. Predict the offspring.',
         explain:
-          'CyO/CyO dies. mut¹/CyO and CyO/mut² are Curly. mut¹/mut² survives because each chromosome covers the other\u2019s defect: the straight-winged third are your evidence of complementation.',
+          'CyO/CyO dies. mut¹/CyO and CyO/mut² have Curly wings. mut¹/mut² survives because the mutations affect different genes; this straight-winged class shows complementation.',
       },
       {
         type: 'choice',
         question: 'If instead every adult from a cross like this is Curly, what does that mean?',
         options: [
           {
-            text: 'The trans-heterozygotes died: the mutations fail to complement and are probably in the same gene',
+            text: 'The flies carrying both mutant chromosomes died, suggesting the mutations affect the same gene',
             correct: true,
-            why: 'Right. The straight-winged class is the only one that can carry both mutations, and it is missing.',
+            why: 'Right. Only the straight-winged class can carry both mutant chromosomes, and that class is missing.',
           },
           {
             text: 'The mutations complement',
-            why: 'Complementation would give straight-winged flies (a third of them). Their absence means failure.',
+            why: 'With complementation, a third of the adults would have straight wings. Their absence instead suggests failure to complement.',
           },
           {
             text: 'You scored too few flies to tell',
-            why: 'With dozens of flies you expect about a third straight-winged. Seeing none is a clear result.',
+            why: 'You expect about a third of the adults to have straight wings. Finding none among dozens makes failure to complement likely.',
           },
         ],
       },
@@ -983,15 +997,15 @@ export const LESSON_CONTENT = {
         title: 'Test all three',
         rows: ['mut', 'mut2', 'mut3'],
         cols: ['mut', 'mut2', 'mut3'],
-        intro: 'Cross every pair (and each with itself, as a control). Click a cell to run that cross.',
-        done: 'Each mutation fails only with itself: mut¹, mut² and mut³ are in three different genes. The diagonal is your control, showing what failure looks like.',
+        intro: 'Cross every pair, including each line with itself as a control. Click a cell to run a cross.',
+        done: 'Each mutation fails only with itself. mut¹, mut² and mut³ therefore affect three different genes. The diagonal shows the expected failures for the self-cross controls.',
       },
       {
         type: 'text',
         title: 'Mapping with deficiencies',
         body: [
-          'A deficiency (Df) is a chromosome with a stretch deleted. A mutation fails to complement a deficiency that deletes its gene, and complements one that does not.',
-          'With overlapping deficiencies you can narrow a mutation down to the region they share, then test the genes in it.',
+          'A deficiency, written Df, is a chromosome missing a stretch of DNA. A mutation fails to complement it when the missing stretch includes the required gene.',
+          'Compare overlapping deletions to narrow the possible region. Then test candidate genes within that region.',
         ],
       },
       {
@@ -1001,7 +1015,7 @@ export const LESSON_CONTENT = {
         cols: ['Df1', 'Df2', 'Df3'],
         map: true,
         intro: 'Here are three overlapping deficiencies. Cross each mutation to each deficiency.',
-        done: 'Now read the pattern: each mutation lies where every deficiency it fails with overlaps, and outside every deficiency it complements.',
+        done: 'Keep the regions shared by all failing deficiencies. Exclude regions deleted by any deficiency that complements the mutation.',
       },
       {
         type: 'choice',
@@ -1010,10 +1024,10 @@ export const LESSON_CONTENT = {
           {
             text: 'In gene c: deleted by Df(2L)B and Df(2L)C, not by Df(2L)A',
             correct: true,
-            why: 'Right. It fails with B and C, so it lies in their overlap, and complements A, which rules out gene b.',
+            why: 'Right. The failures with B and C place mut² in their overlap, while complementation with A rules out gene b.',
           },
-          { text: 'In gene b', why: 'Gene b is deleted by Df(2L)A too, and mut² complements Df(2L)A.' },
-          { text: 'In gene d', why: 'Gene d is deleted only by Df(2L)C, but mut² also fails with Df(2L)B.' },
+          { text: 'In gene b', why: 'Df(2L)A also deletes gene b, but mut² complements Df(2L)A.' },
+          { text: 'In gene d', why: 'Df(2L)C deletes gene d, but mut² also fails with Df(2L)B.' },
         ],
       },
       {
@@ -1023,10 +1037,13 @@ export const LESSON_CONTENT = {
           {
             text: 'In gene d: only Df(2L)C deletes it',
             correct: true,
-            why: 'Right. It fails with C alone, so it lies in the part of C that B does not cover.',
+            why: 'Right. Failure with C alone places mut³ in the part deleted by C but not B.',
           },
-          { text: 'In gene c', why: 'Then it would fail with Df(2L)B as well.' },
-          { text: 'Outside all three deficiencies', why: 'Then it would complement all three, but it fails with Df(2L)C.' },
+          { text: 'In gene c', why: 'A mutation in gene c would also fail with Df(2L)B.' },
+          {
+            text: 'Outside all three deficiencies',
+            why: 'A mutation outside all three deletions would complement all three. mut³ instead fails with Df(2L)C.',
+          },
         ],
       },
       {
@@ -1036,13 +1053,16 @@ export const LESSON_CONTENT = {
           {
             text: 'Rescue: a transgene carrying the candidate gene restores viability',
             correct: true,
-            why: 'Right. Rescue, or a matching mutation found by sequencing, shows causation. Mapping alone narrows the search.',
+            why: 'Right. Restoring viability with a working copy tests the candidate gene directly, whereas mapping only narrows the region.',
           },
           {
             text: 'Test more deficiencies',
-            why: 'Smaller deficiencies narrow the region further, but cannot prove which gene in it is responsible.',
+            why: 'More deficiencies can narrow the region, but a gene-specific test is needed to identify the cause.',
           },
-          { text: 'Count more flies', why: 'The complementation results are already clear. You need a test of the specific gene.' },
+          {
+            text: 'Count more flies',
+            why: 'The crosses have already narrowed the region. You now need evidence about the candidate gene itself.',
+          },
         ],
       },
     ],
@@ -1051,15 +1071,15 @@ export const LESSON_CONTENT = {
     title: 'Three-point mapping',
     notation: 'both',
     model: [
-      'This teaching cross samples sons only, with equal viability and complete penetrance of the three markers. Sampled interval estimates need not equal the reference distances. Rare classes are identifiable here because sampling and viability do not obscure them.',
+      'Only sons are sampled. All three markers are fully visible, and every class has equal survival. The sample is chosen so parental and rare double-crossover classes are distinguishable. Sampling changes interval estimates from the reference values.',
     ],
     steps: [
       {
         type: 'text',
         title: 'Read one maternal X at a time',
         body: [
-          'The mother has two X chromosomes: one carries yellow (y), crossveinless (cv) and vermilion (v); the other carries normal alleles at all three loci. Her sons receive one maternal X and their father’s Y, so each son exposes the recessive markers carried by one of her eggs.',
-          'Score all eight marker combinations. A chromosome with no crossover keeps a parental combination; a crossover in one interval gives a single recombinant. A double crossover swaps both intervals. You will infer the order from the counts, rather than being given a map.',
+          'The mother carries yellow (y), crossveinless (cv) and vermilion (v) on one X, with normal copies on the other. Each son gets one maternal X and a paternal Y. His traits therefore show which maternal alleles he received.',
+          "Score all eight combinations. A parental chromosome keeps the mother's starting alleles together. A single crossover exchanges one interval; a double crossover exchanges both. Use these classes to work out the gene order.",
         ],
       },
       {
@@ -1069,15 +1089,15 @@ export const LESSON_CONTENT = {
           {
             text: 'A son has just one maternal X, so its recessive markers are exposed',
             correct: true,
-            why: 'His father contributes a Y rather than a second X. The son’s phenotype therefore reads the maternal chromosome directly.',
+            why: "Right. A son receives his father's Y, so the markers on his only X show the maternal allele combination.",
           },
           {
             text: 'Sons make more crossovers than daughters',
-            why: 'The chromosomes recombined in the mother’s meiosis. Drosophila males do not make meiotic crossovers.',
+            why: 'These crossovers occurred while the mother made eggs. Drosophila males do not have meiotic crossovers.',
           },
           {
             text: 'The Y supplies normal copies of all three marker genes',
-            why: 'A Y does not supply normal alleles at these X-linked loci; that is why recessive maternal markers are visible in sons.',
+            why: 'The Y supplies no normal copies at these loci. This lets the maternal recessive markers show in sons.',
           },
         ],
       },
@@ -1092,9 +1112,9 @@ export const LESSON_CONTENT = {
         n: 2000,
         seed: 29,
         intro:
-          'The table shows 2,000 sons. First mark the two parental classes and the two double-crossover classes, then identify the middle gene. Locus columns are listed alphabetically, not in map order.',
+          'These are counts from 2,000 sons. Mark the two parental classes and the two double-crossover classes. Compare their alleles to find the middle gene. The columns are alphabetical, not map order.',
         explain:
-          'Each maternal chromosome carrying a double crossover is recombinant in BOTH intervals. Include those sons once in each interval total. The coefficient of coincidence is observed double crossovers divided by the number expected from the two measured interval fractions; interference is one minus that coefficient.',
+          'Count each double-crossover son once in each interval. Coincidence is observed double crossovers divided by the expected count, calculated from the measured interval fractions. Interference is one minus coincidence.',
       },
       {
         type: 'choice',
@@ -1102,17 +1122,17 @@ export const LESSON_CONTENT = {
           'Why does adding the two interval distances give a larger value than counting only recombinants between the outside genes?',
         options: [
           {
-            text: 'Double crossovers restore the outside-marker arrangement but contribute to both interval distances',
+            text: 'Two exchanges restore the outside markers but still count in both intervals',
             correct: true,
-            why: 'Two exchanges on a maternal chromosome can leave the outer alleles in their parental combination. The middle marker exposes the exchanges that a two-marker score misses.',
+            why: 'Right. The middle marker reveals two exchanges that leave the outside alleles in their parental arrangement.',
           },
           {
             text: 'The Y chromosome adds another map interval',
-            why: 'The map concerns the mother’s X pair. Her son’s Y lets you read it but contributes no interval to this map.',
+            why: "The intervals lie on the mother's X chromosomes. The son's Y adds no interval to that map.",
           },
           {
             text: 'Double-crossover sons should be discarded',
-            why: 'Their chromosomes carry information about both intervals. Discarding them underestimates both map distances.',
+            why: 'Double-crossover chromosomes are recombinant in both intervals. Omitting them makes both distances too short.',
           },
         ],
       },
@@ -1121,17 +1141,17 @@ export const LESSON_CONTENT = {
         question: 'A coefficient of coincidence below one tells you what?',
         options: [
           {
-            text: 'Fewer double crossovers occurred than expected from independent interval events',
+            text: 'Fewer double crossovers than expected if the intervals exchanged independently',
             correct: true,
-            why: 'The two exchanges on a chromosome are less often found together than the product of the measured interval fractions predicts. This is positive interference.',
+            why: 'Right. The observed double-crossover count is below the expectation from the two interval fractions; this is positive interference.',
           },
           {
             text: 'No chromosome underwent a double crossover',
-            why: 'A coefficient between zero and one still includes observed double-crossover chromosomes; it means fewer than expected, not none.',
+            why: 'A value between zero and one can include double crossovers. It means fewer than expected, not none.',
           },
           {
             text: 'The physical length of the X chromosome has decreased',
-            why: 'The calculation compares crossover frequencies. It does not measure DNA length or chromosome loss.',
+            why: 'This compares how often exchanges occur together. It does not measure physical chromosome length.',
           },
         ],
       },
@@ -1141,15 +1161,15 @@ export const LESSON_CONTENT = {
     title: 'FLP/FRT clones and twin spots',
     notation: 'both',
     model: [
-      'The disc is a schematic growing tissue. Coloured cells represent known marker/genotype classes, not microscope fluorescence. Every successful event here uses the segregation that generates reciprocal homozygous daughters; other segregation outcomes, cell death and genotype-dependent growth are not simulated. Heat-shock ages and induction probabilities illustrate timing, not a lab protocol.',
+      'The disc is a schematic tissue. Colour labels genotype, not fluorescence. Each successful event uses the segregation that makes two homozygous daughters. Other segregation outcomes, cell death and genotype-dependent growth are omitted. Heat-shock ages and event probabilities are teaching settings, not a laboratory protocol. A small sample does not give a calibrated laboratory success rate.',
     ],
     steps: [
       {
         type: 'text',
         title: 'Two homologs inside one dividing cell',
         body: [
-          'A cell carries m on one chromosome arm and a normal allele on the homolog. Both arms have an FRT site at the same position, between the centromere and the locus. After DNA replication, FLP can exchange the distal arms between homologous chromatids.',
-          'With the appropriate mitotic segregation, one daughter receives two mutant distal arms (m/m), while its sister receives two normal arms (+/+). Their descendants make a mutant clone and a reciprocal twin spot in the surrounding m/+ tissue. This is mitotic recombination inside a fly, not a meiotic cross to make offspring.',
+          'The cell carries m on one chromosome arm and a normal allele on its partner. Each arm has an FRT DNA site between the centromere and the gene. After the chromosomes are copied, FLP recombinase can exchange the arms beyond those sites.',
+          'With the required segregation, one daughter becomes m/m and the other +/+. Their descendants form a mutant clone and a twin spot, surrounded by m/+ tissue. These are cell lineages inside one fly, not offspring from a cross.',
         ],
       },
       {
@@ -1157,17 +1177,17 @@ export const LESSON_CONTENT = {
         question: 'What must be true of the chromosomes for this clone scheme to make m/m cells?',
         options: [
           {
-            text: 'The homologs have compatible FRT sites proximal to the mutation',
+            text: 'Matching FRT sites lie between the centromere and the mutation',
             correct: true,
-            why: 'An exchange at those FRT sites can put two mutant distal arms into one daughter. A mutation on the centromere side of the exchange would not become homozygous by this event.',
+            why: 'Right. Exchange at these sites can give a daughter two mutant arms, whereas a mutation on the centromere side would not become homozygous in this event.',
           },
           {
             text: 'One FRT site anywhere in the genome is enough',
-            why: 'The exchange needs compatible sites on the homologous chromatids. Their position relative to m determines whether the daughter becomes m/m.',
+            why: 'The copied partner chromosomes need matching FRT sites. Their position relative to m determines whether m/m daughters can form.',
           },
           {
             text: 'The starting fly must already be m/m throughout',
-            why: 'The starting chromosome pair is m/+. Mitotic recombination makes local m/m and +/+ patches while the rest remains heterozygous.',
+            why: 'The starting pair is m/+. Exchange can make m/m and +/+ cell patches while the surrounding tissue keeps the original pair.',
           },
         ],
       },
@@ -1177,9 +1197,9 @@ export const LESSON_CONTENT = {
         seed: 17,
         goal: { minClones: 1, maxClones: 5, minLargest: 40 },
         intro:
-          'You need one to five visible mutant clones, with at least one containing 40 cells. Choose when and how strongly to induce FLP, then dissect the model disc.',
+          'Aim for one to five visible mutant clones, with a largest clone of at least 40 cells. Choose the induction age and strength, then inspect the disc.',
         explain:
-          'An early chromosome exchange leaves more divisions for each daughter lineage to expand. Induction strength changes the chance of an exchange in each dividing cell; it does not directly enlarge a clone.',
+          "Earlier exchange leaves more cell divisions for the clone to grow. Stronger induction makes exchange more likely; it does not directly increase a clone's size.",
       },
       {
         type: 'clones',
@@ -1187,26 +1207,26 @@ export const LESSON_CONTENT = {
         seed: 17,
         goal: { minClones: 8, maxMean: 12 },
         intro:
-          'Now you need at least eight visible mutant clones, averaging no more than 12 cells each. Change the induction plan, then test it across independent model discs.',
+          'Now aim for at least eight visible mutant clones with a mean size no greater than 12 cells. Change the induction plan and compare independent discs.',
         explain:
-          'Later in growth there are more heterozygous chromosome pairs available to recombine, but fewer divisions remain for each new daughter lineage. This favours many smaller patches.',
+          'Later induction reaches more dividing cells, but each new clone has fewer divisions left to grow. This favours many small patches.',
       },
       {
         type: 'choice',
         question: 'A mutant clone is smaller than its twin spot. Is reduced growth of m/m cells established?',
         options: [
           {
-            text: 'It is a candidate explanation; compare matched controls and many reciprocal pairs',
+            text: 'Possibly; compare many twin spots with matched controls',
             correct: true,
-            why: 'The reciprocal chromosome products give a useful internal comparison, but induction time, unequal lineage growth and survival also affect patch size. Multiple matched pairs test a genotype effect.',
+            why: 'Right. Induction time, lineage growth and survival can also change patch size, so compare many matched mutant and twin patches.',
           },
           {
             text: 'Yes: twin spots must always contain exactly equal numbers of cells',
-            why: 'Reciprocal chromosome inheritance does not force identical growth histories. Even this neutral model splits lineages unevenly.',
+            why: 'The daughters inherit different chromosome arms, but they need not have identical growth histories.',
           },
           {
             text: 'No: the two patches have the same genotype',
-            why: 'They carry reciprocal homozygous chromosome arms: m/m versus +/+. That difference is precisely why the comparison can be informative.',
+            why: 'One patch is m/m and the other +/+. Their different genotypes are what makes the comparison useful.',
           },
         ],
       },
@@ -1216,15 +1236,15 @@ export const LESSON_CONTENT = {
     title: 'GAL80ts: controlling time',
     notation: 'both',
     model: [
-      'Schedules use two temperature settings and fixed model stage lengths. GAL80ts switching, RNAi and protein turnover are illustrative first-order kinetics; real constructs and proteins require calibration. This model follows an RNAi target protein, not the abundance of a directly expressed UAS reporter.',
+      'The simulation uses two temperatures and fixed stage lengths. GAL80ts switching, RNAi and protein turnover use simplified rates. Real experiments need measured rates for the constructs and target. The plot follows the RNAi target protein, not a UAS reporter.',
     ],
     steps: [
       {
         type: 'text',
         title: 'Keep the chromosomes, change their activity',
         body: [
-          'The fly carries a GAL4 driver, a UAS-RNAi construct and a GAL80ts transgene. Their chromosomes remain present throughout the experiment. GAL80ts regulates the activity of GAL4 rather than removing either transgene.',
-          'At 18 °C GAL80ts represses GAL4; at 29 °C repression is relieved and GAL4 can drive the RNAi. Temperature also changes developmental rate. After a shift, GAL4 activity changes over time and existing target protein takes time to disappear or recover.',
+          'The fly carries GAL4, UAS-RNAi and GAL80ts throughout the experiment. GAL80ts is a temperature-sensitive protein that blocks GAL4. Temperature changes this block without removing the transgenes.',
+          'At 18 °C GAL80ts blocks GAL4. At 29 °C GAL4 can activate RNAi. GAL4 activity changes before existing target protein disappears. Temperature also changes how long development takes.',
         ],
       },
       {
@@ -1232,17 +1252,17 @@ export const LESSON_CONTENT = {
         question: 'Why can target protein remain after the RNAi-driving transgenes have been activated?',
         options: [
           {
-            text: 'The chromosomes are present, but switching and turnover of existing protein take time',
+            text: 'The switch takes time, and existing target protein must break down',
             correct: true,
-            why: 'GAL4/UAS changes new expression; it does not instantly remove proteins already made. The relevant biological window depends on both activation and protein turnover.',
+            why: 'Right. Activating GAL4/UAS does not remove protein already present, so allow time for both switching and protein loss before the assay.',
           },
           {
             text: 'The UAS chromosome has to recombine with the GAL4 chromosome first',
-            why: 'GAL4 acts on UAS in trans. Their chromosomes need not recombine; the delay is in regulation and protein abundance.',
+            why: 'GAL4 can activate UAS on another chromosome. They do not need to recombine for RNAi to begin.',
           },
           {
             text: '29 °C deletes the GAL80ts chromosome',
-            why: 'The chromosome remains. Temperature changes the repressor’s activity, and shifting back can restore repression.',
+            why: 'The chromosome stays in the fly. Temperature changes GAL80ts activity, and a cold shift can restore repression.',
           },
         ],
       },
@@ -1250,7 +1270,7 @@ export const LESSON_CONTENT = {
         type: 'target',
         title: 'Protect development, knock down in adults',
         intro:
-          'Choose 18 or 29 °C for each stage. Keep the target protein at or above 90% throughout pre-adult development, then at or below 20% during the final 48 hours of the adult observation window.',
+          'Choose 18 or 29 °C for each stage. Keep target protein at or above 90% before adulthood. Then keep it at or below 20% throughout the final 48 hours of adult observation.',
         goal: {
           checks: [
             {
@@ -1263,13 +1283,13 @@ export const LESSON_CONTENT = {
           ],
         },
         explain:
-          'The same chromosomes can support normal development and later knockdown. Inducing RNAi only after eclosion protects development, but the adult assay must wait for regulation and protein depletion.',
+          'Starting RNAi after adults emerge protects development. Delay the adult assay until GAL4 is active and the target protein has fallen far enough.',
       },
       {
         type: 'target',
         title: 'A pupal pulse, then recovery',
         intro:
-          'Keep target protein at or above 90% through the larval stages. Reduce it to at most 25% in the last 24 pupal hours, then restore it to at least 80% during the last 48 adult hours.',
+          'Keep target protein at or above 90% through larval development. Aim for at most 25% during the last 24 pupal hours, then at least 80% during the last 48 adult hours.',
         goal: {
           checks: [
             { stages: ['embryo', 'L1', 'L2', 'L3'], measure: 'protein', min: 0.9, text: 'Target protein ≥90% through larval development' },
@@ -1278,7 +1298,7 @@ export const LESSON_CONTENT = {
           ],
         },
         explain:
-          'Returning these chromosomes to 18 °C restores GAL80ts repression, but recovery of the target protein lags behind. A temperature schedule must specify the assay window as well as the shift.',
+          'At 18 °C, GAL80ts blocks GAL4 again, but target protein takes time to recover. Plan when to measure the effect as well as when to change temperature.',
       },
       {
         type: 'multi',
@@ -1287,20 +1307,20 @@ export const LESSON_CONTENT = {
           {
             text: 'Matched genetic controls under the same temperature schedule',
             correct: true,
-            why: 'Matched chromosome backgrounds without the experimental knockdown help separate RNAi effects from temperature and background effects.',
+            why: 'Right. Temperature-matched flies without the knockdown help separate RNAi effects from temperature and genetic-background effects.',
           },
           {
             text: 'An independent measure of target protein or knockdown in the intended window',
             correct: true,
-            why: 'Possessing the driver and UAS chromosomes does not establish when their target protein actually changes. Measure the biological consequence of the switch.',
+            why: 'Right. Measure the target in the assay window, because inheriting the driver and responder does not establish when the protein changes.',
           },
           {
             text: 'Only the experimental genotype, because GAL80ts removes temperature effects',
-            why: 'GAL80ts regulates the driver; it does not stop temperature acting on the rest of the fly. Genetic and temperature controls remain necessary.',
+            why: 'GAL80ts controls GAL4, not every effect of temperature on the fly. Include genetic and temperature controls.',
           },
         ],
         explain:
-          'The chromosomes define the tools; controls and an independent readout establish what those tools did during the assay window.',
+          'The genotype tells you which tools are present. Controls and a separate measurement show what those tools did during the assay.',
       },
     ],
   },
@@ -1308,15 +1328,15 @@ export const LESSON_CONTENT = {
     title: 'Planning a genetic screen',
     notation: 'both',
     model: [
-      'Hits per chromosome follow a Poisson distribution. The preset dose labels are parameters in the supplied model, not recommended mutagenesis conditions. The same per-gene hit probability is assumed for each independent line; viability, recovery efficiency and gene size do not vary here. Workload counts two vials per line and is not a full budget.',
+      'Hits follow a Poisson distribution. Dose labels are teaching settings, not recommended treatments. Each independent line has the same per-gene hit rate. Survival, recovery and gene size do not vary. Workload includes two maintenance vials per line, not the full cost of the screen.',
     ],
     steps: [
       {
         type: 'text',
         title: 'One independently mutagenised chromosome per line',
         body: [
-          'A screen isolates mutagenised chromosome 2s and keeps each over a balancer. Descendants from the same chromosome are one line, even if you score many flies. Finding an allele in your gene requires sampling independent chromosomes.',
-          'Increasing mutagenesis increases hits per chromosome. That improves the chance of hitting the gene, but also increases chromosomes with more than one lethal lesion. A line with two lethals is harder to map and interpret, so plan coverage, complexity and capacity together.',
+          'Keep each mutagenised chromosome 2 over a balancer as a separate line. Siblings copy that founding chromosome. To search for new alleles, sample different founding chromosomes.',
+          'Stronger mutagenesis gives more hits per chromosome. This can improve the chance of hitting your gene, but also produces more chromosomes carrying several lethal mutations. Plan how you will maintain and interpret those lines.',
         ],
         diagrams: [
           { g: 'w/w; mut/CyO; +/+', chroms: ['2'], caption: 'Each recovered chromosome is maintained as an independent balanced line' },
@@ -1329,15 +1349,15 @@ export const LESSON_CONTENT = {
           {
             text: 'No: they mostly resample copies of the same chromosome',
             correct: true,
-            why: 'The mutations were carried by one founding chromosome. More siblings improve phenotyping of that line, but do not add independent chances to hit a new gene.',
+            why: 'Right. Siblings inherit copies of one founding chromosome, so counting more of them does not add new chances to mutate another gene.',
           },
           {
             text: 'Yes: every fly has a newly mutagenised chromosome',
-            why: 'The founding chromosome is inherited. Its siblings do not each gain an independent set of mutations just because you count them.',
+            why: 'The siblings inherit the founding chromosome. Counting each sibling does not create a new set of mutations.',
           },
           {
             text: 'Only if all the siblings carry the balancer',
-            why: 'The balancer preserves the chromosome but does not create independent mutation events. Independence comes from different founding chromosomes.',
+            why: 'A balancer maintains a chromosome; it does not create new mutation events. Independent lines need different founding chromosomes.',
           },
         ],
       },
@@ -1345,19 +1365,19 @@ export const LESSON_CONTENT = {
         type: 'screen',
         title: 'Coverage with simple chromosomes',
         intro:
-          'Plan at least a 90% chance of an allele in your gene, with no more than 35% of lethal lines carrying multiple lethal hits. Your capacity is 5,000 independent lines.',
+          'Aim for at least a 90% chance of finding an allele in your gene. No more than 35% of lethal lines may carry several lethal hits. You can maintain 5,000 independent lines.',
         goal: { minHit: 0.9, maxMulti: 0.35, maxLines: 5000 },
         explain:
-          'Less heavily mutagenised chromosomes are easier to interpret, but more independent lines are needed for coverage. Count lines, not individual sibling flies, when estimating the hit probability.',
+          'A weaker treatment gives simpler chromosomes but needs more independent lines for coverage. Count founding chromosomes, not their siblings.',
       },
       {
         type: 'screen',
         title: 'A tighter fly room',
         intro:
-          'Now aim for at least 95% coverage with capacity for only 3,500 independent lines. Up to 45% of lethal lines may carry multiple hits. Find a plan that meets all three constraints.',
+          'Aim for at least 95% coverage with room for 3,500 independent lines. Up to 45% of lethal lines may carry several hits. Meet all three limits.',
         goal: { minHit: 0.95, maxMulti: 0.45, maxLines: 3500 },
         explain:
-          'The chromosome-level trade-off changes with capacity. The strongest preset can exceed the acceptable multiple-hit burden even when its coverage is high; the weakest can require too many lines.',
+          'The strongest preset may give enough coverage but too many multiple-hit chromosomes. The weakest may need more lines than your room can hold.',
       },
       {
         type: 'choice',
@@ -1366,34 +1386,34 @@ export const LESSON_CONTENT = {
           {
             text: 'Among chromosomes with at least one lethal hit, the share with two or more lethal hits',
             correct: true,
-            why: 'The denominator is the recovered lethal chromosome set, not every screened chromosome. Conditioning on lethal lines makes the complexity of that collection visible.',
+            why: 'Right. Count chromosomes with several lethal hits as a share of chromosomes with at least one lethal hit, not of all screened chromosomes.',
           },
           {
             text: 'The share of flies homozygous for the balancer',
-            why: 'Balancer homozygotes concern segregation and viability. This statistic counts lesions on each independently mutagenised chromosome.',
+            why: 'This counts mutations on a founding chromosome, not copies of the balancer in a fly.',
           },
           {
             text: 'The chance that the target gene is hit twice in one fly',
-            why: 'The model counts lethal lesions across a chromosome; its coverage calculation separately asks whether at least one line hits the particular gene.',
+            why: 'This counts lethal hits across a chromosome. Target-gene coverage is a separate probability.',
           },
         ],
       },
       {
         type: 'choice',
-        question: 'A planned screen has 95% coverage in this model. What does that mean for the real experiment?',
+        question: 'A screen has 95% predicted coverage. What does this tell you about the experiment?',
         options: [
           {
-            text: 'A conditional probability estimate, not a guarantee; recovery and the per-gene rate need calibration',
+            text: 'It is a probability estimate that needs measured hit and recovery rates',
             correct: true,
-            why: 'Chromosome recovery, gene-specific mutability and detection affect the chance of obtaining an allele. A calculated probability is only as applicable as those assumptions.',
+            why: "Right. Check recovery, detection and the target gene's mutation rate before using the calculated probability to plan a real screen.",
           },
           {
             text: 'Exactly 95% of the recovered chromosomes will mutate the target gene',
-            why: 'Coverage is the chance that at least one independent chromosome hits the gene. It is not the fraction of lines that carry its mutation.',
+            why: 'Coverage is the chance of finding at least one target allele. It is not the fraction of lines with that allele.',
           },
           {
             text: 'The first target allele must appear before the last planned line',
-            why: 'Independent chromosome samples remain random. Even a correctly calibrated 95% design can miss the gene.',
+            why: 'Even a well-calibrated 95% design can miss the gene. Each independent line remains a chance event.',
           },
         ],
       },
@@ -1409,9 +1429,13 @@ export const LESSON_CONTENT = {
         area: 'handling',
         question: 'Under the microscope, what tells you a fly is male?',
         options: [
-          { text: 'Sex combs on the front legs', correct: true, why: 'Right: sex combs are the reliable cue, even in pale young males.' },
-          { text: 'Pale colour', why: 'Young flies of both sexes are pale. Sex combs are the reliable cue.' },
-          { text: 'Larger size', why: 'Females are usually the larger ones. Sex combs are the reliable cue.' },
+          {
+            text: 'Sex combs on the front legs',
+            correct: true,
+            why: 'Right. Sex combs on the forelegs identify a male, including a pale young male.',
+          },
+          { text: 'Pale colour', why: 'Young males and females can both be pale. Check the foreleg sex combs.' },
+          { text: 'Larger size', why: 'Females are usually larger. Size alone does not identify a male; check the sex combs.' },
         ],
       },
       {
@@ -1422,10 +1446,16 @@ export const LESSON_CONTENT = {
           {
             text: 'Females do not mate for about 8 hours after eclosion',
             correct: true,
-            why: 'Right: any female younger than that is still a virgin.',
+            why: 'Right. The clearing record supports collecting these young females as virgins.',
           },
-          { text: 'Males die after 8 hours', why: 'Males live for weeks. The point is that young females do not mate yet.' },
-          { text: 'The food dries out', why: 'The window is about the females: they do not mate for about 8 hours after eclosion.' },
+          {
+            text: 'Males die after 8 hours',
+            why: 'Males live for weeks. The collection window concerns mating maturity, not the males dying.',
+          },
+          {
+            text: 'The food dries out',
+            why: 'The collection rule uses the period before mating, about 8 hours after eclosion, when the adult emerges from its pupa.',
+          },
         ],
       },
       {
@@ -1433,9 +1463,9 @@ export const LESSON_CONTENT = {
         area: 'inheritance',
         question: 'CyO/+ × CyO/+: what share of the adults are Curly?',
         options: [
-          { text: '2/3', correct: true, why: 'Right: CyO/CyO dies, leaving 2 Curly : 1 straight.' },
+          { text: '2/3', correct: true, why: 'Right. CyO/CyO dies, leaving 2 Curly : 1 straight among adults.' },
           { text: '3/4', why: 'That forgets that CyO/CyO dies.' },
-          { text: '1/2', why: 'Count the combinations: CyO/+ twice, +/+ once, CyO/CyO lethal.' },
+          { text: '1/2', why: 'CyO/+ occurs twice, +/+ once, and CyO/CyO dies. Count only surviving combinations.' },
         ],
       },
       {
@@ -1443,9 +1473,9 @@ export const LESSON_CONTENT = {
         area: 'inheritance',
         question: 'w/w females × +/Y males: what eye colour are the sons?',
         options: [
-          { text: 'White', correct: true, why: 'Right: sons get their only X, carrying w, from their mother.' },
-          { text: 'Red', why: 'Sons get the Y from their father, not his X, so they have no normal white gene.' },
-          { text: 'Half red, half white', why: 'Every son gets one of his mother’s Xs, and both carry w.' },
+          { text: 'White', correct: true, why: 'Right. A son gets his only X, carrying w, from his mother.' },
+          { text: 'Red', why: "A son gets his father's Y. His mother's w-bearing X has no normal white copy to mask it." },
+          { text: 'Half red, half white', why: 'Both maternal Xs carry w, so every son inherits w.' },
         ],
       },
       {
@@ -1456,10 +1486,13 @@ export const LESSON_CONTENT = {
           {
             text: 'The counts are consistent with 3:1, but that does not prove it',
             correct: true,
-            why: 'Right: not rejecting is not the same as confirming.',
+            why: 'Right. Failing to reject a ratio does not prove that ratio is correct.',
           },
-          { text: 'The ratio is 3:1', why: 'A χ² test can only fail to reject a hypothesis. 2:1 (χ² = 0.5) fits these counts too.' },
-          { text: 'The ratio is not 3:1', why: 'χ² is below the critical value, so you cannot reject 3:1.' },
+          {
+            text: 'The ratio is 3:1',
+            why: 'The counts also fit 2:1 (χ² = 0.5). The test cannot establish one ratio just because it fits.',
+          },
+          { text: 'The ratio is not 3:1', why: 'χ² is below the rejection threshold, so these counts do not reject 3:1.' },
         ],
       },
       {
@@ -1467,9 +1500,12 @@ export const LESSON_CONTENT = {
         area: 'stocks',
         question: 'What stops a balancer recombining with its partner chromosome?',
         options: [
-          { text: 'Its inversions', correct: true, why: 'Right: multiple inversions block viable crossover products.' },
-          { text: 'Its dominant marker', why: 'The marker only lets you see it. Inversions block recombination.' },
-          { text: 'Being lethal when homozygous', why: 'That keeps the stock true-breeding. Inversions block recombination.' },
+          { text: 'Its inversions', correct: true, why: 'Right. Inversions suppress the recovery of recombinant chromosomes.' },
+          { text: 'Its dominant marker', why: 'The marker identifies the chromosome. Its inversions suppress recovered recombinants.' },
+          {
+            text: 'Being lethal when homozygous',
+            why: 'Homozygous lethality maintains the stock. Inversions suppress recovered recombinants.',
+          },
         ],
       },
     ],

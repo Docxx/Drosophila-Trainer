@@ -15,8 +15,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'chromosomes',
         title: 'A fly, a cell, a chromosome',
         body: [
-          'Start with the animal. A fly is made of cells, and chromosomes in a typical body-cell nucleus carry many genes. We draw chromosomes as bars so you can follow inheritance without first learning a molecular diagram.',
-          'The female example has four pairs: two corresponding X chromosomes, pairs 2 and 3, and tiny pair 4. A pair is not two different flies: both homologs are inside the same diploid cell.',
+          'A fly is made of cells. Inside a typical body cell, a nucleus holds the chromosomes. Each chromosome carries many genes. We draw it as a bar so you can follow it from parent to offspring.',
+          'This female cell has four chromosome pairs: X, 2, 3 and the tiny 4. Both members of a pair are inside the same cell. A cell with paired chromosomes is called diploid.',
         ],
       },
       {
@@ -24,8 +24,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'chromosomes',
         title: 'A gene is not a chromosome',
         body: [
-          'A chromosome contains many genes. A gene occupies a locus; an allele is a version of that gene. Homologs carry corresponding loci, so a fly can carry different alleles at the same locus on its two homologs.',
-          'A and a are labels in our schematic example. Capital letters are a convention in some examples, not a general rule for reading Drosophila gene names. The course will introduce actual stock notation separately.',
+          'A gene sits at a particular place on a chromosome, called its locus. An allele is a version of that gene. The matching chromosomes in a pair are homologues. They carry the same loci but can carry different alleles.',
+          'Here A and a label different alleles. Drosophila gene names use other naming rules, so do not rely on capital letters alone. You will learn to read stock labels in a later lesson.',
         ],
       },
       {
@@ -33,8 +33,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'dominance',
         title: 'What you carry and what you see',
         body: [
-          'Genotype describes the alleles or chromosome combination. Phenotype describes an observation such as wing shape or eye colour. A genetic difference need not be visible in every fly carrying it.',
-          'For the Curly marker, one copy on CyO is enough to affect wings. A recessive effect can be masked by a functional copy on the other homolog. Dominant does not mean healthier, more common or stronger.',
+          'Genotype means the genetic combination a fly carries. Phenotype means a trait you can observe, such as wing shape. Different genotypes can sometimes give the same visible trait.',
+          'One Curly copy on CyO is enough to affect the wings: Curly is dominant. A recessive effect can be hidden by a working gene copy on the other chromosome. Dominant does not mean healthier or more common.',
         ],
       },
       {
@@ -42,42 +42,48 @@ export const ADDITIONAL_LESSONS = {
         visual: 'inheritance',
         title: 'Why an egg contains half a set',
         body: [
-          'An egg and a sperm are gametes. Meiosis gives each gamete one chromosome from every pair. Fertilisation joins the two reduced sets and restores pairs in the offspring.',
-          'Half a set means one intact member of each pair, not half of each chromosome. When two homologs carry the same allele, their eggs may be the same scored type even though each egg has only one homolog.',
+          'An egg or sperm is called a gamete. During meiosis, the division that makes gametes, each takes one chromosome from every pair. Fertilisation joins an egg and sperm, restoring the pairs.',
+          'Half a set means one whole chromosome from each pair. If both chromosomes carry the same allele, the eggs can all look the same genetically at that gene. Each egg still receives only one member of the pair.',
         ],
       },
       choice('A bar is labelled CyO. What is the bar in these diagrams?', [
         [
           'A chromosome carrying a set of genes and markers.',
-          'The marker can help you follow that chromosome; the whole bar is not a single allele.',
+          'Right. The bar is a whole chromosome carrying many genes; its marker helps you follow it.',
           true,
         ],
-        ['A complete fly.', 'One fly has several chromosome pairs; a bar represents one chromosome.'],
-        ['One visible wing.', 'Wing shape is a phenotype that can help follow a chromosome, not the chromosome itself.'],
+        ['A complete fly.', 'One fly has several chromosome pairs. Each bar is just one chromosome.'],
+        ['One visible wing.', 'A wing is part of the fly. Its shape can reveal a trait carried on a chromosome.'],
       ]),
-      choice('A mother has A/a at a locus. Can one of her eggs carry just A at that locus?', [
+      choice('A mother carries A/a at one gene. Can an egg carry A without a?', [
         [
-          'Yes: the egg receives one homolog of that pair.',
-          'Meiosis separates the homologs; the sperm supplies the other member at fertilisation.',
+          'Yes: an egg receives one chromosome from that pair.',
+          'Right. Meiosis separates the pair, and the sperm supplies the other chromosome at fertilisation.',
           true,
         ],
-        ['No: every egg must contain the A/a pair.', 'Carrying the entire pair in every gamete would not reduce the chromosome set.'],
+        [
+          'No: every egg must contain the A/a pair.',
+          'An egg with both members would not have half the chromosome set. Each egg takes just one member of the pair.',
+        ],
       ]),
-      choice('A fly has normal-looking wings. Does this establish every allele it carries?', [
+      choice("Does a fly's normal wing shape tell you every allele it carries?", [
         [
-          'No: many genetic differences are unseen or masked.',
-          'An observation is not a complete readout of every gene on every homolog.',
+          'No: some genetic differences do not show in its wings.',
+          "Right. Wing shape does not reveal every gene on the fly's chromosomes.",
           true,
         ],
-        ['Yes: a normal appearance means every chromosome is +.', 'A normal appearance can be shared by different genotypes.'],
+        [
+          'Yes: a normal appearance means every chromosome is +.',
+          'Different genotypes can give the same normal wing shape. Appearance alone cannot tell them apart.',
+        ],
       ]),
       {
         type: 'text',
         visual: 'fertilisation',
         title: 'Carry this reasoning into the next lesson',
         body: [
-          'For every cross, ask three questions in order: what chromosomes can each parent pass on, which pairs result when gametes meet, and which resulting flies survive and show the scored trait?',
-          'You do not need to memorise ratios first. Drawing the chromosomes explains where a ratio comes from and when it changes.',
+          'For each cross, first list the chromosomes each parent can pass on. Then join egg and sperm chromosomes. Finally, check which offspring survive and show the trait you are scoring.',
+          'Draw the chromosomes before memorising a ratio. The drawing shows where the ratio comes from and why it may change.',
         ],
       },
     ],
@@ -90,8 +96,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'chromosomes',
         title: 'Decode a stock record one pair at a time',
         body: [
-          'The trainer writes X; chromosome 2; chromosome 3, separated by semicolons. Each slash separates the two homologs in one fly. Chromosome 4 is not simulated in the stock-building engine.',
-          'For example, w/w; CyO/+; TM3/+ is a female with w on both Xs, CyO over a normal chromosome 2, and TM3 over a normal chromosome 3. A male can be written w/Y; CyO/+; TM3/+.',
+          'The record lists X; chromosome 2; chromosome 3. Semicolons separate these groups. A slash separates the two matching chromosomes in one fly. The tiny chromosome 4 is left out of these records.',
+          'In w/w; CyO/+; TM3/+, the female has w on both Xs. CyO is paired with a normal chromosome 2, and TM3 with a normal chromosome 3. The corresponding male record is w/Y; CyO/+; TM3/+.',
         ],
         diagrams: [{ g: 'w/w; CyO/+; TM3/+', mode: 'both', caption: 'Known reference female: compare the record with the pairs' }],
       },
@@ -100,8 +106,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'dominance',
         title: 'Distinguish names, markers and function',
         body: [
-          'CyO and TM3 name balancer chromosomes, carrying Curly and Stubble markers respectively in this catalogue. UAS-GFP names an insertion-bearing chromosome at its stated location. The label is shorthand for a genetic object, not a complete sequence.',
-          'A + homolog is normal at the loci being described. A marker can establish which known parental homolog was inherited, but cannot prove every unobserved locus in an unrelated fly.',
+          'CyO and TM3 name balancer chromosomes. Their visible markers are Curly and Stubble. UAS-GFP names a chromosome carrying a DNA insertion. These names help you follow the chromosomes.',
+          'A + means normal at the genes being described. A marker can identify a chromosome inherited in a known cross. It does not identify every hidden allele in an unrelated fly.',
         ],
       },
       {
@@ -109,13 +115,17 @@ export const ADDITIONAL_LESSONS = {
         visual: 'fertilisation',
         title: 'Read the cross direction',
         body: [
-          'Write the virgin female stock first, then ×, then the male stock. Assign the sexes explicitly: X-linked outcomes and recombination can depend on that choice.',
-          'A slash is not a cross. CyO/+ describes homologs in one fly; CyO/+ × +/+ describes two parental genotypes. Keep the vial identity, generation, selected markers and intended verification in the notebook.',
+          'Write the virgin female first, then ×, then the male. Always record the sexes: X-linked inheritance and crossing over can depend on which parent carries an allele.',
+          'CyO/+ is a pair of chromosomes inside one fly. CyO/+ × +/+ is a cross between two flies. Record the vial, generation, markers you selected and the checks you plan to make.',
         ],
       },
       choice('In w/w; CyO/+; TM3/+, what does the first semicolon separate?', [
-        ['The X pair from chromosome pair 2.', 'Semicolons separate chromosome groups, not individual alleles within one pair.', true],
-        ['The female from the male.', 'The cross symbol separates parents; this record describes one fly.'],
+        [
+          'The X pair from chromosome pair 2.',
+          'Right. A semicolon separates different chromosome pairs; a slash separates the members of one pair.',
+          true,
+        ],
+        ['The female from the male.', "The × symbol separates parents. This record describes one fly's chromosome pairs."],
       ]),
       {
         type: 'gametes',
@@ -123,12 +133,12 @@ export const ADDITIONAL_LESSONS = {
         visual: 'assortment',
         parent: 'w/w; CyO/+; TM3/+',
         chroms: ['2', '3'],
-        intro: 'Use the record to find every chromosome-2/chromosome-3 gamete type. Select one homolog of each pair.',
-        done: 'Four combinations: each contains one chromosome 2 and one chromosome 3. A semicolon separates the groups; it does not separate different flies.',
+        intro: 'Read the record, then find every chromosome-2/chromosome-3 egg type. Choose one chromosome from each pair.',
+        done: 'Four combinations, each with one chromosome 2 and one chromosome 3. The semicolon separates chromosome groups within a gamete.',
       },
       choice('Which record describes a male carrying w on his only X?', [
-        ['w/Y; +/+; +/+', 'Y identifies the paternal sex chromosome in the usual XY male model; w is the allele on his X.', true],
-        ['w/w; +/+; +/+', 'This has two X homologs carrying w, not an X plus Y.'],
+        ['w/Y; +/+; +/+', 'Right. This male has Y paired with his X, and w is the allele on that X.', true],
+        ['w/w; +/+; +/+', 'This record has two X chromosomes carrying w. A male record needs an X paired with Y.'],
       ]),
     ],
   },
@@ -141,19 +151,22 @@ export const ADDITIONAL_LESSONS = {
         visual: 'balancers',
         title: 'A plausible plan fails',
         body: [
-          'You must move an unmarked recessive lethal into a stock with a GAL4 driver. A colleague first crosses mut/CyO to a normal chromosome-2 driver stock, keeps a non-Curly intermediate, then crosses to a double balancer.',
-          'The final Curly class can contain mut/CyO and +/CyO. Curly establishes the balancer, but the unmarked intermediate could pass either mut or +. Those hidden homologs cannot be separated by selecting more Curly siblings.',
+          'You need to move a lethal mutation with no visible marker into a stock carrying GAL4. A colleague crosses mut/CyO to a driver stock with normal chromosome-2s. They keep non-Curly offspring and cross these to a double balancer.',
+          'The final Curly group can contain both mut/CyO and +/CyO. Curly identifies CyO, but the other parent could pass on mut or +. Keeping more Curly flies cannot separate these hidden alternatives.',
         ],
       },
       choice(
         'What needs changing before the final generation?',
         [
           [
-            'Use a marked intermediate that keeps mut distinguishable from +.',
-            'The chromosome must stay traceable at every selection, not just the final one.',
+            'Use a marked intermediate so you can distinguish mut from +.',
+            'Right. You must be able to follow the wanted chromosome at every selection, not just the last.',
             true,
           ],
-          ['Keep more of the ambiguous Curly class.', 'More copies of an indistinguishable mixture do not establish the unmarked homolog.'],
+          [
+            'Keep more of the ambiguous Curly class.',
+            'The two genotypes look the same. More flies with that appearance do not tell you which unmarked chromosome each carries.',
+          ],
         ],
         'guide',
       ),
@@ -163,17 +176,20 @@ export const ADDITIONAL_LESSONS = {
         title: 'Build the verified target class',
         puzzle: 3,
         intro:
-          'Build mut/CyO with GAL4/TM6B using the available stocks. You choose crosses and kept classes across generations. Incorrect choices remain on your shelf and can give ambiguous descendants.',
+          'Build a stock with mut/CyO and GAL4/TM6B. Choose the crosses and which offspring to keep across generations. A poor selection can leave different hidden genotypes together in a vial.',
       },
       choice(
-        'The target class was obtained by a valid model route. What does that establish?',
+        'Your crosses produced the target class. What have you established?',
         [
           [
-            'The selected class has the target composition within the stated stock and inheritance model; real work still needs reliable records and appropriate verification.',
-            'Construction evidence follows the parental chromosomes. It does not establish every possible background change or laboratory error.',
+            'The selected class has the target genotype, assuming the recorded stocks and crosses are correct.',
+            'Right. The recorded chromosome inheritance supports this genotype, but stock identity and laboratory checks still matter.',
             true,
           ],
-          ['Every other vial on the shelf also has the target.', 'Different kept classes carry different chromosome combinations.'],
+          [
+            'Every other vial on the shelf also has the target.',
+            'Each kept group has its own chromosome combination. Building the target in one vial says nothing about the others.',
+          ],
         ],
         'diagnose',
       ),
@@ -188,8 +204,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'recombination',
         title: 'Work backwards from the experimental fly',
         body: [
-          'The target stock carries UAS-GFP/CyO on chromosome 2 and a GAL4,UAS-RNAi recombinant over TM6B on chromosome 3. Its two insertions start on different chromosome-3 homologs, so a female meiosis must first generate the combined chromosome.',
-          'Plan the generations backwards. Prepare the chromosome-2 intermediate in parallel while making chromosome-3 trans-heterozygous virgins. In each generation record which visible class proves the needed homologs, and where a verification test is still required.',
+          'The target carries UAS-GFP/CyO on chromosome 2 and GAL4,UAS-RNAi over TM6B on chromosome 3. GAL4 and UAS-RNAi start on separate chromosome-3s. A crossover during egg formation must bring them together.',
+          'Work backwards from the target. Prepare the chromosome-2 stock while you make virgin females carrying the two different chromosome-3 insertions. At each generation, record the markers that identify the wanted chromosomes and the checks still needed.',
         ],
       },
       {
@@ -198,35 +214,38 @@ export const ADDITIONAL_LESSONS = {
         title: 'Build the complete research stock',
         puzzle: 5,
         intro:
-          'Use the full stock shelf to construct the target. This is the three-generation integration challenge: recombination, balancing, parallel intermediates and marker dosage must agree.',
+          'Use the stocks on the shelf to build the target over three generations. Plan the crossover and balancing steps, prepare stocks in parallel and use marker dosage to choose the right flies.',
       },
       choice(
-        'A candidate has the expected eye dosage and balancer markers. Before using its RNAi phenotype to assign gene function, what is the priority?',
+        'A candidate has the expected eye colour and balancer markers. What should you check before using its RNAi phenotype to infer gene function?',
         [
           [
-            'Verify insertion identity and function, then test independent lines and matched controls.',
-            'The selected chromosome combination is a construction result. Marker dosage alone does not establish functional constructs or causal specificity.',
+            'Confirm both insertions are present and work, then compare independent lines and matched controls.',
+            'Right. The markers help identify the chromosome combination, but do not show that both insertions work or that RNAi caused the phenotype.',
             true,
           ],
           [
-            'Treat the visible markers as proof of the gene’s biological function.',
-            'The markers report genetic tools, not whether the intended biological perturbation caused the phenotype.',
+            "Treat the markers as proof of the gene's biological function.",
+            'The markers help track chromosomes. They do not establish which genetic change caused the phenotype.',
           ],
         ],
         'diagnose',
       ),
       choice(
-        'The phenotype appears only after a warm shift. Which result most strengthens a timing-specific knockdown explanation?',
+        'A phenotype appears only after warming the flies. Which evidence best supports a knockdown during that period?',
         [
           [
-            'Target protein changes in the assayed window, with matched-temperature genetic controls and independent evidence for specificity.',
-            'Genotype, regulation, protein abundance and phenotype are different levels of evidence. They must be connected rather than assumed.',
+            'The target protein falls during the assay, with temperature-matched controls and independent checks of the target effect.',
+            'Right. You need evidence linking the constructs to a protein change and that change to the phenotype.',
             true,
           ],
-          ['Only the experimental flies were warmed.', 'That confounds temperature with the genetic perturbation.'],
+          [
+            'Only the experimental flies were warmed.',
+            'Then temperature and knockdown change together. You cannot tell which caused the phenotype.',
+          ],
           [
             'The DNA record alone confirms when protein disappeared.',
-            'Possessing the constructs does not measure activity or protein turnover.',
+            'A DNA record shows which constructs are present. It does not measure their activity or when the protein changes.',
           ],
         ],
         'diagnose',
@@ -236,10 +255,9 @@ export const ADDITIONAL_LESSONS = {
         stage: 'diagnose',
         title: 'Write your experimental argument',
         prompts: {
-          hypothesis: 'What biological hypothesis are you testing, and which result would contradict it?',
-          design: 'Which genotypes, independent lines, controls, scoring rules and assay window will you use?',
-          evidence:
-            'How will you verify the constructs and distinguish target effects from background, marker, temperature or timing effects?',
+          hypothesis: 'What biological explanation are you testing? What result would show it is wrong?',
+          design: 'Which genotypes, separately derived lines, controls and scoring rules will you use? When will you measure the result?',
+          evidence: 'How will you check that the constructs work and separate the target effect from other genetic or temperature effects?',
         },
       },
       {
@@ -248,8 +266,8 @@ export const ADDITIONAL_LESSONS = {
         visual: 'screens',
         title: 'A research conclusion includes its limits',
         body: [
-          'Keep the construction record, independent-line identities, sample unit, scoring rules, control outcomes and assay window with the result. A model-correct stock build is one part of a research argument.',
-          'You have integrated the trainer’s supported methods. Transfer to unfamiliar photographs, real stocks and real experiments still requires supervised practice and independent validation; lesson completion alone does not certify expertise.',
+          'Keep your cross records, line identities, sampling unit, scoring rules, control results and measurement times with the conclusion. Building the right stock is the starting point for testing the biological question.',
+          'Try these skills with unfamiliar stocks under supervision. Use independent checks of identity and function before relying on a line in an experiment.',
         ],
       },
     ],

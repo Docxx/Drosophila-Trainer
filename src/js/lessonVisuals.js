@@ -6,24 +6,36 @@ export const VISUAL_GUIDES = {
   inheritance: {
     title: 'Follow a chromosome into the next generation',
     frames: [
-      ['Two homologs', 'A diploid parent has two homologs of this chromosome, carrying A and a. Only one chromosome pair is shown.'],
-      ['Separate into gametes', 'Meiosis separates the homologs. Each gamete receives one member of the pair.'],
-      ['Fertilisation', 'Here either kind of egg can meet a sperm carrying a. Follow each chromosome’s label and colour.'],
-      ['Restore the pair', 'The offspring receives one homolog from each parent: A/a or a/a in this example.'],
+      [
+        'Two homologs',
+        'This parent has a matching chromosome pair. Each member is called a homologue; one carries A and the other a. Follow this pair through the example.',
+      ],
+      ['Separate into gametes', 'Meiosis is the division that makes eggs and sperm. Each gamete receives one chromosome from this pair.'],
+      [
+        'Fertilisation',
+        'An egg carrying either allele can meet a sperm carrying a. Follow the labels to see which chromosome each parent supplies.',
+      ],
+      [
+        'Restore the pair',
+        'Joining an egg and sperm restores a pair. The offspring receives one chromosome from each parent: A/a or a/a here.',
+      ],
     ],
   },
   xlinked: {
     title: 'Trace the X from mother to offspring',
     frames: [
-      ['Parental chromosomes', 'Example: an Xᴬ/Xᵃ mother and Xᴬ/Y father. A is a functional allele; a is recessive.'],
+      [
+        'Parental chromosomes',
+        'The mother is Xᴬ/Xᵃ and the father Xᴬ/Y. A is a working allele. The recessive a effect is hidden when a working A is present.',
+      ],
       [
         'Follow one maternal egg',
-        'We follow an egg carrying Xᵃ. The father can contribute Xᴬ or Y. The other maternal egg type is not shown.',
+        "Follow an Xᵃ egg. It can meet a sperm carrying the father's Xᴬ or Y. This diagram follows this egg type only.",
       ],
-      ['Two possible offspring', 'With paternal Xᴬ, this egg makes an Xᵃ/Xᴬ daughter. With paternal Y, it makes an Xᵃ/Y son.'],
+      ['Two possible offspring', "An Xᴬ sperm gives an Xᵃ/Xᴬ daughter. A Y sperm gives an Xᵃ/Y son. Both inherit their mother's Xᵃ."],
       [
         'Read the allele copies',
-        'The daughter has a functional A copy; the son has only a at this locus. The Y does not provide a normal allele here. This example uses usual XX/XY flies.',
+        'The daughter has a working A copy, but the son has only a at this gene. The Y provides no normal copy in this XX/XY example.',
       ],
     ],
   },
@@ -32,11 +44,11 @@ export const VISUAL_GUIDES = {
     frames: [
       [
         'A recessive lethal',
-        'The mutation m is carried on one homolog. An m/+ fly survives because the other homolog supplies a functional copy.',
+        'One chromosome carries m. An m/+ fly survives because the normal partner supplies a working copy of the affected gene.',
       ],
       [
         'Pair it with a balancer',
-        'In this teaching example, Bal carries a visible dominant marker and is lethal when homozygous. Its inversions suppress recovery of recombinants.',
+        'Bal has a dominant visible marker and is lethal in two copies. Its inversions, or reversed DNA segments, make recovered recombinant chromosomes rare.',
       ],
       [
         'Transmit whole chromosomes',
@@ -44,25 +56,25 @@ export const VISUAL_GUIDES = {
       ],
       [
         'Cross two carriers',
-        'For m/Bal × m/Bal, m/m and Bal/Bal die. Surviving m/Bal carriers retain the lethal chromosome and the visible marker.',
+        'In m/Bal × m/Bal, m/m and Bal/Bal die. The m/Bal adults keep both the mutation chromosome and the visible balancer marker.',
       ],
     ],
   },
   chance: {
     title: 'From chromosome probabilities to counts',
     frames: [
-      ['A chromosome pair', 'For this example, follow transmission of A or a from an A/a parent.'],
+      ['A chromosome pair', 'Start with an A/a parent. Follow which member of this chromosome pair enters each egg or sperm.'],
       [
         'Equal probabilities',
-        'Each gamete has a 1/2 chance of receiving either homolog. Probability describes repeated events, not a fixed quota.',
+        'Each gamete has a 1/2 chance of taking either chromosome. This is a probability, not a requirement for an exact split in each sample.',
       ],
       [
         'A small sample',
-        'An illustrative sample has 12 A and 8 a transmissions. Chance can move a small sample away from its expected 1:1 ratio.',
+        'This sample has 12 A and 8 a transmissions. Chance alone can move a small sample away from the expected 1:1 ratio.',
       ],
       [
         'A larger sample',
-        'Here 104 of 200 transmissions carry A. Compare relative deviations: larger samples usually vary less in proportion. A close fit does not prove a hypothesis.',
+        'Here 104 of 200 transmissions carry A. Larger samples usually lie closer to the expected share, though a close fit does not prove the explanation.',
       ],
     ],
   },
@@ -71,19 +83,19 @@ export const VISUAL_GUIDES = {
     frames: [
       [
         'Replicated homologs',
-        'A female has homologs AB and ab. Each has replicated into two sister chromatids; the four bars are chromatids.',
+        'The female has AB on one chromosome and ab on the other. Each is copied into two sister chromatids. The four bars show those copies.',
       ],
       [
         'Exchange between non-sisters',
-        'Two non-sister chromatids exchange corresponding segments between A and B. The other two do not participate in this event.',
+        'Two copies from different homologues exchange matching DNA segments between A and B. The other two copies do not take part in this exchange.',
       ],
       [
         'Read the products',
-        'This single crossover produces two parental chromatids, AB and ab, and two recombinant chromatids, Ab and aB.',
+        'One crossover leaves the original combinations AB and ab, and makes two new combinations, Ab and aB. These new products are called recombinants.',
       ],
       [
         'Score gametes',
-        'Gametes receive individual products of meiosis. Recombinant counts estimate exchange frequency; not every meiosis has the single crossover illustrated here. Drosophila males do not have meiotic crossovers.',
+        'Gametes take individual chromosome products. Count the new combinations to estimate recombination frequency. In Drosophila, use females for this meiotic crossover step.',
       ],
     ],
   },
@@ -92,16 +104,16 @@ export const VISUAL_GUIDES = {
     frames: [
       [
         'Two DNA components',
-        'The driver carries GAL4; the responder carries UAS linked to an output gene. Insertion sites are unspecified.',
+        'The driver carries GAL4, which makes a protein that activates genes. The responder carries an output gene beside UAS DNA sites that GAL4 can bind.',
       ],
-      ['Make the activator', 'The driver produces GAL4 protein in its expression pattern. GAL4 can bind the responder’s UAS sequence.'],
+      ['Make the activator', "The driver makes GAL4 in particular cells. GAL4 protein can bind the responder's UAS sites in those cells."],
       [
         'Activate the output',
-        'When both components are present and active in the same cell, GAL4 drives expression of the UAS-linked output.',
+        'When driver and responder are present and active in the same cell, GAL4 activates the UAS-linked output gene.',
       ],
       [
         'Compare controls',
-        'Driver alone and responder alone lack one component. Compare them with the combined genotype; additional controls depend on the experiment.',
+        'Driver-only and responder-only flies each lack one part of the switch. Compare both with flies carrying the combined genotype.',
       ],
     ],
   },
@@ -110,16 +122,19 @@ export const VISUAL_GUIDES = {
     frames: [
       [
         'Two recessive mutations',
-        'Each chromosome carries a loss-of-function mutation. The question is which gene each mutation disrupts.',
+        "Each chromosome carries a mutation that removes a gene's function. Find out whether the two mutations affect the same gene or different genes.",
       ],
       [
         'Different genes',
-        'In a⁻ b⁺ / a⁺ b⁻, each gene has a functional copy on the other homolog. The mutations complement in this simplified example.',
+        'In a⁻ b⁺ / a⁺ b⁻, each chromosome supplies the working gene copy missing from the other. The mutations complement: together they restore both functions.',
       ],
-      ['The same gene', 'In a¹ b⁺ / a² b⁺, neither homolog provides functional a. These two recessive alleles fail to complement.'],
+      [
+        'The same gene',
+        'In a¹ b⁺ / a² b⁺, neither chromosome supplies working a. These recessive mutations fail to complement each other.',
+      ],
       [
         'Interpret the cross',
-        'Complementation tests gene function, not whether two DNA changes are identical. This example assumes recessive loss-of-function alleles without unusual interactions.',
+        'Complementation asks whether the chromosome pair supplies the required gene functions. It does not ask whether the two DNA changes are identical.',
       ],
     ],
   },
@@ -132,45 +147,54 @@ export const VISUAL_GUIDES = {
       ],
       [
         'Two exchanges',
-        'After replication, the same two non-sister chromatids exchange once in each interval. This illustrates one kind of double crossover.',
+        'After the chromosomes are copied, the same two non-sister copies exchange DNA in both intervals. This makes the double-crossover products shown next.',
       ],
       [
         'Compare parental and DCO',
-        'ABC becomes AbC; abc becomes aBc. The outside alleles keep their parental arrangement, while the middle allele changes.',
+        'ABC becomes AbC and abc becomes aBc. The outside alleles stay in the parental combination, but the middle allele changes.',
       ],
       [
         'Count both intervals',
-        'Each double-crossover product is recombinant in A–B AND B–C. Include it once in each interval total; an outside-marker-only score misses these two exchanges.',
+        'Each double-crossover chromosome has exchanges in A–B and B–C. Count it once in each interval; looking only at the outside markers misses these exchanges.',
       ],
     ],
   },
   mosaics: {
     title: 'From chromosome exchange to a clone',
     frames: [
-      ['A heterozygous cell', 'Start with an m/+ chromosome-arm pair. The FRT site lies between the centromere and the mutation.'],
-      ['Mitotic recombination', 'After replication, FLP can induce exchange between matching FRT sites on non-sister chromatids.'],
+      [
+        'A heterozygous cell',
+        'Start with m/+ on this chromosome arm. An FRT DNA site sits between the centromere and m on each homologue. FLP recognises these matching sites.',
+      ],
+      [
+        'Mitotic recombination',
+        'After the chromosomes are copied, FLP can exchange DNA between matching FRT sites on copies from different homologues.',
+      ],
       [
         'Reciprocal daughters',
-        'The segregation illustrated here gives m/m and +/+ daughters. Other segregation outcomes need not produce homozygous twins.',
+        'In the division shown, one daughter becomes m/m and the other +/+. Follow these different genotypes into the growing tissue.',
       ],
       [
         'Expand the lineages',
-        'Further divisions expand the two daughter lineages into neighbouring patches. Earlier induction leaves more divisions for expansion; colour labels genotype, not microscope fluorescence.',
+        'Each daughter divides to form a patch of descendants. Earlier exchange leaves more divisions for each patch to grow. Colour identifies the genotype of each patch.',
       ],
     ],
   },
   target: {
     title: 'Separate a temperature shift from its biological effect',
     frames: [
-      ['Keep the DNA', 'The same fly retains GAL4, UAS-RNAi and GAL80ts. Temperature changes activity, not which transgenes it carries.'],
-      ['Repress at 18 °C', 'Active GAL80ts represses GAL4. The target protein can be maintained while RNAi expression is suppressed.'],
+      [
+        'Keep the DNA',
+        'The fly keeps GAL4, UAS-RNAi and GAL80ts throughout. Temperature changes their activity without changing which transgenes it carries.',
+      ],
+      ['Repress at 18 °C', 'GAL80ts blocks GAL4 at the cold setting. RNAi stays suppressed, so the target protein can remain high.'],
       [
         'Shift to 29 °C',
-        'Repression is relieved and GAL4 activates RNAi. Existing target protein remains at first; a temperature shift is not an instant knockout.',
+        'At the warm setting, GAL4 can activate RNAi. Protein made earlier remains at first, so the genetic switch does not instantly remove the target.',
       ],
       [
         'Wait for protein turnover',
-        'RNAi reduces new target-protein production. Existing protein turns over, so depletion lags behind activation. The time course depends on the construct and protein.',
+        'RNAi reduces new target-protein production. Existing protein must break down before its level falls, so depletion follows activation after a delay.',
       ],
     ],
   },
@@ -179,19 +203,19 @@ export const VISUAL_GUIDES = {
     frames: [
       [
         'Maintain one chromosome',
-        'A mutagenised chromosome is maintained over a balancer. One independent chromosome defines one line in this model.',
+        'Keep each mutagenised chromosome over a balancer. Each separately mutagenised founding chromosome starts one independent line.',
       ],
       [
         'Build independent lines',
-        'Each new independently mutagenised chromosome adds another opportunity to recover an allele. Duplicating the same chromosome does not add independence.',
+        'A different founding chromosome adds another chance of recovering a new allele. Making more copies of the same chromosome does not.',
       ],
       [
         'Find a target-gene allele',
-        'A target-gene allele may appear among many lines. More independent lines increase its recovery probability; they never guarantee it.',
+        'One line may carry an allele of your target gene. More independent lines improve the chance of finding one, but do not guarantee it.',
       ],
       [
         'Check mutation burden',
-        'Stronger mutagenesis can place several mutations on one chromosome. Balance coverage against interpretation and the vials needed to maintain the lines.',
+        'Stronger mutagenesis can add several mutations to one chromosome. Balance the chance of a target hit against the extra work of keeping and interpreting those lines.',
       ],
     ],
   },
@@ -204,19 +228,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Fly → body cell',
-        'A fly is made of cells. In a typical diploid body cell, the nucleus contains the chromosomes. The sizes here are schematic.',
+        'A fly is made of cells. The nucleus of a typical body cell holds paired chromosomes, a state called diploid. Zoom in to see the pairs.',
       ],
       [
         'Four chromosome pairs',
-        'This female cell has four pairs: X, 2, 3 and the tiny 4. That is eight chromosomes: one homolog of each pair originally came from each parent.',
+        'This female has four pairs: X, 2, 3 and the tiny 4. That makes eight chromosomes, with one member of each pair inherited from each parent.',
       ],
       [
         'Gene and allele',
-        'A gene occupies a locus on a chromosome. Homologs carry the same loci; A and a are different versions, or alleles, of one gene. A bar is a chromosome, not a single gene.',
+        "A gene's position is its locus. Matching chromosomes carry the same loci. A and a are different versions, called alleles. Each bar represents a whole chromosome.",
       ],
       [
         'One from every pair',
-        'Meiosis produces gametes with one chromosome from each pair: four chromosomes, not four pairs. The course often draws only the pairs relevant to a cross.',
+        'Meiosis makes eggs or sperm with one chromosome from each pair: four chromosomes, not four pairs. Later diagrams may show only the pairs needed for that cross.',
       ],
     ],
   },
@@ -225,19 +249,16 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Read the two homologs',
-        'CyO names a balancer chromosome. It carries the dominant Curly marker; + denotes a normal homolog in this example.',
+        'CyO is a balancer chromosome carrying Curly. Curly is dominant: one copy affects the wings. The + labels a normal partner chromosome.',
       ],
       [
         'One copy can show',
-        'A CyO/+ fly has one Curly-bearing chromosome 2 and one normal homolog. One copy of the dominant marker is sufficient for the Curly phenotype.',
+        'A CyO/+ fly has one Curly-bearing chromosome 2 and one normal partner. One Curly copy is enough for the wing tips to curl.',
       ],
-      [
-        'Compare the normal pair',
-        'A +/+ fly has no Curly-bearing chromosome. Compare its straight wings with the schematic Curly wing shape.',
-      ],
+      ['Compare the normal pair', 'A +/+ fly has no Curly copy. Compare its straight wings with the curled wing tips of the Curly fly.'],
       [
         'Genotype → phenotype',
-        'Genotype describes the chromosome combination. Phenotype describes an observable trait. Dominant means visible with one copy here; it does not mean stronger, more common or necessarily beneficial.',
+        'Genotype is the chromosome combination a fly carries. Phenotype is the trait you can see. A dominant effect shows with one copy; it need not be beneficial.',
       ],
     ],
   },
@@ -246,19 +267,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Start with the parents',
-        'Separate example: an A/a mother is crossed to an a/a father. Follow just this chromosome pair; no dominance or lethality is assumed.',
+        'Cross an A/a mother to an a/a father. Follow this chromosome pair to see how egg and sperm chromosomes combine in the offspring.',
       ],
       [
         'Separate their gametes',
-        'The mother can contribute A or a. The father contributes a in either case. A gamete contains one chromosome from this pair.',
+        'The mother can supply A or a. This father supplies a. An egg or sperm takes only one chromosome from this pair.',
       ],
       [
         'Join one egg and one sperm',
-        'Either egg type can meet an a-carrying sperm. Fertilisation restores two homologs, one from each parent.',
+        'Either egg type can meet an a-carrying sperm. Fertilisation joins their chromosomes, restoring a pair in the offspring.',
       ],
       [
         'Read the combinations',
-        'The possible offspring genotypes are A/a and a/a. Each has probability one half in this model, although a finite vial need not contain exact halves.',
+        'The offspring can be A/a or a/a. Each has probability one half. A real vial need not divide into exact halves.',
       ],
     ],
   },
@@ -267,15 +288,12 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Two different pairs',
-        'This example parent is A/a on one chromosome pair and B/b on another. Letters identify alleles; the two pairs sort independently in the model.',
+        'The parent is A/a on one chromosome pair and B/b on another. A gamete must take one chromosome from each pair, and the choices are independent.',
       ],
-      [
-        'Choose from pair 1',
-        'One homolog of the A/a pair enters each gamete. Choosing A or a does not decide which chromosome the B/b pair contributes.',
-      ],
+      ['Choose from pair 1', 'Choose A or a from the A/a pair. This does not decide whether the B/b pair supplies B or b.'],
       [
         'Choose from pair 2',
-        'For either first choice, B or b is possible. Each gamete must receive one chromosome from both pairs, not two from one pair.',
+        'Whichever first chromosome is chosen, the other pair can supply B or b. Each gamete needs one chromosome from both pairs.',
       ],
       [
         'Four combinations',
@@ -288,13 +306,13 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'A separate model cross',
-        'Here M is a visible dominant marker whose chromosome is lethal in two copies. Cross M/+ to M/+. This is a worked teaching example, not an unknown stock.',
+        'M is a dominant visible marker, and two copies of its chromosome are lethal. Follow the example cross M/+ to M/+.',
       ],
       [
         'Four egg–sperm combinations',
-        'Each parent contributes M or +. The four equally likely combinations are M/M, M/+, +/M and +/+. The two mixed orders have the same genotype.',
+        'Each parent supplies M or +. The four equally likely combinations are M/M, M/+, +/M and +/+. The middle two are the same genotype, inherited in different orders.',
       ],
-      ['Apply viability', 'M/M does not survive in this example. Both M/+ combinations and the +/+ combination can contribute adults.'],
+      ['Apply viability', 'M/M flies die. Both M/+ combinations and the +/+ combination can survive to become the adults you score.'],
       [
         'Change the denominator',
         'Among surviving adults, two of the three viable combinations carry the marker. The expected adult ratio is 2:1, not the 3:1 obtained when all genotypes survive.',
@@ -310,16 +328,13 @@ Object.assign(VISUAL_GUIDES, {
       ],
       [
         'Locate the gene',
-        'This example locus is on the X. The Y has no matching functional copy of this gene. Do not treat a Y as another allele at the X-linked locus.',
+        'This gene is on the X. The Y has no matching working copy, so it cannot mask a recessive allele at this X-linked gene.',
       ],
       [
         'A recessive allele in a female',
-        'For this recessive loss-of-function example, an Xᴬ/Xᵃ female has a functional A copy. Xᵃ/Xᵃ has no functional A copy at this locus.',
+        'An Xᴬ/Xᵃ female has a working A copy that hides the recessive a effect. An Xᵃ/Xᵃ female has no working A at this gene.',
       ],
-      [
-        'A single X in a male',
-        'An Xᵃ/Y male has only a at this locus. Its recessive effect is exposed because there is no functional A copy on a second X.',
-      ],
+      ['A single X in a male', 'An Xᵃ/Y male has only a at this gene. With no working copy on a second X, the recessive effect shows.'],
     ],
   },
   'sex-gametes': {
@@ -327,19 +342,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Look at the chromosome pairs',
-        'This example uses an Xᵃ/Xᵃ female and an Xᴬ/Y male. Both eggs and sperm receive one sex chromosome, not the whole pair.',
+        'The female is Xᵃ/Xᵃ and the male Xᴬ/Y. Each egg or sperm receives one sex chromosome, not the whole pair.',
       ],
       [
         'The male makes X or Y sperm',
-        'His Xᴬ and Y segregate. Half the sperm carry Xᴬ and half carry Y in the model. A sperm does not carry both together.',
+        "The male's Xᴬ and Y separate during sperm formation. Half the sperm carry Xᴬ and half carry Y; none carries both together.",
       ],
       [
         'The female contributes X',
-        'Both of this female’s X homologs carry a, so every egg has the same allele at this locus even though it receives just one of her X chromosomes.',
+        "Both of this female's X chromosomes carry a. Every egg therefore carries a, even though it takes only one of her X chromosomes.",
       ],
       [
         'Keep copy count separate from variety',
-        'One chromosome per gamete does not mean only one gamete type. Different homologs can give different types; identical alleles can give the same scored type.',
+        'Each gamete takes one chromosome per pair, but there can be several gamete types. Different alleles give different types; identical alleles can give one scored type.',
       ],
     ],
   },
@@ -348,19 +363,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'First direction',
-        'Separate example: Xᵃ/Xᵃ mother × Xᴬ/Y father. A is functional and a is recessive. Track the maternal X and the paternal X or Y.',
+        "Cross an Xᵃ/Xᵃ mother to an Xᴬ/Y father. A works; a has a recessive effect. Follow the mother's X and the father's X or Y.",
       ],
       [
         'Follow their offspring',
-        'The daughters receive paternal Xᴬ and maternal Xᵃ; sons receive maternal Xᵃ and paternal Y. The sons lack functional A at this locus.',
+        'Daughters receive paternal Xᴬ and maternal Xᵃ. Sons receive maternal Xᵃ and paternal Y, so they lack a working A at this gene.',
       ],
       [
         'Reverse the parental sexes',
-        'Now cross Xᴬ/Xᴬ mothers to Xᵃ/Y fathers. The mother contributes Xᴬ to every offspring, including every son.',
+        'Reverse the cross: Xᴬ/Xᴬ mothers with Xᵃ/Y fathers. Every offspring now receives a maternal Xᴬ, including every son.',
       ],
       [
         'Compare the directions',
-        'Both daughters and sons in the reversed cross have a functional A copy. For an X-linked gene, a reciprocal cross can change the outcome because fathers pass their X only to daughters in these usual XX/XY crosses.',
+        'All offspring now have a working A copy. Reversing parental sexes can change X-linked outcomes because, in these XX/XY crosses, a father gives his X only to daughters.',
       ],
     ],
   },
@@ -369,19 +384,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Two parental homologs',
-        'This male carries AB on one homolog and ab on the other. These two genes lie on the same chromosome pair in this example.',
+        'This male carries AB on one chromosome and ab on the other. Both genes are on this same pair, so follow their allele combinations together.',
       ],
       [
         'Copy before segregation',
-        'The homologs replicate into sister chromatids before meiosis. Replication copies the existing allele arrangements; it does not combine AB with ab.',
+        'Each chromosome is copied into two sister chromatids before meiosis. Copying preserves AB or ab; it does not make new allele combinations.',
       ],
       [
         'No meiotic exchange',
-        'Drosophila males do not undergo meiotic crossing over. The parental arrangements remain intact as the chromatids segregate.',
+        'Drosophila males have no meiotic crossing over. As the copies separate into sperm, they keep their parental allele combinations.',
       ],
       [
         'Two scored sperm types',
-        'Sperm carry either AB or ab. Ab and aB recombinant types are not generated by meiotic crossing over in this male.',
+        'The sperm carry AB or ab. This male does not produce the recombinant types Ab and aB through meiotic exchange.',
       ],
     ],
   },
@@ -390,20 +405,17 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Keep the homologs distinct',
-        'A fly carries an insertion-bearing chromosome G beside a balancer Bal. G is an insertion label here, not a recessive lethal mutation.',
+        'One chromosome carries the insertion G. Its partner is the balancer Bal. Here G labels an insertion, not a lethal mutation.',
       ],
       [
         'Recognise the balancer',
-        'The balancer’s inversion pattern and visible marker help maintain and follow the paired chromosome. The drawing is a symbol for inversions, not a literal DNA map.',
+        'The balancer carries a visible marker and inversions, shown by the striped pattern. These features help you maintain and follow its partner chromosome.',
       ],
       [
         'Use the teaching-model rule',
-        'This course model recovers the intact G or Bal chromosome, without recombinant products from this pair. Real balancers suppress recovery of recombinants rather than making all exchange physically impossible.',
+        'Here you recover intact G or Bal chromosomes. Balancer inversions suppress the recovery of recombinant chromosomes rather than preventing every DNA exchange.',
       ],
-      [
-        'Read the gamete types',
-        'The gametes scored by the model carry G or Bal. Bal does not copy, repair or replace G; the homologs remain different chromosomes.',
-      ],
+      ['Read the gamete types', 'Each gamete carries G or Bal. The balancer does not repair or copy G; they remain separate chromosomes.'],
     ],
   },
 });
@@ -412,15 +424,18 @@ Object.assign(VISUAL_GUIDES, {
   'life-cycle': {
     title: 'Follow a vial through the life cycle',
     frames: [
-      ['Egg', 'Adults lay eggs. A collection or cross record must distinguish the parents from the generation developing in the vial.'],
+      ['Egg', 'Adults lay eggs in the vial. Keep records that distinguish these parents from the new generation developing there.'],
       [
         'Larva',
-        'Larvae hatch, feed and grow through three instars. A vial can contain developing offspring even when no new adults are visible.',
+        'Larvae hatch, feed and pass through three stages called instars. The vial may hold developing offspring before new adults appear.',
       ],
-      ['Pupa', 'Larvae leave the food and pupate. Metamorphosis precedes adult eclosion; a pupa is not a newly collected adult.'],
+      [
+        'Pupa',
+        'Larvae leave the food and become pupae. Inside the pupa, the fly changes into an adult. Emerging from the pupal case is called eclosion.',
+      ],
       [
         'Adult',
-        'New adults eclose. Record clearing and collection history to establish a collection interval. Development and sexual maturity depend on conditions; colour alone cannot establish virginity.',
+        'New adults emerge. Use the clearing and collection times to establish their age range. Colour alone does not establish whether a female has mated.',
       ],
     ],
   },
@@ -429,19 +444,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Repress the reporter',
-        'The starting heterozygous cell carries matching FRT sites, the mutation on one homolog and GAL80 on the other. GAL4 and UAS-GFP are also present, but GAL80 represses expression.',
+        'The starting cell has m on one chromosome and GAL80 on the other, with matching FRT sites. GAL4 and UAS-GFP are present, but GAL80 blocks the reporter.',
       ],
       [
         'Induce exchange',
-        'FLP-mediated mitotic recombination at matching FRT sites can produce informative reciprocal daughter lineages. The mutation and GAL80 lie distal to the FRT site in this schematic.',
+        'FLP can exchange DNA at the matching FRT sites during cell division. Here the mutation and GAL80 lie beyond FRT, on the side away from the centromere.',
       ],
       [
         'Lose GAL80 in one daughter',
-        'With the informative segregation shown, m/m cells no longer carry GAL80. The reciprocal +/+ lineage retains GAL80. Other segregation outcomes do not yield this marked mutant pair.',
+        'In the division shown, m/m daughters lose GAL80. The +/+ daughters retain it. Follow these two different lineages as they grow.',
       ],
       [
         'Read the marked clone',
-        'Where the driver is active, the m/m lineage can express UAS-GFP after losing repression. Fluorescence identifies a lineage in this designed system; it does not by itself establish a causal biological effect.',
+        'The m/m cells can express UAS-GFP where the driver is active. Fluorescence identifies the lineage; use a separate assay and controls to test the biological effect.',
       ],
     ],
   },
@@ -450,19 +465,19 @@ Object.assign(VISUAL_GUIDES, {
     frames: [
       [
         'Maternal supply',
-        'A heterozygous mother can supply functional RNA or protein to developing eggs. That supply is different from the allele the egg inherits.',
+        'A mother carrying a working allele can put its RNA or protein into an egg. The egg can receive this supply even when it inherits the mutant allele.',
       ],
       [
         'Mutant zygote, maternal product',
-        'An m/m embryo can initially retain maternal product from a mother carrying a functional copy. An early normal appearance therefore need not show that the gene is dispensable.',
+        'An m/m embryo may still have working RNA or protein from its mother. A normal early appearance need not mean the gene is unnecessary.',
       ],
       [
         'Mutant germline clone',
-        'A homozygous mutant germline clone can produce eggs without the normal product of that gene, if the relevant oogenesis and survival requirements permit it. The mother’s somatic genotype need not be homozygous mutant.',
+        "A mutant germline clone can make eggs without the normal gene product. Check that those eggs can form and survive to the stage you score; the mother's other tissues need not share the clone's genotype.",
       ],
       [
         'Compare maternal and zygotic contributions',
-        'Follow the paternal allele as well as the maternal supply. A functional paternal allele can contribute zygotic expression later; compare the relevant genotypes and developmental windows rather than calling all embryos equivalent.',
+        "Track the father's allele as well as the mother's supply. A paternal working allele can be expressed later by the embryo, so compare the genotypes at the relevant stages.",
       ],
     ],
   },
