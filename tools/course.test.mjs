@@ -20,10 +20,43 @@ import {
 import { practiceProblem, benchCross, countVial, PRESETS } from '../src/js/sandboxLogic.js';
 import { lessonDraft, restoreDraft } from '../src/js/lessonDraft.js';
 import { threePointPractice, cloneCohort, targetWindow } from '../src/js/research.js';
+import { VISUAL_GUIDES, guideScene, visualGuideHTML, actionGuideHTML } from '../src/js/lessonVisuals.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-9;
 const steps = (type) => Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
 const share = (rows, label) => rows.find((r) => r.label === label)?.p ?? 0;
+
+test('every genetics lesson has a labelled chromosome-first visual sequence', () => {
+  for (const lesson of LESSONS.filter((l) => l.kind === 'lesson')) {
+    const guide = VISUAL_GUIDES[lesson.id];
+    assert(guide && guide.frames.length >= 4, `${lesson.id}: explanatory stages`);
+    const scenes = guide.frames.map(([title, caption], i) => {
+      assert(title && caption.length > 40, `${lesson.id}: stage explains the biological change`);
+      const svg = guideScene(lesson.id, i);
+      assert(svg.includes('role="img"') && svg.includes('aria-label='));
+      assert(!/undefined|NaN|Infinity/.test(svg));
+      return svg;
+    });
+    assert.equal(new Set(scenes).size, scenes.length);
+    assert(visualGuideHTML(lesson.id).includes('data-visual-play'));
+  }
+  assert.equal(visualGuideHTML('diagnostic'), '', 'assessment has no explanatory answer guide');
+  assert.equal(guideScene('missing', 0), '');
+  assert.equal(guideScene('inheritance', -1), guideScene('inheritance', 0));
+  assert.equal(guideScene('inheritance', 99), guideScene('inheritance', 3));
+});
+
+test('visual activities offer navigation cues, with a separate mapping example', () => {
+  for (const type of ['gametes', 'predict', 'count', 'chance', 'chisq', 'grid', 'threepoint', 'clones', 'target', 'screen']) {
+    assert.equal((actionGuideHTML(type).match(/data-guide-target/g) || []).length, 3);
+  }
+  assert.equal(actionGuideHTML('choice'), '');
+  assert(VISUAL_GUIDES.threepoint.frames[0][1].includes('not the exercise'));
+  assert(guideScene('threepoint', 2).includes('>b</text>'));
+  assert(!guideScene('threepoint', 2).includes('cv'));
+  assert(guideScene('target', 3).includes('protein-ghost'), 'protein is depleted after activation');
+  assert(VISUAL_GUIDES.balancers.frames[2][1].includes('not absolute'));
+});
 
 test('every lesson in the course has content, and every step is well formed', () => {
   for (const l of LESSONS.filter((x) => x.kind === 'lesson')) assert.ok(LESSON_CONTENT[l.id], `content for ${l.id}`);

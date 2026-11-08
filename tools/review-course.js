@@ -14,6 +14,11 @@
   progress.reset();
 
   async function solve(step) {
+    for (const button of $$('[data-guide-target]')) {
+      assert($(button.dataset.guideTarget), `${step.type}: visual guide has an actual target`);
+      click(button);
+      assert($('.guide-highlight'), `${step.type}: visual activity guide highlights its target`);
+    }
     if (step.type === 'choice') {
       const i = step.options.findIndex((o) => o.correct);
       if (step.options.length > 1 && !step.area) { click(`[data-option="${(i + 1) % step.options.length}"]`); assert($('.feedback.wrong'), 'wrong answer explained'); assert($('[data-next], [data-finish]').disabled, 'Next waits for a right answer'); }

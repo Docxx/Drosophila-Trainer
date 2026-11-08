@@ -150,3 +150,14 @@ Use reasonable, reversible defaults without another broad requirements questionn
 - Completion using explicit worked support is labelled separately from independent fresh-case mapping practice. These statuses do not certify practical mastery. All lessons remain open.
 - Human pilot sessions with Ray, a beginner and an experienced fly researcher remain necessary to assess transfer to unfamiliar samples and real microscope work. Automated checks do not replace that validation.
 - Correction validation: `npm run check` passes all 48 domain tests and mesh checks; all six puzzle generation pars pass. Electron walkthroughs cover all eleven desk lessons, draft/input/simulation restoration, supported completion, independent fresh mapping, the collection exercise and both cross-history scenarios. The course also passes at 1000 × 700. The cross review now enters through the course router so its layout assertions inspect the visible microscope.
+
+## Visual learning update, 8 November 2026
+
+Ray requests very visual lessons with animations and visual guides. All eleven genetics lessons now include four-stage, learner-controlled SVG explanations (44 scenes). Topics include chromosome segregation and fertilisation, X-linked inheritance, balanced lethal stocks, sampling, single/double crossovers, GAL4/UAS, complementation, mitotic clones, temperature-dependent repression and RNAi lag, and independent screen lines.
+
+- Visual explanations lead text pages. During exercises, the conceptual animation is available in a folded panel while the activity's own evidence and diagrams remain central.
+- Play/pause, previous/next, direct stage selection, Replay and three speeds support different learning paces. Stage and speed persist with the lesson draft; playback resumes paused. Closing a guide or leaving a lesson cleans up its timer. Reduced-motion settings suppress movement while retaining stage controls and captions.
+- Labels and captions accompany colours. Crossover products retain parental segment colours, with the allele changes explicitly labelled. Guides are separate schematic examples, not calibrated laboratory animations. In particular, the three-point demonstration uses A–B–C instead of exposing the exercise's marker order.
+- Numbered activity guides highlight and focus the relevant chromosomes, controls, count tables and result plots without making a prediction or supplying an answer. Watching an animation never marks an exercise complete or certifies independent competence.
+- No external media or network service is needed. The microscope activities retain their interactive 3D fly views.
+- Validation includes 50 domain tests plus mesh checks, an Electron walkthrough of all 44 visual stages and playback/persistence controls, and the full course walkthrough at 1000 × 700 with checks of the activity-guide targets.

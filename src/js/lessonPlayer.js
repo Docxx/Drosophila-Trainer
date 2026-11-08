@@ -11,6 +11,7 @@ import {
 } from './lessons.js';
 import { progress, LESSONS } from './course.js';
 import { lessonDraft, restoreDraft } from './lessonDraft.js';
+import { visualGuideHTML, wireVisualGuide, actionGuideHTML, wireActionGuide } from './lessonVisuals.js';
 import {
   TP_GENES, threePointData, threePointPractice, cloneCohort, SHOCK_TIMES, SHOCK_LENGTHS,
   STAGES, simulateTarget, targetChecks, targetWindow, DOSES, PER_GENE, screenStats, screenChecks,
@@ -30,6 +31,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
   let index = saved ? saved.index : 0;
   let state = saved ? saved.state : lesson.steps.map(() => ({ done: false }));
   let diagnosticAnswers = [];
+  let stopVisual = () => {};
   const save = () => { if (!lesson.diagnostic) progress.saveDraft(id, lessonDraft(lesson, index, state)); };
   const complete = () => progress.complete(id, {
     assisted: state.some((s) => s.assisted),
@@ -497,6 +499,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
   }
 
   function render() {
+    stopVisual();
     const step = lesson.steps[index];
     const s = state[index];
     const out = RENDER[step.type](step, s);
@@ -507,13 +510,17 @@ export function mountLesson(root, id, { onExit, onAction }) {
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button>
         <div><span class="eyebrow">${esc(lesson.title)}</span><h2>${esc(heading)}</h2></div>
         <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
-      <div class="lesson-body">${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
+      <div class="lesson-body">${visualGuideHTML(id, step.type === 'text')}${actionGuideHTML(step.type)}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
       ${lesson.model ? `<details class="support about lesson-model"><summary>About this model</summary>${paras(lesson.model)}</details>` : ''}
       <footer class="lesson-foot"><button type="button" data-back ${index === 0 ? 'disabled' : ''}>Back</button>
         <span class="secondary">${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>
         ${last ? (step.type === 'go' ? '<button type="button" data-finish>Back to course</button>' : `<button type="button" class="primary" data-finish ${s.done ? '' : 'disabled'}>Finish</button>`)
           : `<button type="button" class="primary" data-next ${s.done ? '' : 'disabled'}>Next</button>`}</footer></article>`;
     out.wire?.(root);
+    wireActionGuide(root);
+    stopVisual = wireVisualGuide(root, id, { frame: state[0].visualFrame, initialSpeed: state[0].visualSpeed,
+      onFrame(frame) { state[0].visualFrame = frame; save(); },
+      onSpeed(speed) { state[0].visualSpeed = speed; save(); } });
     root.querySelectorAll('input, select, textarea').forEach((input) => {
       input.addEventListener('input', save); input.addEventListener('change', save);
     });
@@ -529,5 +536,5 @@ export function mountLesson(root, id, { onExit, onAction }) {
   }
 
   render();
-  return { rerender: render, get step() { return index; }, goTo(i) { index = i; render(); } };
+  return { rerender: render, destroy() { stopVisual(); }, get step() { return index; }, goTo(i) { index = i; render(); } };
 }

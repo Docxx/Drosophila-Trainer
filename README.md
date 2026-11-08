@@ -69,6 +69,28 @@ goal; the observed success fraction is a teaching sample, not a laboratory calib
 The trusted six-fly collection uses `fly-trainer.collection.v3`; earlier collection
 notebooks under v1/v2 keys are retained untouched. Cross notebooks remain v2.
 
+### Animated visual lessons
+
+All eleven genetics lessons include a visual guide with four captioned stages.
+Chromosomes separate into gametes, parental segments exchange at crossovers,
+GAL4 moves to a UAS-linked output, clone lineages expand and target protein
+disappears after RNAi activation. Allele labels accompany colour cues throughout.
+These are explicitly separate schematic teaching examples; the mapping animation
+uses A–B–C rather than revealing the exercise's locus order.
+
+Use **Play animation**, pause, the arrow buttons, the numbered stages or **Replay**.
+Slow/normal/fast speed and the selected stage are saved with the unfinished lesson.
+Guides open on explanation pages and fold away during exercises. Numbered activity
+guides highlight the actual controls, tables or results without entering answers.
+Animations start only when requested, stop when closed or left, and respect the
+operating system's reduced-motion setting. Everything runs offline, with no video
+downloads or external assets. Watching a guide does not complete an assessment.
+
+Visual verification: `tools/review-visuals.js` runs in the isolated Electron snapshot
+profile; it checks all 44 scenes, playback/pause/replay, saved position/speed,
+notation changes and highlighting. The ordinary course walkthrough also checks
+the activity-guide targets at each exercise step.
+
 ## Current activities
 
 **Virgin collection:** inspect six flies from a Canton-S vial completely cleared at

@@ -22,6 +22,7 @@ function setView(view) {
 }
 
 function hub() {
+  current?.destroy?.();
   tour?.stop(); tour = null; current = null;
   setView('desk');
   const p = progress.get();
@@ -50,6 +51,7 @@ function hub() {
 }
 
 function open(id) {
+  current?.destroy?.(); current = null;
   tour?.stop(); tour = null;
   if (id === DIAGNOSTIC.id) return lesson(id);
   const l = LESSONS.find((x) => x.id === id);

@@ -250,3 +250,51 @@ button.done { border-color: #5f9e72; }
 .clone-replicates caption, .screen-comparison caption, .interval-rows caption { text-align: left; color: var(--muted); margin: 12px 0; }
 @media (max-width: 1000px) { .lesson-head { flex-wrap: wrap; }.lesson-head > div { min-width: 250px; }.lesson-head h2 { font-size: 20px; } }
 @media (max-width: 860px) { .clone-view { grid-template-columns: 1fr; }.clone-view svg { max-width: 350px; }.research-controls { gap: 12px; } }
+
+/* Visual explanations: learner-controlled, offline SVG storyboards. */
+.visual-guide { margin: 0 0 24px; border: 1px solid #536674; border-radius: 14px; overflow: hidden; background: linear-gradient(130deg, #1d303c, #142029 65%, #222633); }
+.visual-guide > summary { display: flex; align-items: center; gap: 14px; padding: 15px 18px; cursor: pointer; list-style: none; }
+.visual-guide > summary::after { content: '+'; margin-left: auto; font-size: 22px; color: var(--accent); }
+.visual-guide[open] > summary::after { content: '−'; }
+.visual-guide > summary strong { font-size: 15px; font-weight: 550; }
+.visual-badge { flex-shrink: 0; padding: 5px 8px; border: 1px solid #8a7043; border-radius: 5px; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #f3c779; }
+.guide-content { padding: 0 18px 16px; }
+.guide-example { margin: 0 0 8px; font-size: 11px; color: #b7c5ce; }
+.visual-scene { display: block; width: 100%; border: 1px solid #4c606c; border-radius: 12px; background: radial-gradient(ellipse at 50% 50%, #203643, #101b23); }
+.visual-scene text { font: 16px 'Segoe UI', sans-serif; fill: #e4edf2; }
+.visual-scene .scene-title { font-size: 20px; font-weight: 600; fill: #f5d69e; }
+.visual-scene .scene-note { font-size: 16px; fill: #c1d0db; }
+.visual-scene .scene-alleles { font-size: 16px; font-weight: 650; fill: #142029; }
+.visual-scene .scene-white { font-size: 18px; font-weight: 550; }
+.visual-scene .scene-hit { font-size: 23px; fill: #f3c779; }
+.scene-arrow { stroke: #a4afb9; stroke-width: 3; fill: none; }
+.protein-ghost { opacity: .12; }
+.guide-frames { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; gap: 6px; padding: 0; margin: 12px 0; }
+.guide-frames button { height: 100%; width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; font-size: 12px; padding: 9px 10px; background: #18252e; border-color: #3b505e; }
+.guide-frames button span { display: grid; place-items: center; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: #304653; }
+.guide-frames button[aria-current=step] { border-color: var(--accent); background: #3a3224; color: #ffdaa3; }
+.guide-frames button[aria-current=step] span { background: var(--accent); color: #142029; }
+.guide-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.guide-controls button { min-height: 35px; font-size: 12px; }
+.guide-controls label { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 12px; color: #c1d0db; }
+.guide-caption { min-height: 3em; margin: 12px 0 0; padding: 10px 14px; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; background: #0f1921; color: #e4edf2; font-size: 14px; line-height: 1.7; }
+.action-guide { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+.action-guide button { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 12px; border-style: dashed; }
+.action-guide button span:first-child { color: var(--accent); font-weight: 700; }
+.action-guide button span:last-child { color: #88ccec; }
+.guide-highlight { outline: 3px solid #88ccec !important; outline-offset: 5px; border-radius: 7px; }
+.visual-guide :focus-visible { outline: 3px solid #88ccec; outline-offset: 2px; }
+.is-moving .scene-token { animation: chromosome-journey .85s cubic-bezier(.2,.7,.3,1) both; }
+.is-moving .exchange-path { stroke-dasharray: 420; animation: exchange-journey 1s ease-out both; }
+.is-moving .active-flow { stroke-dasharray: 8 6; animation: guide-flow .9s linear 2; }
+.is-moving .protein-ghost { animation: protein-turnover 1.1s ease-out both; }
+.is-moving .scene-patch { transform-box: fill-box; transform-origin: center; animation: lineage-growth .8s ease-out both; }
+.is-moving .scene-dot, .is-moving .scene-line { animation: sample-arrival .35s ease-out both; animation-delay: var(--delay, 0ms); }
+@keyframes chromosome-journey { from { transform: translateX(var(--travel, 0px)); opacity: .25; } to { transform: translateX(0); opacity: 1; } }
+@keyframes exchange-journey { from { stroke-dashoffset: 420; } to { stroke-dashoffset: 0; } }
+@keyframes guide-flow { to { stroke-dashoffset: -28; } }
+@keyframes protein-turnover { from { opacity: 1; } to { opacity: .12; } }
+@keyframes lineage-growth { from { transform: scale(.25); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+@keyframes sample-arrival { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (max-width: 1000px) { .guide-frames { grid-template-columns: repeat(2, minmax(0, 1fr)); }.guide-content { padding: 0 12px 12px; } }
+@media (prefers-reduced-motion: reduce) { .visual-guide *, .visual-guide *::before, .visual-guide *::after { animation: none !important; transition: none !important; } }
