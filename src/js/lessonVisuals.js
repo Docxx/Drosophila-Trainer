@@ -698,9 +698,9 @@ function gal4uas(frame) {
       .map(
         (x, i) =>
           cell(x, 170, 87, i === 2 ? green : '#667785') +
-          text(x, 156, ['GAL4', 'UAS–output', 'GAL4 + UAS–output'][i], 'scene-white') +
+          text(x, 156, ['GAL4 only', 'UAS only', 'GAL4 + UAS'][i], 'scene-white') +
           text(x, 190, i === 2 ? 'Output ON' : 'Output OFF', 'scene-white') +
-          label(x, 43, i === 2 ? 'Both components' : 'Single-component control'),
+          label(x, 43, ['Driver control', 'Responder control', 'Experiment'][i]),
       )
       .join('');
   return (
@@ -829,7 +829,7 @@ function screens(frame) {
       const x = 155 + (i % 5) * 150,
         y = 92 + Math.floor(i / 5) * 105,
         hit = frame >= 2 && i === 6;
-      return `<g class="${frame === 1 ? 'scene-line' : ''}" style="--delay:${i * 35}ms"><path d="M${x - 25} ${y}v57q25 22 50 0v-57" fill="${hit ? '#493e29' : '#243541'}" stroke="${hit ? amber : blue}" stroke-width="2"/><path d="M${x - 27} ${y}h54" stroke="#a6b3bd" stroke-width="7"/>${text(x, y + 84, `Line ${i + 1}`, 'scene-note')}${hit ? text(x, y + 40, frame === 3 ? '★ + •' : '★', 'scene-hit') : ''}</g>`;
+      return `<g class="${frame === 1 ? 'scene-line' : ''}" style="--delay:${i * 35}ms"><path d="M${x - 25} ${y}v57q25 22 50 0v-57" fill="${hit ? '#493e29' : '#243541'}" stroke="${hit ? amber : blue}" stroke-width="2"/><path d="M${x - 27} ${y}h54" stroke="#a6b3bd" stroke-width="7"/>${text(x, y + 84, `Line ${i + 1}`, 'scene-note')}${hit ? text(x, y + 40, frame === 3 ? '★ •' : '★', 'scene-hit') : ''}</g>`;
     }).join('') +
     text(
       450,
@@ -1048,8 +1048,8 @@ function xCopies(frame) {
   if (frame < 2)
     return (
       label(450, 38, frame ? 'Only the X carries this example locus' : 'Count X homologs in usual XX and XY flies') +
-      pair(260, 165, frame ? 'X · locus A' : 'X', frame ? 'X · locus a' : 'X') +
-      pair(650, 165, frame ? 'X · locus a' : 'X', 'Y', amber, purple) +
+      pair(260, 165, frame ? 'X · allele A' : 'X', frame ? 'X · allele a' : 'X') +
+      pair(650, 165, frame ? 'X · allele a' : 'X', 'Y', amber, purple) +
       text(260, 295, 'XX female: two X homologs', 'scene-note') +
       text(650, 295, frame ? 'Y: no matching copy here' : 'XY male: one X plus Y', 'scene-note')
     );

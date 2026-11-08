@@ -336,13 +336,13 @@ export function mountLesson(root, id, { onExit, onAction }) {
         } else if (step.kind === 'screen') {
           if (f === 0) html = fly('w/w; mut/CyO; +/+', { chroms: ['2'], caption: 'One independent founding chromosome per line' });
           else if (f === 1)
-            html = `<p class="worked-number">Low preset · ${step.lines.toLocaleString('en-GB')} lines</p><p>Chance of a target allele: ${(model.selected.hitGene * 100).toFixed(2)}%.</p>`;
+            html = `<p class="worked-number">Low preset · ${step.lines.toLocaleString('en-GB')} lines</p><p>Chance of a target allele: ${(model.selected.hitGene * 100).toFixed(1)}%.</p>`;
           else if (f === 2) html = screenPlot(step.dose, step.lines, model.goal);
           else
             html = table(
               ['Quantity', 'Model expectation'],
               [
-                ['Coverage', (model.selected.hitGene * 100).toFixed(2) + '%'],
+                ['Coverage', (model.selected.hitGene * 100).toFixed(1) + '%'],
                 ['Multiple hits among lethal lines', (model.selected.multiShare * 100).toFixed(1) + '%'],
                 ['Expected lethal lines', model.selected.lethalLines.toFixed(0)],
                 ['Maintenance vials', model.selected.vials.toLocaleString('en-GB')],
@@ -1087,7 +1087,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
       if (s.ran && !s.result) s.result = screenStats(s.dose, Number(s.lines));
       const result = s.result;
       const resultHTML = result
-        ? `<dl class="screen-stats"><div><dt>Chance of at least one target-gene allele</dt><dd>${(result.hitGene * 100).toFixed(3)}%</dd></div><div><dt>Expected lethal lines</dt><dd>${result.lethalLines.toFixed(1)}</dd></div><div><dt>Multiple-hit share among lethal lines</dt><dd>${(result.multiShare * 100).toFixed(1)}%</dd></div><div><dt>Maintenance vials</dt><dd>${result.vials.toLocaleString('en-GB')}</dd></div></dl>${checksHTML(screenChecks(s.dose, Number(s.lines), step.goal))}`
+        ? `<dl class="screen-stats"><div><dt>Chance of at least one target-gene allele</dt><dd>${(Math.floor(result.hitGene * 1000) / 10).toFixed(1)}%</dd></div><div><dt>Expected lethal lines</dt><dd>${Math.round(result.lethalLines).toLocaleString('en-GB')}</dd></div><div><dt>Multiple-hit share among lethal lines</dt><dd>${(result.multiShare * 100).toFixed(1)}%</dd></div><div><dt>Maintenance vials</dt><dd>${result.vials.toLocaleString('en-GB')}</dd></div></dl>${checksHTML(screenChecks(s.dose, Number(s.lines), step.goal))}`
         : '';
       return {
         html: `<p>${esc(step.intro)}</p>${fly('w/w; mut/CyO; +/+', { chroms: ['2'], caption: 'One independent mutagenised chromosome maintained over CyO' })}<div class="research-controls"><label>Mutagenesis preset<select data-dose>${DOSES.map((d) => `<option value="${d.mM}" ${s.dose === d.mM ? 'selected' : ''}>${esc(d.label)}</option>`).join('')}</select></label><label>Independent lines<input type="number" min="1" step="1" data-lines value="${esc(s.lines)}"/></label></div><div class="tool-row"><button type="button" class="primary" data-screen-run>Evaluate screen plan</button>${s.tries && !s.done ? '<button type="button" data-screen-example>Show a feasible plan</button>' : ''}</div>${resultHTML}${result ? screenPlot(s.dose, Number(s.lines), step.goal) : ''}${s.invalid ? '<p class="feedback wrong" role="status">Enter a positive whole number of independent chromosome lines.</p>' : s.tries ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'Check all three constraints. More independent chromosomes improve coverage, but cannot fix the fraction carrying multiple lethal hits at a given preset.')}</p>` : ''}`,
@@ -1157,11 +1157,23 @@ export function mountLesson(root, id, { onExit, onAction }) {
       <button type="button" class="primary" data-start="${start.id}">Start ${esc(start.title)}</button></div>`;
   }
 
+  // Checklist and control pointers stay out of the way until the learner asks.
+  function hintsHTML(step) {
+    const pointers = actionGuideHTML(step.type);
+    const checklist =
+      lesson.curriculum && step.stage === 'guide'
+        ? `<aside class="coaching"><strong>Work through it in this order</strong><ol>${lesson.curriculum.coach.map((c) => `<li>${esc(c)}</li>`).join('')}</ol></aside>`
+        : '';
+    if (!pointers && !checklist) return '';
+    return `<details class="hints"><summary>Hints</summary>${checklist}${pointers}</details>`;
+  }
+
   function render() {
     stopVisual();
     const step = lesson.steps[index];
     const guideId = step.visual || id;
-    const guideOpen = step.visual ? !['choice', 'multi', 'pick', 'go'].includes(step.type) : step.type === 'text';
+    // Lean layout: the animated guide opens on explanation steps only; activities lead.
+    const guideOpen = step.type === 'text';
     const guideState =
       state[0].visualGuides?.[guideId] || (guideId === id ? { frame: state[0].visualFrame, speed: state[0].visualSpeed } : {});
     const s = state[index];
@@ -1175,20 +1187,18 @@ export function mountLesson(root, id, { onExit, onAction }) {
     const heading = step.title || (step.type === 'choice' ? (lesson.diagnostic ? `Question ${index + 1}` : 'Check your thinking') : '');
     root.innerHTML = `<article class="lesson" data-step-type="${step.type}">
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button>
-        <div><span class="eyebrow">${esc(lesson.title)}</span><h2>${esc(heading)}</h2></div>
+        <div><span class="eyebrow">${esc(lesson.title)}${step.stage && TEACHING_STAGES[step.stage] ? ` · <span class="stage-label" data-stage="${step.stage}">${esc(TEACHING_STAGES[step.stage])}</span>` : ''}</span><h2>${esc(heading)}</h2></div>
         <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].skipped ? 'skipped' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
       ${
-        lesson.curriculum
-          ? `<details class="lesson-orientation" ${index === 0 ? 'open' : ''}><summary>${esc(lesson.curriculum.level)} · What you will learn</summary><button type="button" data-start-activity>Know the explanation? Start the activity</button><ul>${lesson.curriculum.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>${lesson.curriculum.prerequisites.length ? `<p>Useful preparation: ${lesson.curriculum.prerequisites.map((p) => `<button class="link" type="button" data-open="${p}">${esc(LESSONS.find((l) => l.id === p)?.title || p)}</button>`).join(' · ')}. Every lesson remains open.</p>` : ''}<dl class="lesson-glossary">${Object.entries(
+        lesson.curriculum && index === 0
+          ? `<details class="lesson-orientation" open><summary>${esc(lesson.curriculum.level)} · What you will learn</summary><button type="button" data-start-activity>Know the explanation? Start the activity</button><ul>${lesson.curriculum.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>${lesson.curriculum.prerequisites.length ? `<p>Useful preparation: ${lesson.curriculum.prerequisites.map((p) => `<button class="link" type="button" data-open="${p}">${esc(LESSONS.find((l) => l.id === p)?.title || p)}</button>`).join(' · ')}. Every lesson remains open.</p>` : ''}<dl class="lesson-glossary">${Object.entries(
               lesson.curriculum.terms,
             )
               .map(([term, meaning]) => `<div><dt>${esc(term)}</dt><dd>${esc(meaning)}</dd></div>`)
-              .join('')}</dl></details><nav class="teaching-cycle" aria-label="Learning sequence">${Object.entries(TEACHING_STAGES)
-              .map(([key, label]) => `<span aria-current="${step.stage === key ? 'step' : 'false'}">${esc(label)}</span>`)
-              .join('')}</nav>`
+              .join('')}</dl></details>`
           : ''
       }
-      <div class="lesson-body">${['worked', 'mission'].includes(step.type) ? '' : visualGuideHTML(guideId, guideOpen)}${actionGuideHTML(step.type)}${lesson.curriculum && step.stage === 'guide' ? `<aside class="coaching"><strong>Work through it in this order</strong><ol>${lesson.curriculum.coach.map((c) => `<li>${esc(c)}</li>`).join('')}</ol></aside>` : ''}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
+      <div class="lesson-body">${['worked', 'mission'].includes(step.type) ? '' : visualGuideHTML(guideId, guideOpen)}${hintsHTML(step)}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
       ${lesson.model ? `<details class="support about lesson-model"><summary>About this model</summary>${paras(lesson.model)}</details>` : ''}
       <footer class="lesson-foot"><button type="button" data-back ${index === 0 ? 'disabled' : ''}>Back</button>
         <span class="secondary" data-step-status>${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>

@@ -314,7 +314,11 @@ button.done { border-color: #5f9e72; }
 .lesson-glossary dt { color: #88ccec; font-weight: 600; }
 .lesson-glossary dd { margin: 3px 0 0; color: var(--muted); line-height: 1.45; }
 .lesson-orientation summary + button { margin: 10px 0 4px; }
-.teaching-cycle { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 20px; }.teaching-cycle span { padding: 5px 9px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); font-size: 11px; }.teaching-cycle [aria-current=step] { color: #ffdaa3; border-color: var(--accent); background: #3a3224; }
+.hints { margin: 0 0 16px; font-size: 13px; }
+.hints > summary { display: inline-block; cursor: pointer; color: var(--accent); padding: 4px 10px; border: 1px solid var(--line); border-radius: 14px; font-size: 12px; }
+.hints[open] > summary { margin-bottom: 12px; }
+.hints .action-guide { margin-bottom: 4px; }
+.stage-label { color: var(--muted); }
 .coaching { padding: 14px 18px; border-left: 3px solid #88ccec; background: #162b38; border-radius: 0 10px 10px 0; margin-bottom: 18px; font-size: 13px; }.coaching li { margin: 6px 0; }
 .worked-scene { min-height: 260px; border: 1px solid #4c606c; border-radius: 12px; background: #111c24; padding: 20px; overflow-x: auto; }.worked-scene .cross-line { justify-content: center; }.worked-scene .counts { width: 100%; }.worked-number { font-size: 24px; color: #f3c779; font-weight: 600; }
 .worked-gametes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }.worked-gamete { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; align-items: center; }.worked-gamete .gamete { flex-wrap: wrap; }.worked-arrival .hom { animation: sample-arrival .6s ease-out both; }

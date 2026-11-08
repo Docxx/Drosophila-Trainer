@@ -46,7 +46,11 @@
   window.course.open('inheritance');
   click('[data-restart]');
   click('[data-start-activity]');
-  assert($('.teaching-cycle [aria-current="step"]').textContent === 'Guided practice', 'experienced users can start the activity');
+  assert($('.stage-label').textContent === 'Guided practice', 'experienced users can start the activity');
+  assert(
+    !$('.lesson-orientation') && $('.hints') && !$('.hints').open,
+    'activity screens are lean: goals on step 1 only, hints on request',
+  );
   assert($('.dots .skipped') && $('[data-next]').disabled, 'skipped teaching is recorded distinctly and an answer is still required');
   // An untrusted saved completion cannot replace the actual construction history.
   window.course.open('investigation');

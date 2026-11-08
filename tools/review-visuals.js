@@ -23,11 +23,12 @@
         ({ id, step }) => (step.visual || id) === guideId && !['choice', 'multi', 'pick', 'go', 'worked', 'mission'].includes(step.type),
       );
     assert(location, `${guideId}: guide is connected to an actual teaching step`);
-    const { id, i: stepIndex } = location;
+    const { id, i: stepIndex, step: guideStep } = location;
     window.course.open(id);
     click('[data-restart]');
     window.course.current.goTo(stepIndex);
-    assert($('.visual-guide').open, `${guideId}: explanation opens visually`);
+    assert($('.visual-guide').open === (guideStep.type === 'text'), `${guideId}: guide open on explanations only`);
+    $('.visual-guide').open = true;
     assert($('.visual-scene').getAttribute('role') === 'img', `${id}: accessible labelled scene`);
     const initial = $('.visual-scene').outerHTML;
     for (let i = 0; i < guide.frames.length; i++) {

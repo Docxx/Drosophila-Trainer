@@ -21,7 +21,7 @@
       if (!step.visual) continue;
       window.course.current.goTo(i);
       assert($('.visual-guide summary strong').textContent === VISUAL_GUIDES[step.visual].title, `${id}/${step.title}: specific concept`);
-      assert($('.visual-guide').open === !['choice', 'multi', 'pick', 'go'].includes(step.type), `${id}: teaching visible, quiz optional`);
+      assert($('.visual-guide').open === (step.type === 'text'), `${id}: guide open on explanations, collapsed on activities`);
       for (let frame = 0; frame < 4; frame++) {
         click(`[data-visual-frame="${frame}"]`);
         assert($('[data-guide-caption]').textContent === VISUAL_GUIDES[step.visual].frames[frame][1], `${id}/${i}: stage caption`);
