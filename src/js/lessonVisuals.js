@@ -1,6 +1,7 @@
 // Visual teaching examples. They explain mechanisms without reading exercise
 // answers or revealing an unknown stock. Chromosome positions are schematic.
 import { esc } from './chromosomes.js';
+import { MOLECULAR_GUIDES, MOLECULAR_SCENES } from './molecularVisuals.js';
 
 export const VISUAL_GUIDES = {
   inheritance: {
@@ -482,6 +483,8 @@ Object.assign(VISUAL_GUIDES, {
     ],
   },
 });
+
+Object.assign(VISUAL_GUIDES, MOLECULAR_GUIDES);
 
 const amber = '#efb95f',
   blue = '#88ccec',
@@ -1275,6 +1278,7 @@ function maternal(f) {
 }
 
 const SCENES = {
+  ...MOLECULAR_SCENES,
   'life-cycle': lifeCycle,
   marcm,
   maternal,

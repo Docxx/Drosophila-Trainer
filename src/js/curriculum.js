@@ -1,4 +1,5 @@
 // Authored curriculum. All taught modules follow teach → demonstrate → guide → practise → diagnose.
+import { MOLECULAR_CURRICULUM, MOLECULAR_DEMONSTRATIONS, MOLECULAR_DIAGNOSES } from './molecularLessons.js';
 export const STAGES = {
   teach: 'Learn the idea',
   demonstrate: 'Worked demonstration',
@@ -884,3 +885,7 @@ DIAGNOSES.strategies = diagnosis(
 PATH[0].lessons.splice(1, 0, 'flyroom');
 PATH[3].lessons.push('strategies');
 CURRICULUM['research-project'].prerequisites.push('strategies');
+Object.assign(CURRICULUM, MOLECULAR_CURRICULUM);
+Object.assign(DEMONSTRATIONS, MOLECULAR_DEMONSTRATIONS);
+Object.assign(DIAGNOSES, MOLECULAR_DIAGNOSES);
+PATH[3].lessons.push('transgenesis', 'gal80', 'geneswitch', 'recombination-tools');

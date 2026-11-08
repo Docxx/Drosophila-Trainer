@@ -413,6 +413,10 @@
     'target',
     'screens',
     'strategies',
+    'transgenesis',
+    'gal80',
+    'geneswitch',
+    'recombination-tools',
     'investigation',
     'research-project',
   ]) {
@@ -540,5 +544,5 @@
   await solve(stepOf('target', 'target'));
   $('.target-plot').scrollIntoView({ block: 'center' });
   assert(document.documentElement.scrollWidth <= window.innerWidth, 'lesson fits the window without horizontal overflow');
-  return `PASS: saved-step/input/model restoration, supported completion, fresh independent mapping; 17 taught lessons, 15 worked demonstrations, two multi-generation investigations, bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
+  return `PASS: saved-step/input/model restoration, supported completion, fresh independent mapping; 21 taught lessons, 19 worked demonstrations, two multi-generation investigations, transgenesis and expression-control lessons, bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
 })();

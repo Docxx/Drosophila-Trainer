@@ -1,5 +1,9 @@
 # Fly Trainer: agreed product specification
 
+## Transgenics and expression-control extension, 8 November 2026
+
+Four additional open research lessons cover transgene creation and germline recovery, GAL80 repression, GeneSwitch drug control, and the distinction between meiotic exchange, mitotic clones, DNA excision/inversion, integration and targeted repair. Each uses chromosome-first teaching, a four-stage animated guide, a separate worked example, guided and independent questions, and evidence-led diagnosis. These extend the existing mapping, clone and TARGET activities. Existing lesson step sequences and saved-progress keys are unchanged. Sources and scope are recorded in [Transgenics and expression-control references](Transgenics%20and%20expression-control%20references.md).
+
 Status: design baseline agreed with Ray, 1 November 2026. Implementation milestones below are proposed delivery steps, not completed features.
 
 Implementation update: the 3D trainer is now the main root application. The V1 interface has been removed; its reusable genetics engine and puzzles are retained in `src/js/genetics/`, with a recovery archive outside the active app under `tmp/migration/`. The reference bench and first six-fly virgin-collection exercise are implemented, including reversible collection decisions, delayed review, local notebook saving/export, and optional support. Male anatomy remains a first pass and detailed male terminalia remain unimplemented; unexpanded wings and meconium are now modelled. The first white-eye cross mission now connects a separate maternal collection to inheritance prediction, documented/uncertain vial histories, parent removal, F1 examination and offspring-led diagnosis. Its notebook is separate from the original Canton-S collection.

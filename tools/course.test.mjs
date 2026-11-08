@@ -543,7 +543,7 @@ test('research section exposes technique and strategy lessons with model notes',
   const lessons = LESSONS.filter((l) => l.section === 'research');
   assert.deepEqual(
     lessons.map((l) => l.id),
-    ['threepoint', 'mosaics', 'target', 'screens', 'strategies'],
+    ['threepoint', 'mosaics', 'target', 'screens', 'transgenesis', 'gal80', 'geneswitch', 'recombination-tools', 'strategies'],
   );
   for (const l of lessons) {
     assert.equal(l.kind, 'lesson');
