@@ -30,11 +30,19 @@ suggests where to begin. Suggested order:
 | | First cross | The bench cross below. |
 | Building stocks | Balancers | The three properties of a balancer, a true-breeding mut¹/CyO stock, crossing over in females only and its suppression by TM3, picking classes by markers. |
 | | Cross planner | Six puzzles: cross vials, keep classes by their markers, declare the target stock. Par, hints on request. |
+| Experiments and analysis | Counting and chance | Count vials of 20, 100 and 1000 and watch the scatter shrink; χ² test a Curly × Curly vial against 1:1, 2:1 and 3:1; why "not rejected" is not "proven". |
+| | Recombination and mapping | Score 400 test-cross offspring by mini-white eye dosage and estimate the map distance; pick the recombinant class; plan screen sizes; verify recombinants. |
+| | GAL4/UAS and controls | Driver × reporter; sorting GAL4 flies by the balancer marker; choose the controls a knockdown needs; sibling controls and their limits. |
+| | Complementation and mapping | Run a complementation grid for three lethals, then map them against three overlapping deficiencies. |
+| Open practice | Genetics bench | Build any two flies (dropdowns or stock presets), see gamete counts and offspring classes, count a vial with a χ² test, and drill generated practice problems (one or two chromosomes, with a streak). |
 
 Lessons are step by step: explanations with chromosome diagrams, multiple choice with
 an explanation for every option, a gamete builder (with a crossover switch that
 explains why it does nothing in males or over a balancer), predict-then-reveal tables
-with a Punnett square that marks lethal cells, and pick-the-class steps. Next unlocks
+with a Punnett square that marks lethal cells, and pick-the-class steps. The advanced
+lessons add select-all-that-apply questions, estimates worked out from sampled counts,
+a vial-counting simulator, a step-by-step χ² table, and complementation grids with a
+deficiency map. Next unlocks
 once a step is worked through. Every answer a lesson checks is computed by the
 genetics engine, never typed in. A Diagram / Notation / Both switch controls how
 genotypes are shown everywhere.
@@ -130,7 +138,10 @@ browser preview and desktop app do not share notebooks.
 main.cjs                  Electron shell and hidden snapshot support
 src/js/desk.js             Course hub and router (opens lessons, planner, tour, microscope)
 src/js/course.js           Lesson catalogue, suggested order and saved progress
-src/js/lessons.js          Lesson content and engine helpers (gametes, classes, Punnett squares)
+src/js/lessons.js          Lesson content and engine helpers (gametes, classes, Punnett squares,
+                           GAL4/UAS expression, seeded sampling, chi-square, complementation)
+src/js/sandboxLogic.js     Genetics bench and practice-problem logic (no DOM)
+src/js/sandbox.js          Genetics bench UI
 src/js/lessonPlayer.js     Interactive lesson steps
 src/js/chromosomes.js      Chromosome-bar diagrams and notation
 src/js/plannerSession.js   Cross-planner state (no DOM; tested in node)
@@ -154,6 +165,13 @@ The project is under Git (local repository, branch `main`). Commit before handin
 folder between assistants or people so every change can be reviewed and undone.
 
 ## Model provenance and limitations
+
+Genetics simplifications used by the lessons: GAL4/UAS expression is all-or-none
+(no temperature, tissue pattern, leakiness or knockdown efficiency); recombination
+between GAL4 and UAS-RNAi is a fixed 30% with no double-crossover correction;
+the deficiency map is a teaching example (genes a–d on chromosome 2), not real
+Df(2L) breakpoints; sampled counts are reproducible (seeded) in lessons and random
+on the bench.
 
 The anatomy meshes derive from the Hidalgo lab (University of Birmingham) external
 anatomy model via MICRA. The existing project provenance requires checking the

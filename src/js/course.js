@@ -5,6 +5,8 @@ export const SECTIONS = [
   { id: 'handling', title: 'Handling flies', blurb: 'Use the microscope, tell males from females and collect virgins.' },
   { id: 'inheritance', title: 'Inheritance', blurb: 'Follow chromosomes from parents to offspring, then test it at the bench.' },
   { id: 'stocks', title: 'Building stocks', blurb: 'Balancers, and planning crosses across generations.' },
+  { id: 'advanced', title: 'Experiments and analysis', blurb: 'Statistics, recombination mapping, GAL4/UAS experiments and complementation.' },
+  { id: 'practice', title: 'Open practice', blurb: 'Free experimentation and unlimited practice problems. Use any time.' },
 ];
 
 // kind: 'tour' and 'scope' open the microscope; 'lesson' and 'planner' open the genetics desk.
@@ -17,9 +19,14 @@ export const LESSONS = [
   { id: 'first-cross', section: 'inheritance', kind: 'scope', activity: 'cross', title: 'First cross', minutes: 15, summary: 'Collect white-eyed females, cross them to red-eyed males and read the result in their offspring.' },
   { id: 'balancers', section: 'stocks', kind: 'lesson', title: 'Balancers', minutes: 15, summary: 'How CyO, TM3 and TM6B keep mutations in place, and why every fly in a balanced stock looks the same.' },
   { id: 'planner', section: 'stocks', kind: 'planner', title: 'Cross planner', minutes: 30, summary: 'Six puzzles: plan the crosses that build a target stock, generation by generation.' },
+  { id: 'chance', section: 'advanced', kind: 'lesson', title: 'Counting and chance', minutes: 12, summary: 'Count vials of different sizes, see how far chance moves a ratio, and test counts with χ².' },
+  { id: 'recombination', section: 'advanced', kind: 'lesson', title: 'Recombination and mapping', minutes: 12, summary: 'Measure the distance between two insertions from real counts, then pick and verify a recombinant.' },
+  { id: 'gal4uas', section: 'advanced', kind: 'lesson', title: 'GAL4/UAS and controls', minutes: 12, summary: 'Switch genes on with GAL4/UAS, sort the right offspring, and choose the controls a knockdown needs.' },
+  { id: 'complementation', section: 'advanced', kind: 'lesson', title: 'Complementation and mapping', minutes: 15, summary: 'Run a complementation grid, then map three lethal mutations with overlapping deficiencies.' },
+  { id: 'sandbox', section: 'practice', kind: 'sandbox', title: 'Genetics bench', minutes: 0, summary: 'Build any two flies, see their gametes and offspring, count vials with a χ² test, and drill unlimited practice problems.', practice: true },
 ];
 
-export const DIAGNOSTIC = { id: 'diagnostic', title: 'Quick check', minutes: 3, summary: 'Five questions to suggest where to start. Optional.' };
+export const DIAGNOSTIC = { id: 'diagnostic', title: 'Quick check', minutes: 3, summary: 'Six questions to suggest where to start. Optional.' };
 
 const KEY = 'fly-trainer.progress.v1';
 
@@ -49,6 +56,11 @@ export const progress = {
     if (!best || generations < best) p.puzzles[id] = generations;
     write(p);
     document.dispatchEvent(new CustomEvent('flytrainer:progress', { detail: { id: `puzzle:${id}` } }));
+  },
+  /** Best run of right answers in the practice problems. */
+  recordStreak(n) {
+    const p = read();
+    if (n > (p.bestStreak || 0)) { p.bestStreak = n; write(p); }
   },
   /** How genotypes are shown: 'diagram', 'notation' or 'both'. */
   get notation() { return read().notation; },

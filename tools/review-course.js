@@ -53,7 +53,38 @@
       const { rows } = L.classesFor(step.mother, step.father, { traits: step.traits });
       click(`[data-class="${rows.findIndex((r) => L.classMatches(r, step.target))}"]`);
       assert($('.feedback.right'), `${step.title}: right class confirmed`);
+    } else if (step.type === 'multi') {
+      const wrong = step.options.findIndex((o) => !o.correct);
+      if (wrong >= 0) { click(`[data-multi="${wrong}"]`); click('[data-check]'); assert($('.feedback.wrong'), `${step.question}: wrong selection challenged`); click(`[data-multi="${wrong}"]`); }
+      step.options.forEach((o, i) => { if (o.correct) click(`[data-multi="${i}"]`); });
+      click('[data-check]');
+    } else if (step.type === 'count') {
+      const { rows } = L.classesFor(step.mother, step.father, { traits: step.traits });
+      const answer = step.answer(L.sampleCounts(rows, step.n, L.rng(step.seed)));
+      const input = $('[data-answer]');
+      input.value = String(answer + step.tolerance * 3); input.dispatchEvent(new Event('input'));
+      click('[data-check]'); assert($('.feedback.wrong'), 'a wrong estimate gets a hint');
+      const again = $('[data-answer]'); again.value = answer.toFixed(1); again.dispatchEvent(new Event('input'));
+      click('[data-check]');
+    } else if (step.type === 'chance') {
+      for (const n of step.sizes) for (let k = 0; k < step.need; k++) click(`[data-draw="${n}"]`);
+      assert($$('.strip i').length === step.sizes.length * step.need, 'one dot per counted vial');
+    } else if (step.type === 'chisq') {
+      step.hypotheses.forEach((h, i) => {
+        click(`[data-h="${i}"]`);
+        const fits = L.chiSquare(step.observed.map((o) => o.n), h.shares).fits;
+        click(`[data-judge="${fits ? 'reject' : 'fits'}"]`); assert($('.feedback.wrong'), 'a wrong verdict is explained');
+        click(`[data-judge="${fits ? 'fits' : 'reject'}"]`);
+      });
+    } else if (step.type === 'grid') {
+      while ($('[data-cell]')) click('[data-cell]');
+      step.rows.forEach((r, i) => step.cols.forEach((c, j) => {
+        const td = $$('.grid tbody tr')[i].querySelectorAll('td')[j];
+        assert(td.classList.contains(L.complements(r, c) ? 'comp' : 'fail'), `${r} × ${c} shows the engine's result`);
+      }));
     }
+    const next = $('[data-next], [data-finish]');
+    if (step.type !== 'go' && !L.LESSON_CONTENT.diagnostic.steps.includes(step)) assert(next && !next.disabled, `${step.title || step.question}: unlocked after solving`);
   }
 
   async function play(id, stopAt = Infinity) {
@@ -68,7 +99,7 @@
     }
   }
 
-  for (const id of ['inheritance', 'xlinked', 'balancers']) {
+  for (const id of ['inheritance', 'xlinked', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation']) {
     await play(id, L.LESSON_CONTENT[id].steps.length - (L.LESSON_CONTENT[id].steps.at(-1).type === 'go' ? 1 : 0));
     if (L.LESSON_CONTENT[id].steps.at(-1).type === 'go') {
       click('[data-go]'); await sleep(100);
@@ -77,9 +108,9 @@
     assert(progress.isDone(id), `${id} completed`);
   }
   // Quick check: answer everything right; it recommends the planner.
-  await play('diagnostic', 4);
-  await solve(L.LESSON_CONTENT.diagnostic.steps[4]);
-  assert($('[data-start="planner"]'), 'quick check recommends a start');
+  await play('diagnostic', 5);
+  await solve(L.LESSON_CONTENT.diagnostic.steps[5]);
+  assert($('[data-start="recombination"]'), 'quick check recommends a start');
 
   // Notation switch re-renders genotypes in place.
   window.course.open('inheritance'); click('[data-next]');
@@ -96,6 +127,28 @@
   click($$('[data-declare]').at(-1));
   assert($('.bench-panel .feedback.right'), 'planner declares success');
   assert(progress.get().puzzles['cross-1'] === 1, 'puzzle result saved');
+
+  // Genetics bench: change a chromosome, count a vial, answer practice problems.
+  window.course.open('sandbox');
+  const sel = $('select[data-sex="M"][data-chrom="2"][data-slot="0"]');
+  sel.value = '+'; sel.dispatchEvent(new Event('change'));
+  assert(/Curly wings/.test($('.classes').textContent) && $$('.classes tbody tr').length === 2, 'bench recomputes after a change');
+  click('[data-count]');
+  assert($$('.classes thead th').length === 3 && /χ²/.test($('.bench-panel').textContent), 'vial counted and tested');
+  const bad = $('select[data-sex="F"][data-chrom="2"][data-slot="1"]');
+  bad.value = 'CyO'; bad.dispatchEvent(new Event('change'));
+  assert($('.feedback.wrong'), 'a lethal parent is flagged');
+  click('[data-tab="practice"]');
+  for (let k = 0; k < 5; k++) {
+    const q = window.course.current.problem;
+    click(`[data-answer="${q.options.findIndex((o) => Math.abs(o.p - q.answer) < 1e-9)}"]`);
+    assert($('.practice .feedback.right'), 'practice answer marked right');
+    click('[data-next-problem]');
+  }
+  assert(progress.get().bestStreak >= 5, 'streak recorded');
+  click('[data-level="2"]');
+  click('[data-answer="0"]'); click('[data-explore]');
+  assert($('.parent-card') && $('.classes'), 'practice cross opens on the bench');
 
   // Guided tour: "Show me" on each step until it hands over to Virgin collection.
   window.course.open('tour');
@@ -117,5 +170,5 @@
   // Leave the Curly × Curly reveal on screen for visual review.
   await play('inheritance', 6);
   await solve(L.LESSON_CONTENT.inheritance.steps[6]);
-  return `PASS: 3 lessons, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
+  return `PASS: 7 lessons, bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
 })();

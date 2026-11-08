@@ -10,6 +10,10 @@ import {
 } from '../src/js/lessons.js';
 import { LESSONS, progress, nextLesson } from '../src/js/course.js';
 import { PlannerSession } from '../src/js/plannerSession.js';
+import {
+  expression, sampleCounts, rng, chiSquare, chiSquareP, complements, complementationCross, deficiencyMap,
+} from '../src/js/lessons.js';
+import { practiceProblem, benchCross, countVial, PRESETS } from '../src/js/sandboxLogic.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-9;
 const steps = (type) => Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
@@ -19,8 +23,9 @@ test('every lesson in the course has content, and every step is well formed', ()
   for (const l of LESSONS.filter((x) => x.kind === 'lesson')) assert.ok(LESSON_CONTENT[l.id], `content for ${l.id}`);
   for (const [id, lesson] of Object.entries(LESSON_CONTENT)) {
     for (const s of lesson.steps) {
-      assert.ok(['text', 'choice', 'gametes', 'predict', 'pick', 'go'].includes(s.type), `${id}: step type ${s.type}`);
+      assert.ok(['text', 'choice', 'gametes', 'predict', 'pick', 'go', 'multi', 'count', 'chance', 'chisq', 'grid'].includes(s.type), `${id}: step type ${s.type}`);
       for (const g of [s.parent, s.mother, s.father, ...(s.diagrams || []).map((d) => d.g)].filter(Boolean)) assert.doesNotThrow(() => parseGenotype(g), `${id}: ${g}`);
+      if (s.type === 'multi') assert.ok(s.options.some((o) => o.correct) && s.options.every((o) => o.why), `${id}: multi has answers and notes`);
       if (s.type === 'choice') assert.equal(s.options.filter((o) => o.correct).length, 1, `${id}: one correct option in "${s.question}"`);
       if (s.type === 'go' && s.action.kind === 'scope') assert.ok(LESSONS.some((l) => l.activity === s.action.activity), `${id}: activity ${s.action.activity}`);
     }
@@ -86,10 +91,12 @@ test('each pick step has exactly one right class', () => {
 });
 
 test('the quick check recommends the first area with a mistake', () => {
-  assert.equal(recommendStart([true, true, true, true, true]), 'planner');
-  assert.equal(recommendStart([false, true, true, true, true]), 'tour');
-  assert.equal(recommendStart([true, true, true, false, true]), 'inheritance');
-  assert.equal(recommendStart([true, true, true, true, false]), 'balancers');
+  // Questions: handling, handling, inheritance, inheritance, advanced, stocks.
+  assert.equal(recommendStart([true, true, true, true, true, true]), 'recombination');
+  assert.equal(recommendStart([false, true, true, true, true, true]), 'tour');
+  assert.equal(recommendStart([true, true, true, false, true, true]), 'inheritance');
+  assert.equal(recommendStart([true, true, true, true, true, false]), 'balancers');
+  assert.equal(recommendStart([true, true, true, true, false, true]), 'chance');
 });
 
 // ---- planner ------------------------------------------------------------------------
@@ -165,4 +172,74 @@ test('progress is saved, suggests the next lesson and keeps the best puzzle resu
   assert.deepEqual(progress.get().done, []);
   assert.equal(progress.notation, 'both', 'reset keeps the display preference');
   assert.deepEqual(events, ['tour', 'puzzle:cross-3', 'puzzle:cross-3', 'puzzle:cross-3']);
+});
+
+// ---- advanced material ------------------------------------------------------------------
+
+test('complementation follows shared lethal genes, and the mapping lesson agrees with the engine', () => {
+  assert.ok(complements('mut', 'mut2') && complements('mut', 'mut3') && complements('mut2', 'mut3'), 'three different genes');
+  for (const m of ['mut', 'mut2', 'mut3']) assert.equal(complements(m, m), false, `${m} fails with itself`);
+  const fails = (m) => ['Df1', 'Df2', 'Df3'].filter((d) => !complements(m, d));
+  assert.deepEqual(fails('mut'), ['Df1']);
+  assert.deepEqual(fails('mut2'), ['Df2', 'Df3'], 'mut² lies in gene c (B and C overlap)');
+  assert.deepEqual(fails('mut3'), ['Df3'], 'mut³ lies in gene d (C only)');
+  assert.equal(complements('Df1', 'Df3'), true, 'non-overlapping deficiencies complement');
+  assert.equal(complements('Df1', 'Df2'), false, 'overlapping deficiencies fail');
+  // Sampled crosses show straight-winged flies exactly when the pair complements.
+  for (const [a, b] of [['mut', 'mut2'], ['mut', 'Df1'], ['mut2', 'Df3'], ['mut3', 'Df2']]) {
+    assert.equal(complementationCross(a, b, 60, 5).complements, complements(a, b), `${a} × ${b}`);
+  }
+  assert.deepEqual(deficiencyMap(['Df1', 'Df2', 'Df3']).dfs.map((d) => d.genes.join('')), ['ab', 'bc', 'cd']);
+});
+
+test('balancer puzzles are unaffected by the new lethal rules', () => {
+  const { rows } = classesFor('w/w; mut/CyO; +/+', 'w/Y; mut/CyO; +/+', { traits: ['curly'] });
+  assert.equal(rows.length, 1, 'mut/mut still dies');
+});
+
+test('GAL4/UAS expression needs both halves', () => {
+  const ex = (t) => expression(parseGenotype(t));
+  assert.deepEqual(ex('w/w; UAS-GFP/+; +/+'), { gfp: false, rnai: false });
+  assert.deepEqual(ex('w/w; UAS-GFP/+; GAL4/+'), { gfp: true, rnai: false });
+  assert.deepEqual(ex('w/w; +/+; GAL4,UAS-RNAi/+'), { gfp: false, rnai: true }, 'recombinant carries both');
+  const { rows } = classesFor('w/w; +/+; GAL4/TM6B', 'w/Y; +/+; UAS-RNAi/UAS-RNAi', { traits: ['rnai', 'tubby'] });
+  assert.ok(near(share(rows, 'Knockdown (GAL4 > RNAi)'), 1 / 2) && near(share(rows, 'No knockdown, Tubby'), 1 / 2));
+});
+
+test('sampling is reproducible and chi-square matches standard tables', () => {
+  const rows = [{ label: 'a', p: 0.5 }, { label: 'b', p: 0.5 }];
+  assert.deepEqual(sampleCounts(rows, 100, rng(4)), sampleCounts(rows, 100, rng(4)));
+  assert.equal(sampleCounts(rows, 250, rng(9)).reduce((t, r) => t + r.n, 0), 250);
+  assert.ok(Math.abs(chiSquareP(3.841, 1) - 0.05) < 1e-3);
+  assert.ok(Math.abs(chiSquareP(5.991, 2) - 0.05) < 1e-3);
+  assert.ok(Math.abs(chiSquareP(9.488, 4) - 0.05) < 1e-3);
+  const step = LESSON_CONTENT.chance.steps.find((s) => s.type === 'chisq');
+  const verdict = step.hypotheses.map((h) => chiSquare(step.observed.map((o) => o.n), h.shares).fits);
+  assert.deepEqual(verdict, [false, true, false], 'only 2:1 fits the Curly × Curly vial');
+});
+
+test('the recombination counting step has a sensible, reproducible answer', () => {
+  const step = LESSON_CONTENT.recombination.steps.find((s) => s.type === 'count');
+  const { rows } = classesFor(step.mother, step.father, { traits: step.traits });
+  const a = step.answer(sampleCounts(rows, step.n, rng(step.seed)));
+  assert.ok(a > 24 && a < 36, `estimate ${a}% near the model's 30%`);
+});
+
+test('the bench handles every preset, and practice problems are answerable', () => {
+  for (const p of PRESETS) {
+    const r = benchCross(p.F, p.M);
+    assert.ok(r.motherOk && r.fatherOk && near(r.rows.reduce((t, x) => t + x.p, 0), 1), p.name);
+  }
+  assert.equal(benchCross('w/w; mut/mut; +/+', 'w/Y; +/+; +/+').motherOk, false, 'lethal parent is flagged');
+  const v = countVial(benchCross('w/w; CyO/+; +/+', 'w/Y; +/+; +/+').rows, 200, 3);
+  assert.equal(v.counts.reduce((t, c) => t + c.n, 0), 200);
+  assert.ok(v.test && v.test.df === 1);
+  for (let seed = 1; seed <= 300; seed++) {
+    for (const level of [1, 2]) {
+      const q = practiceProblem(seed, level);
+      assert.equal(q.options.filter((o) => near(o.p, q.answer)).length, 1, `seed ${seed}: one right option`);
+      assert.equal(new Set(q.options.map((o) => o.label)).size, q.options.length, `seed ${seed}: options distinct`);
+      assert.ok(q.rows.some((r) => r.label === q.label && near(r.p, q.answer)));
+    }
+  }
 });

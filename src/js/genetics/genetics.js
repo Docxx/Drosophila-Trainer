@@ -29,8 +29,16 @@ export const CHROMS = {
     'UAS-GFP': { label: 'UAS-GFP', markers: ['mw'], transgene: true },
     GAL4: { label: 'GAL4', markers: ['mw'], transgene: true },
     Sco: { label: 'Sco', markers: ['Sco'] },
-    // An unmarked recessive lethal mutation: invisible, and only survives over a balancer or +.
-    mut: { label: 'mut¹', markers: [], recLethal: true },
+    // Unmarked recessive lethal mutations: invisible, and only survive over a balancer or +.
+    // `lethal` lists the essential genes each chromosome lacks; a fly dies when both of
+    // its chromosome 2s lack the same gene (failure to complement).
+    mut: { label: 'mut¹', markers: [], recLethal: true, lethal: ['a'] },
+    mut2: { label: 'mut²', markers: [], recLethal: true, lethal: ['c'] },
+    mut3: { label: 'mut³', markers: [], recLethal: true, lethal: ['d'] },
+    // Deficiencies: overlapping deletions used to map mutations (genes a-d, left to right).
+    Df1: { label: 'Df(2L)A', markers: [], recLethal: true, lethal: ['a', 'b'], deficiency: true },
+    Df2: { label: 'Df(2L)B', markers: [], recLethal: true, lethal: ['b', 'c'], deficiency: true },
+    Df3: { label: 'Df(2L)C', markers: [], recLethal: true, lethal: ['c', 'd'], deficiency: true },
   },
   3: {
     '+': { label: '+', markers: [] },
@@ -78,6 +86,9 @@ function homologs(g) {
   return ORDER.flatMap((c) => g[c].map((k) => CHROMS[c][k]));
 }
 
+/** Genes essential for viability, in map order on chromosome 2 (deficiency mapping). */
+export const GENES_2 = ['a', 'b', 'c', 'd'];
+
 export function isMale(g) {
   return g.X.includes('Y');
 }
@@ -118,6 +129,7 @@ export function isViable(g) {
     if (a.balancer && a.balancer === b.balancer) return false;
     if (a.markers.some((m) => MARKERS[m].homLethal && b.markers.includes(m))) return false;
     if (a.recLethal && a === b) return false;
+    if (a.lethal && b.lethal && a.lethal.some((gene) => b.lethal.includes(gene))) return false;
   }
   return true;
 }
