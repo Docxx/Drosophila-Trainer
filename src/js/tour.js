@@ -60,7 +60,7 @@ export const TOUR_STEPS = [
     check: () => is('reference-female') && fromAbove(), show: () => click('dorsal') },
   { title: 'A brand-new fly', text: 'Pick the just-eclosed female, top right, and view her underside. Very pale body, wings still folded, and a dark spot in the abdomen: the meconium, her first gut contents. All three mean she hatched within the last hour or so.',
     check: () => is('reference-teneral-female') && underside(), show: () => { pick('reference-teneral-female'); setTimeout(() => click('ventral'), 50); } },
-  { title: 'That is the toolkit', text: 'Sex combs tell you the sex; pale colour, folded wings and meconium tell you a fly is young. Next, use both to collect virgin females from a real batch. The Reference bench stays open whenever you want to compare.',
+  { title: 'That is the toolkit', text: 'Sex combs tell you the sex; pale colour, folded wings and meconium tell you a fly is young. Next, use anatomy and the source-vial clearing record to collect virgin females. Colour alone cannot establish virginity. The Reference bench stays open whenever you want to compare.',
     check: () => true, auto: false, final: true },
 ];
 

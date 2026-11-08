@@ -60,6 +60,12 @@ export function threePointData(step) {
   };
 }
 
+// Fresh counts and chromosome phase; keep the actual y–cv–v locus order/map.
+export function threePointPractice(step, seed) {
+  const random = rng(seed);
+  return { ...step, seed, phase: Object.fromEntries(step.shown.map((g) => [g, random() < 0.5])) };
+}
+
 // ---- FLP/FRT mosaics -------------------------------------------------------------------
 
 /**
@@ -131,6 +137,20 @@ export function cloneGoalMet(t, goal) {
     && (goal.maxMean === undefined || (t.clones > 0 && t.meanSize <= goal.maxMean));
 }
 
+/** Independent discs, reproducible when a saved experiment is reopened. */
+export function cloneCohort({ round, p, seed, goal, count = 8 }) {
+  const discs = Array.from({ length: count }, (_, i) => cloneTissue({ round, p, seed: (seed + i * 104729) >>> 0 }));
+  const summaries = discs.map(({ clones, meanSize, largest }) => ({ clones, meanSize, largest }));
+  return { disc: discs[0], summaries, met: discs.filter((d) => cloneGoalMet(d, goal)).length, count };
+}
+
+/** The exact hourly points used by both assessment and the shaded plot windows. */
+export function targetWindow(sim, check) {
+  const points = sim.points.filter((p) => check.stages.includes(p.stage));
+  const end = points.at(-1)?.t ?? 0;
+  return check.last ? points.filter((p) => p.t > end - check.last) : points;
+}
+
 // ---- GAL80ts (TARGET) ------------------------------------------------------------------
 
 // Stage lengths at 25 °C in days, roughly; development runs about half as fast at
@@ -177,9 +197,7 @@ export function simulateTarget(temps) {
  */
 export function targetChecks(sim, goal) {
   return goal.checks.map((c) => {
-    const window = sim.points.filter((pt) => c.stages.includes(pt.stage));
-    const end = window.at(-1)?.t ?? 0;
-    const pts = c.last ? window.filter((pt) => pt.t > end - c.last) : window;
+    const pts = targetWindow(sim, c);
     const vals = pts.map((pt) => pt[c.measure]);
     const ok = vals.length > 0 && (c.max === undefined || Math.max(...vals) <= c.max) && (c.min === undefined || Math.min(...vals) >= c.min);
     return { text: c.text, ok };

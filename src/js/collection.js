@@ -10,16 +10,17 @@ export const SOURCE_RECORD = Object.freeze({
   collectedAt: '17:00',
   temperature: '25 °C',
   clearing: 'All adults removed at 09:00.',
-  evidence: 'Every fly that eclosed since the clearing is under 8 hours old, so its females are virgins. A fly that looks older was missed at clearing.',
+  evidence: 'Every fly that eclosed since the clearing is under 8 hours old, so its females are virgins. Adults can darken within this interval. Appearance cannot establish virginity; use the trusted clearing record.',
   target: 2,
 });
 
 // Appearance follows age since eclosion (modelled values for this teaching batch):
 // wings expand within the first hour, and the meconium stays visible for a few hours.
 export const WING_EXPANSION_MINUTES = 60;
-export const MECONIUM_MINUTES = 300;
+export const MECONIUM_MINUTES = 180;
+export const PIGMENTATION_MINUTES = 180;
 export function appearanceForAge(ageMinutes) {
-  if (ageMinutes >= VIRGIN_WINDOW_MINUTES * 3) return { stage: 'mature', meconium: false };
+  if (ageMinutes >= PIGMENTATION_MINUTES) return { stage: 'mature', meconium: false };
   return { stage: ageMinutes < WING_EXPANSION_MINUTES ? 'teneral' : 'fresh', meconium: ageMinutes < MECONIUM_MINUTES };
 }
 
@@ -44,10 +45,10 @@ function layout(count) {
 
 /**
  * Six flies that eclosed after the clearing (three of each sex, ages spread over
- * the 8-hour window) plus, by default, one older fly that was missed at clearing.
+ * the 8-hour window). An optional holdover is reserved for explicit custom scenarios.
  * The holdover's mating history is unknown to the learner and may be either.
  */
-export function makePopulation(seed, { holdover = true } = {}) {
+export function makePopulation(seed, { holdover = false } = {}) {
   const random = generator(seed);
   const flies = ['F', 'F', 'F', 'M', 'M', 'M'].map((sex) => {
     const ageMinutes = Math.floor(random() * VIRGIN_WINDOW_MINUTES);
@@ -143,13 +144,9 @@ export class CollectionSession {
     this.#notes[field] = value.slice(0, 5000);
   }
   #reason(f) {
-    if (f.holdover) {
-      return f.sex === 'F'
-        ? 'Fully pigmented, with expanded wings and no meconium: she is far older than 8 hours, so she was missed at clearing. Nothing in the record says she is a virgin; set flies like her aside.'
-        : 'An older male missed at clearing (fully pigmented, sex combs on the forelegs). Not a female, and older than the collection window.';
-    }
+    if (f.holdover) return 'The source history does not establish this fly as a virgin. Colour and expanded wings cannot establish age or mating history.';
     if (f.sex === 'M') return 'Male: sex combs on the first tarsal segment of the forelegs. Pale young males can look female from the abdomen alone.';
-    return 'Female: no foreleg sex combs. Her pale body' + (f.meconium ? ' and meconium' : '') + (f.stage === 'teneral' ? ' and unexpanded wings' : '') + ' fit the 8-hour batch, so the record supports collecting her as a virgin.';
+    return 'Female: no foreleg sex combs. The trusted clearing record supports collecting her as a virgin, whether she is pale or already darkened. Body colour, expanded wings and absence of meconium do not prove mating history.';
   }
   #assess() {
     const collected = this.#population.filter((f) => this.#destinations[f.id] === 'collection');

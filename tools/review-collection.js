@@ -16,8 +16,8 @@
     const fly = publicState().flies[i];
     if (fly.destination !== 'pad') click('[data-transfer="pad"]');
   }
-  assert(scope.specimens.length === 7, 'Exercise must have seven flies');
-  assert(document.getElementById('inventory-title').textContent === 'Your batch · seven flies', 'Roster title must count the batch');
+  assert(scope.specimens.length === 6, 'Exercise must have six flies');
+  assert(document.getElementById('inventory-title').textContent === 'Your batch · six flies', 'Roster title must count the batch');
   assert(new Set(scope.specimens.map((s) => s.reference.rest)).size > 1 || scope.specimens.every((s) => s.reference.rest), 'Flies must carry a resting pose');
   assert(publicState().report === null, 'No pre-submission feedback');
   assert(document.getElementById('specimens').textContent.match(/female|male|virgin/i) === null, 'Roster must not disclose biological answers');
@@ -26,14 +26,12 @@
   const prediction = document.getElementById('prediction');
   prediction.value = 'Use sex combs and the clearing record. <plain text>';
   prediction.dispatchEvent(new Event('input', { bubbles: true }));
-  assert(JSON.parse(localStorage.getItem('fly-trainer.collection.v2')).notes.prediction === prediction.value, 'Prediction was not saved');
+  assert(JSON.parse(localStorage.getItem('fly-trainer.collection.v3')).notes.prediction === prediction.value, 'Prediction was not saved');
   click('[data-close="notebook"]');
-  // The holdover is the one fully pigmented fly; only young females are eligible.
-  const young = (s) => s.reference.stage !== 'mature';
-  const femaleIndices = scope.specimens.map((s, i) => s.reference.sex === 'F' && young(s) ? i : -1).filter((i) => i >= 0);
-  const maleIndex = scope.specimens.findIndex((s) => s.reference.sex === 'M' && young(s));
-  const holdoverIndex = scope.specimens.findIndex((s) => !young(s));
-  assert(holdoverIndex >= 0 && femaleIndices.length === 3, 'Batch must hold three young females and one holdover');
+  // Sex and the trusted record determine eligibility; adult pigmentation is allowed.
+  const femaleIndices = scope.specimens.map((s, i) => s.reference.sex === 'F' ? i : -1).filter((i) => i >= 0);
+  const maleIndex = scope.specimens.findIndex((s) => s.reference.sex === 'M');
+  assert(femaleIndices.length === 3, 'Trusted batch has three eligible females');
   for (const i of [...femaleIndices.slice(0, 2), maleIndex]) {
     click(`[data-specimen="${i}"]`); click('[data-transfer="collection"]');
     assert(!scope.specimens[i].holder.visible, 'Transferred fly must leave the microscope pad');
@@ -51,16 +49,7 @@
   assert(scope.specimens[maleIndex].holder.position.x === scope.specimens[maleIndex].reference.x, 'Returning a fly must restore a visible pad location');
   click('[data-act="submit"]');
   assert(publicState().report.success === true && document.getElementById('review-title').textContent === 'Collection ready', 'Corrected collection must pass');
-  // A fly missed at clearing must not pass, whatever her sex.
-  click('[data-act="retry"]');
-  click(`[data-specimen="${holdoverIndex}"]`); click('[data-transfer="collection"]');
-  click('[data-act="submit"]');
-  assert(publicState().report.success === false && /missed at clearing/.test(document.getElementById('review-rows').textContent), 'The holdover must be explained after submission');
-  click('[data-act="retry"]');
-  click(`[data-specimen="${holdoverIndex}"]`); click('[data-transfer="pad"]');
-  click('[data-act="submit"]');
-  assert(publicState().report.success === true, 'Removing the holdover must restore success');
-  const saved = JSON.parse(localStorage.getItem('fly-trainer.collection.v2'));
+  const saved = JSON.parse(localStorage.getItem('fly-trainer.collection.v3'));
   const { CollectionSession } = await import('./js/collection.js');
   const restored = new CollectionSession({ seed: saved.seed, saved });
   assert(JSON.stringify(restored.snapshot()) === JSON.stringify(publicState()), 'Saved notebook must restore exactly');

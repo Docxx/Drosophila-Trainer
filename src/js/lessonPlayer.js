@@ -10,9 +10,10 @@ import {
   sampleCounts, rng, chiSquare, complementationCross, deficiencyMap,
 } from './lessons.js';
 import { progress, LESSONS } from './course.js';
+import { lessonDraft, restoreDraft } from './lessonDraft.js';
 import {
-  TP_GENES, threePointData, cloneTissue, cloneGoalMet, SHOCK_TIMES, SHOCK_LENGTHS,
-  STAGES, simulateTarget, targetChecks, DOSES, PER_GENE, screenStats, screenChecks,
+  TP_GENES, threePointData, threePointPractice, cloneCohort, SHOCK_TIMES, SHOCK_LENGTHS,
+  STAGES, simulateTarget, targetChecks, targetWindow, DOSES, PER_GENE, screenStats, screenChecks,
 } from './research.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-6;
@@ -25,9 +26,15 @@ const paras = (body = []) => body.map((p) => `<p>${esc(p)}</p>`).join('');
 
 export function mountLesson(root, id, { onExit, onAction }) {
   const lesson = LESSON_CONTENT[id];
-  let index = 0;
-  const state = lesson.steps.map(() => ({ done: false }));
-  const diagnosticAnswers = [];
+  const saved = !lesson.diagnostic && restoreDraft(lesson, progress.get().drafts[id]);
+  let index = saved ? saved.index : 0;
+  let state = saved ? saved.state : lesson.steps.map(() => ({ done: false }));
+  let diagnosticAnswers = [];
+  const save = () => { if (!lesson.diagnostic) progress.saveDraft(id, lessonDraft(lesson, index, state)); };
+  const complete = () => progress.complete(id, {
+    assisted: state.some((s) => s.assisted),
+    independentPractice: state.some((s) => s.practice && s.done && !s.assisted),
+  });
 
   const mode = () => progress.notation;
   const fly = (text, opts = {}) => genotypeHTML(parseGenotype(text), { mode: mode(), ...opts });
@@ -46,17 +53,38 @@ export function mountLesson(root, id, { onExit, onAction }) {
   }
   const checksHTML = (checks) => `<ul class="goal-checks" aria-label="Goal checks">${checks.map((c) => `<li class="${c.ok ? 'met' : 'unmet'}">${c.ok ? '✓' : '○'} ${esc(c.text)}</li>`).join('')}</ul>`;
   const numberOK = (value, answer, tolerance) => value !== undefined && String(value).trim() !== '' && Number.isFinite(Number(value)) && Math.abs(Number(value) - answer) <= tolerance;
-  function targetPlot(sim) {
-    const width = 760, height = 240, left = 42, top = 18, innerW = 700, innerH = 174;
+  function targetPlot(sim, goal) {
+    const width = 760, height = 266, left = 42, top = 18, innerW = 700, innerH = 174;
     const end = sim.points.at(-1).t;
     const x = (t) => left + innerW * t / end, y = (v) => top + innerH * (1 - v);
     const line = (measure) => sim.points.filter((_, i) => i % 3 === 0 || i === sim.points.length - 1).map((pt) => `${x(pt.t).toFixed(1)},${y(pt[measure]).toFixed(1)}`).join(' ');
     return `<svg class="target-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="GAL4 activity and RNAi target protein over elapsed time; stage and temperature shown below">
       ${sim.bounds.map((b) => `<rect x="${x(b.start)}" y="${top}" width="${x(b.end) - x(b.start)}" height="${innerH}" fill="${b.temp === 29 ? '#493421' : '#20384b'}"/><text x="${x((b.start + b.end) / 2)}" y="212" text-anchor="middle">${esc(b.label)}</text><text x="${x((b.start + b.end) / 2)}" y="228" text-anchor="middle">${b.temp}°C</text>`).join('')}
+      ${goal.checks.map((check, i) => {
+        const pts = targetWindow(sim, check), colour = ['#c7b5ed', '#b5dfba', '#ffd09a'][i % 3];
+        return sim.bounds.filter((b) => check.stages.includes(b.id)).map((b) => {
+          const start = Math.max(b.start, (pts[0]?.t ?? 1) - 1), end = Math.min(b.end, pts.at(-1)?.t ?? 0);
+          return end <= start ? '' : `<rect class="checked-window" x="${x(start)}" y="${top}" width="${x(end) - x(start)}" height="${innerH}" fill="${colour}" fill-opacity=".09"><title>${esc(check.text)}</title></rect>${[check.min, check.max].filter((v) => v !== undefined).map((v) => `<line class="target-threshold" x1="${x(start)}" x2="${x(end)}" y1="${y(v)}" y2="${y(v)}" stroke="${colour}" stroke-width="2" stroke-dasharray="2 3"/><text x="${x(start) + 3}" y="${y(v) - 4}" fill="${colour}">${Math.round(v * 100)}%</text>`).join('')}`;
+        }).join('');
+      }).join('')}
+      ${Array.from({ length: 5 }, (_, i) => end * i / 4).map((t) => `<text x="${x(t)}" y="252" text-anchor="middle">${(t / 24).toFixed(1)} d</text>`).join('')}
       ${[0, 0.5, 1].map((v) => `<line x1="${left}" x2="${left + innerW}" y1="${y(v)}" y2="${y(v)}" stroke="#64717c" stroke-dasharray="3 4"/><text x="35" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text>`).join('')}
       <polyline points="${line('gal4')}" fill="none" stroke="#e8b064" stroke-width="2" stroke-dasharray="5 3"/>
       <polyline points="${line('protein')}" fill="none" stroke="#8bc7e6" stroke-width="3"/>
-    </svg><p class="plot-key"><span>Dashed amber: GAL4 activity</span><span>Solid blue: target protein</span><span>Elapsed time: ${(end / 24).toFixed(1)} days; eclosion at ${(sim.eclosion / 24).toFixed(1)} days</span></p>`;
+    </svg><p class="plot-key"><span>Shading and dotted thresholds: assessed windows</span><span>Dashed amber: GAL4 activity</span><span>Solid blue: target protein</span><span>Elapsed time: ${(end / 24).toFixed(1)} days; eclosion at ${(sim.eclosion / 24).toFixed(1)} days</span></p>`;
+  }
+
+  function screenPlot(dose, lines, goal) {
+    const cap = goal.maxLines, x = (n) => 45 + 650 * n / cap, y = (p) => 175 - 150 * p;
+    return `<svg class="screen-plot target-plot" viewBox="0 0 760 220" role="img" aria-label="Coverage versus independent lines for each mutagenesis preset">
+      ${[0, 0.5, 1].map((p) => `<line x1="45" x2="695" y1="${y(p)}" y2="${y(p)}" stroke="#64717c"/><text x="38" y="${y(p) + 4}" text-anchor="end">${p * 100}%</text>`).join('')}
+      <line class="coverage-threshold" x1="45" x2="695" y1="${y(goal.minHit)}" y2="${y(goal.minHit)}" stroke="#c7b5ed" stroke-dasharray="4 3"/>
+      ${DOSES.map((d, i) => `<polyline points="${Array.from({ length: 61 }, (_, k) => { const n = cap * k / 60; return `${x(n)},${y(screenStats(d.mM, n).hitGene)}`; }).join(' ')}" fill="none" stroke="${['#8bca9b', '#8bc7e6', '#e8b064'][i]}" stroke-width="${d.mM === dose ? 4 : 2}"/>`).join('')}
+      ${[0, cap / 2, cap].map((n) => `<text x="${x(n)}" y="194" text-anchor="middle">${Math.round(n).toLocaleString('en-GB')}</text>`).join('')}
+      <text x="370" y="214" text-anchor="middle">Independent chromosome lines (up to room capacity)</text>
+      ${lines <= cap ? `<circle cx="${x(lines)}" cy="${y(screenStats(dose, lines).hitGene)}" r="5" fill="white"><title>Your plan</title></circle>` : ''}
+      </svg><p class="plot-key">Green: low · Blue: standard · Amber: high. Thick line: your preset. Dotted line: required coverage.</p>
+      <table class="counts screen-comparison"><caption>Same ${lines.toLocaleString('en-GB')} lines: compare mutation burden and workload</caption><thead><tr><th>Preset</th><th>Coverage</th><th>Multiple hits among lethal lines</th><th>Expected lethal lines</th><th>Maintenance vials</th></tr></thead><tbody>${DOSES.map((d) => { const st = screenStats(d.mM, lines); return `<tr><th>${esc(d.label)}</th><td>${(st.hitGene * 100).toFixed(1)}%</td><td>${(st.multiShare * 100).toFixed(1)}%</td><td>${st.lethalLines.toFixed(0)}</td><td>${st.vials.toLocaleString('en-GB')}</td></tr>`; }).join('')}</tbody></table>`;
   }
 
   // ---- step renderers: each returns HTML and an optional wire(el) ------------------
@@ -171,8 +199,8 @@ export function mountLesson(root, id, { onExit, onAction }) {
         ${s.revealed ? `<p class="feedback ${s.firstTry ? 'right' : ''}" role="status">${s.firstTry ? 'Spot on. ' : ''}${esc(step.explain)}${dead > 0 ? ` (${fractionLabel(dead)} of the fertilised eggs die.)` : ''}</p>` : ''}`;
       return { html, wire(el) {
         el.querySelectorAll('[data-frac]').forEach((b) => b.addEventListener('click', () => { s.guess[b.dataset.row] = b.dataset.frac; s.checked = false; render(); }));
-        el.querySelector('[data-hint]')?.addEventListener('click', () => { s.hint = true; render(); });
-        el.querySelector('[data-reveal]')?.addEventListener('click', () => { s.revealed = true; s.done = true; render(); });
+        el.querySelector('[data-hint]')?.addEventListener('click', () => { s.hint = true; s.assisted = true; render(); });
+        el.querySelector('[data-reveal]')?.addEventListener('click', () => { s.revealed = true; s.done = true; s.assisted = true; render(); });
         el.querySelector('[data-check]')?.addEventListener('click', () => {
           const ok = options.every((o) => near(FRACTIONS.find((f) => f.label === s.guess[o.label]).value, o.p));
           s.attempts = (s.attempts || 0) + 1;
@@ -244,7 +272,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
           else s.tries = (s.tries || 0) + 1;
           render();
         });
-        el.querySelector('[data-reveal]')?.addEventListener('click', () => { s.done = true; s.revealed = true; render(); });
+        el.querySelector('[data-reveal]')?.addEventListener('click', () => { s.done = true; s.revealed = true; s.assisted = true; render(); });
       } };
     },
 
@@ -338,24 +366,45 @@ export function mountLesson(root, id, { onExit, onAction }) {
     },
 
     threepoint(step, s) {
+      if (s.caseSeed !== undefined) step = threePointPractice(step, s.caseSeed);
       const data = threePointData(step);
-      s.parental ||= []; s.dco ||= []; s.values ||= {};
+      s.parental ||= []; s.dco ||= []; s.values ||= {}; s.interval1 ||= []; s.interval2 ||= [];
       const mark = (rows) => [...rows].sort((a, b) => a - b).join(',');
       const hap = (mutant) => step.shown.map((g) => mutant[g] ? g : '+');
       const diagram = researchDiagram([hap(step.phase), hap(Object.fromEntries(step.shown.map((g) => [g, !step.phase[g]])))],
         `X(${hap(step.phase).join(' ')}) / X(${hap(Object.fromEntries(step.shown.map((g) => [g, !step.phase[g]]))).join(' ')})`, 'Maternal X homologs · loci listed alphabetically, not in map order');
-      const html = `<p>${esc(step.intro)}</p>${diagram}
+      const comparisons = data.dco.map((i) => {
+        const d = data.counts[i], p = data.counts[data.parental.find((j) => step.order.filter((g) => d.mutant[g] !== data.counts[j].mutant[g]).length === 1)];
+        return `<div class="allele-comparison"><span>Parental → DCO</span>${step.order.map((g) => `<span class="${g === data.middle ? 'changed-allele' : ''}">${p.mutant[g] ? g : '+'} → ${d.mutant[g] ? g : '+'}${g === data.middle ? ' (changed)' : ''}</span>`).join('')}</div>`;
+      }).join('');
+      const correctRows = (interval) => data.counts.map((c, i) => c.kind === interval || c.kind === 'D' ? i : -1).filter((i) => i >= 0);
+      const html = `<p>${esc(step.intro)}</p>${diagram}<button type="button" data-fresh-map>Try a fresh chromosome phase and sample</button>${s.practice ? '<p class="secondary">Fresh case: solve without worked-answer support to record independent practice.</p>' : ''}
         <div class="research-table-wrap"><table class="counts mapping-counts"><caption>Sons: each reads one maternal X chromosome</caption><thead><tr><th>Class</th>${step.shown.map((g) => `<th>${esc(g)}</th>`).join('')}<th>Count</th><th>Your class assignment</th></tr></thead><tbody>${data.counts.map((row, i) => `<tr><th scope="row">${esc(row.label)}</th>${step.shown.map((g) => `<td>${row.mutant[g] ? esc(g) : '+'}</td>`).join('')}<td>${row.n}</td><td><div class="tool-row">${['parental', 'dco'].map((kind) => `<button type="button" data-map-row="${i}" data-map-kind="${kind}" aria-pressed="${s[kind].includes(i)}" class="${s[kind].includes(i) ? 'on' : ''}" ${s.ordered ? 'disabled' : ''}>${kind === 'parental' ? 'Parental' : 'Double crossover'}</button>`).join('')}</div></td></tr>`).join('')}</tbody><tfoot><tr><th colspan="4">Total sons</th><td>${step.n}</td><td></td></tr></tfoot></table></div>
         <label class="answer">Middle gene <select data-middle ${s.ordered ? 'disabled' : ''}><option value="">Choose…</option>${step.shown.map((g) => `<option value="${g}" ${s.middle === g ? 'selected' : ''}>${esc(TP_GENES[g].name)} (${g})</option>`).join('')}</select></label>
         ${s.ordered ? '' : `<div class="tool-row"><button type="button" class="primary" data-check-order>Check classes and order</button>${s.orderTries ? '<button type="button" data-reveal-order>Show me the chromosome comparison</button>' : ''}</div>`}
+        ${s.orderTries ? checksHTML([
+          {text: mark(s.parental) === mark(data.parental) ? 'Parental pair: correct' : 'Parental pair: match the maternal homologs; these are the two largest classes here.', ok: mark(s.parental) === mark(data.parental)},
+          {text: mark(s.dco) === mark(data.dco) ? 'Double-crossover pair: correct' : 'DCO pair: identify the two rarest reciprocal classes in this sample.', ok: mark(s.dco) === mark(data.dco)},
+          {text: s.middle === data.middle ? 'Middle locus: correct' : 'Middle locus: compare a DCO with the parental chromosome sharing its two outside alleles.', ok: s.middle === data.middle},
+        ]) : ''}
         ${s.orderTries && !s.ordered ? '<p class="feedback wrong" role="status">Choose two parental classes and two double-crossover classes. Compare their maternal X chromosomes: only the middle allele changes when the two outside alleles return to their parental arrangement.</p>' : ''}
         ${s.ordered ? `<p class="feedback right">The maternal X order is ${step.order.join(' — ')} (the reverse order describes the same map). Compare each double-crossover chromosome with its closest parental chromosome: ${data.middle} changes while the outside alleles match.</p>
-          <p>Compute each interval distance from single crossovers in that interval plus BOTH double-crossover classes. Then compute observed DCO / expected DCO, where expected DCO = total × interval fraction I × interval fraction II.</p>
+          ${comparisons}<p>Compute each interval distance from single crossovers in that interval plus BOTH double-crossover classes. Then compute observed DCO / expected DCO, where expected DCO = total × interval fraction I × interval fraction II.</p>
+          <table class="counts interval-rows"><caption>Select recombinant chromosomes for each interval. Each DCO belongs to both.</caption><thead><tr><th>Class (count)</th><th>${step.order[0]}–${step.order[1]}</th><th>${step.order[1]}–${step.order[2]}</th></tr></thead><tbody>${data.counts.map((row, i) => `<tr><th>${esc(row.label)} (${row.n})</th>${[1, 2].map((k) => `<td><input type="checkbox" aria-label="${esc(row.label)}, interval ${k}" data-interval="${k}" data-interval-row="${i}" ${s['interval' + k].includes(i) ? 'checked' : ''} ${s.done ? 'disabled' : ''}/></td>`).join('')}</tr>`).join('')}</tbody></table>
+          ${[1, 2].map((k) => `<p>Interval ${k}: selected total = ${s['interval' + k].reduce((n, i) => n + data.counts[i].n, 0)} / ${step.n}</p>`).join('')}
           <div class="map-answers">${[['d1', `${step.order[0]}–${step.order[1]} distance (cM)`], ['d2', `${step.order[1]}–${step.order[2]} distance (cM)`], ['coc', 'Coefficient of coincidence']].map(([key, label]) => `<label class="answer">${esc(label)}<input type="number" step="any" data-map-value="${key}" value="${esc(s.values[key] ?? '')}" ${s.done ? 'disabled' : ''}/></label>`).join('')}</div>
           ${s.done ? '' : `<div class="tool-row"><button type="button" class="primary" data-check-map>Check map</button>${s.mapTries ? '<button type="button" data-reveal-map>Show the calculation</button>' : ''}</div>`}
-          ${s.mapTries && !s.done ? '<p class="feedback wrong" role="status">Count exchanges on the maternal chromosomes separately for each interval. Double crossovers count in both. Use the measured interval fractions, rather than reference map values, to calculate expected double crossovers.</p>' : ''}
+          ${s.mapTries && !s.done ? '<p class="feedback wrong" role="status">Check your selected rows as well as your numbers. Count exchanges on the maternal chromosomes separately for each interval. Double crossovers count in both. Use the measured interval fractions, rather than reference map values, to calculate expected double crossovers.</p>' : ''}
           ${s.done ? `<p class="feedback right" role="status">${step.order[0]}–${step.order[1]}: ${data.d1.toFixed(2)} cM; ${step.order[1]}–${step.order[2]}: ${data.d2.toFixed(2)} cM. Observed DCO = ${data.dco.reduce((t, i) => t + data.counts[i].n, 0)}; expected = ${data.expectedDco.toFixed(2)}. Coefficient = ${data.coc.toFixed(3)}; interference = ${(1 - data.coc).toFixed(3)}. ${esc(step.explain)}</p>` : ''}` : ''}`;
       return { html, wire(el) {
+        el.querySelector('[data-fresh-map]').addEventListener('click', () => {
+          const caseSeed = ((s.caseSeed ?? step.seed) + 7919) >>> 0;
+          Object.keys(s).forEach((k) => delete s[k]); Object.assign(s, { caseSeed, practice: true, done: false }); render();
+        });
+        el.querySelectorAll('[data-interval]').forEach((input) => input.addEventListener('change', () => {
+          const key = 'interval' + input.dataset.interval, row = Number(input.dataset.intervalRow);
+          s[key] = input.checked ? [...s[key], row] : s[key].filter((i) => i !== row); render();
+        }));
         el.querySelectorAll('[data-map-row]').forEach((b) => b.addEventListener('click', () => {
           const row = Number(b.dataset.mapRow), kind = b.dataset.mapKind, other = kind === 'parental' ? 'dco' : 'parental';
           s[kind] = s[kind].includes(row) ? s[kind].filter((i) => i !== row) : [...s[kind], row];
@@ -366,73 +415,75 @@ export function mountLesson(root, id, { onExit, onAction }) {
           s.orderTries = (s.orderTries || 0) + 1;
           s.ordered = mark(s.parental) === mark(data.parental) && mark(s.dco) === mark(data.dco) && s.middle === data.middle; render();
         });
-        el.querySelector('[data-reveal-order]')?.addEventListener('click', () => { s.parental = [...data.parental]; s.dco = [...data.dco]; s.middle = data.middle; s.ordered = true; render(); });
+        el.querySelector('[data-reveal-order]')?.addEventListener('click', () => { s.parental = [...data.parental]; s.dco = [...data.dco]; s.middle = data.middle; s.ordered = true; s.assisted = true; render(); });
         el.querySelectorAll('[data-map-value]').forEach((input) => input.addEventListener('input', () => { s.values[input.dataset.mapValue] = input.value; }));
         el.querySelector('[data-check-map]')?.addEventListener('click', () => {
           s.mapTries = (s.mapTries || 0) + 1;
-          s.done = numberOK(s.values.d1, data.d1, 0.1) && numberOK(s.values.d2, data.d2, 0.1) && numberOK(s.values.coc, data.coc, 0.02); render();
+          s.done = mark(s.interval1) === mark(correctRows('I')) && mark(s.interval2) === mark(correctRows('II')) && numberOK(s.values.d1, data.d1, 0.1) && numberOK(s.values.d2, data.d2, 0.1) && numberOK(s.values.coc, data.coc, 0.02); render();
         });
-        el.querySelector('[data-reveal-map]')?.addEventListener('click', () => { s.values = { d1: data.d1.toFixed(2), d2: data.d2.toFixed(2), coc: data.coc.toFixed(3) }; s.done = true; render(); });
+        el.querySelector('[data-reveal-map]')?.addEventListener('click', () => { s.assisted = true; s.interval1 = correctRows('I'); s.interval2 = correctRows('II'); s.values = { d1: data.d1.toFixed(2), d2: data.d2.toFixed(2), coc: data.coc.toFixed(3) }; s.done = true; render(); });
       } };
     },
 
     clones(step, s) {
       s.round ??= SHOCK_TIMES[3].round; s.minutes ??= 30;
-      const result = s.result;
-      const goals = [
-        ...(step.goal.minClones === undefined ? [] : [{ text: `At least ${step.goal.minClones} visible mutant clones`, ok: result && result.clones >= step.goal.minClones }]),
-        ...(step.goal.maxClones === undefined ? [] : [{ text: `At most ${step.goal.maxClones} visible mutant clones`, ok: result && result.clones <= step.goal.maxClones }]),
-        ...(step.goal.minLargest === undefined ? [] : [{ text: `Largest mutant clone ≥ ${step.goal.minLargest} cells`, ok: result && result.largest >= step.goal.minLargest }]),
-        ...(step.goal.maxMean === undefined ? [] : [{ text: `Mean mutant clone ≤ ${step.goal.maxMean} cells`, ok: result && result.clones > 0 && result.meanSize <= step.goal.maxMean }]),
-      ];
+      const cohort = (round = s.round, minutes = s.minutes) => cloneCohort({ round,
+        p: SHOCK_LENGTHS.find((l) => l.minutes === minutes).p, seed: step.seed, goal: step.goal });
+      if (s.ran && !s.result) s.result = cohort();
+      const sample = s.result, result = sample?.disc;
       const diagram = researchDiagram([['centromere', 'FRT', 'm'], ['centromere', 'FRT', '+']], 'FRT m / FRT + → m/m and +/+ daughter lineages', 'One heterozygous chromosome-arm pair');
-      const disc = result ? `<div class="clone-view"><svg viewBox="0 0 ${result.size} ${result.size}" role="img" aria-label="Model disc: purple mutant clones, green reciprocal twins, grey heterozygous tissue">${result.cells.map((c, i) => c.inside ? `<rect x="${i % result.size}" y="${Math.floor(i / result.size)}" width="0.96" height="0.96" fill="${['#c48fc7', '#53616a', '#8bca9b'][c.geno]}"/>` : '').join('')}</svg><div><p class="clone-key"><span>■ m/m · purple</span><span>■ +/+ twins · green</span><span>■ m/+ · grey</span></p><dl><div><dt>Visible mutant clones</dt><dd>${result.clones}</dd></div><div><dt>Mean mutant clone size</dt><dd>${result.meanSize.toFixed(1)} cells</dd></div><div><dt>Largest mutant clone</dt><dd>${result.largest} cells</dd></div><div><dt>Mutant share of disc</dt><dd>${(result.mutantShare * 100).toFixed(1)}%</dd></div></dl></div></div>` : '';
-      return { html: `<p>${esc(step.intro)}</p>${diagram}<div class="research-controls"><label>Heat-shock age<select data-clone-round>${SHOCK_TIMES.map((t) => `<option value="${t.round}" ${s.round === t.round ? 'selected' : ''}>${t.hours} h after egg laying</option>`).join('')}</select></label><label>Heat-shock duration<select data-clone-length>${SHOCK_LENGTHS.map((l) => `<option value="${l.minutes}" ${s.minutes === l.minutes ? 'selected' : ''}>${l.minutes} min</option>`).join('')}</select></label></div><div class="tool-row"><button type="button" class="primary" data-clone-run>Induce and dissect</button>${s.tries && !s.done ? '<button type="button" data-clone-example>Show a working plan</button>' : ''}</div>${disc}${checksHTML(goals)}${s.tries && result ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'The chromosome exchanges did not give the required patch sizes and number. Earlier induction leaves more divisions to expand a lineage; later induction reaches more dividing cells. Adjust age and duration, then dissect again.')}</p>` : ''}`, wire(el) {
-        const reset = () => { s.result = null; s.done = false; render(); };
+      const disc = result ? `<div class="clone-view"><svg viewBox="0 0 ${result.size} ${result.size}" role="img" aria-label="First independent disc: purple mutant clones, green reciprocal twins, grey heterozygous tissue">${result.cells.map((c, i) => c.inside ? `<rect x="${i % result.size}" y="${Math.floor(i / result.size)}" width="0.96" height="0.96" fill="${['#c48fc7', '#53616a', '#8bca9b'][c.geno]}"/>` : '').join('')}</svg><div><p>Disc 1 shown: purple m/m, green +/+, grey m/+.</p><p>Same plan, eight independent discs. Variation comes from chromosome-exchange events and lineage growth.</p><strong>${sample.met} / ${sample.count} discs meet the goal</strong><p>Observed success ${(sample.met / sample.count * 100).toFixed(0)}% in this small model sample; this is not a calibrated laboratory success rate.</p></div></div>
+        <table class="counts clone-replicates"><caption>Independent dissections: compare the spread, not just disc 1</caption><thead><tr><th>Disc</th><th>Clones</th><th>Mean size (cells)</th><th>Largest (cells)</th></tr></thead><tbody>${sample.summaries.map((d, i) => `<tr><th>${i + 1}</th><td>${d.clones}</td><td>${d.meanSize.toFixed(1)}</td><td>${d.largest}</td></tr>`).join('')}</tbody></table>` : '';
+      const prediction = `<label class="answer">Before dissecting: earlier induction usually produces…<select data-clone-prediction><option value="">Choose a prediction…</option><option value="larger" ${s.prediction === 'larger' ? 'selected' : ''}>Larger individual clones</option><option value="smaller" ${s.prediction === 'smaller' ? 'selected' : ''}>Smaller individual clones</option></select></label>`;
+      return { html: `<p>${esc(step.intro)}</p><p>Plan for at least four of eight independent discs to meet those tissue goals. A single lucky disc is insufficient.</p>${diagram}${prediction}<div class="research-controls"><label>Heat-shock age<select data-clone-round>${SHOCK_TIMES.map((t) => `<option value="${t.round}" ${s.round === t.round ? 'selected' : ''}>${t.hours} h after egg laying</option>`).join('')}</select></label><label>Heat-shock duration<select data-clone-length>${SHOCK_LENGTHS.map((l) => `<option value="${l.minutes}" ${s.minutes === l.minutes ? 'selected' : ''}>${l.minutes} min</option>`).join('')}</select></label></div><div class="tool-row"><button type="button" class="primary" data-clone-run ${s.prediction ? '' : 'disabled'}>Induce and dissect eight discs</button>${s.tries && !s.done ? '<button type="button" data-clone-example>Show a working plan</button>' : ''}</div>${disc}${checksHTML([{ text: 'Earlier chromosome exchange leaves more divisions for a larger lineage', ok: s.prediction === 'larger' }, { text: 'At least 4 of 8 discs meet the tissue goals', ok: sample && sample.met >= 4 }])}${s.tries && sample ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'Earlier induction leaves more divisions to expand each lineage; later induction reaches more dividing cells. Compare all eight discs and revise your prediction or plan.')}</p>` : ''}`, wire(el) {
+        const reset = () => { s.result = null; s.ran = false; s.done = false; render(); };
+        el.querySelector('[data-clone-prediction]').addEventListener('change', (e) => { s.prediction = e.target.value; reset(); });
         el.querySelector('[data-clone-round]').addEventListener('change', (e) => { s.round = Number(e.target.value); reset(); });
         el.querySelector('[data-clone-length]').addEventListener('change', (e) => { s.minutes = Number(e.target.value); reset(); });
-        const run = () => { s.result = cloneTissue({ round: s.round, p: SHOCK_LENGTHS.find((l) => l.minutes === s.minutes).p, seed: step.seed }); s.tries = (s.tries || 0) + 1; s.done = cloneGoalMet(s.result, step.goal); render(); };
+        const run = () => { s.ran = true; s.result = cohort(); s.tries = (s.tries || 0) + 1; s.done = s.result.met >= 4 && s.prediction === 'larger'; render(); };
         el.querySelector('[data-clone-run]').addEventListener('click', run);
         el.querySelector('[data-clone-example]')?.addEventListener('click', () => {
-          const plan = SHOCK_TIMES.flatMap((t) => SHOCK_LENGTHS.map((l) => ({ round: t.round, minutes: l.minutes, result: cloneTissue({ round: t.round, p: l.p, seed: step.seed }) }))).find((x) => cloneGoalMet(x.result, step.goal));
-          s.round = plan.round; s.minutes = plan.minutes; run();
+          const plan = SHOCK_TIMES.flatMap((t) => SHOCK_LENGTHS.map((l) => ({ round: t.round, minutes: l.minutes }))).find((x) => cohort(x.round, x.minutes).met >= 4);
+          s.assisted = true; s.prediction = 'larger'; s.round = plan.round; s.minutes = plan.minutes; run();
         });
       } };
     },
 
     target(step, s) {
       s.temps ||= Object.fromEntries(STAGES.map((stage) => [stage.id, 18]));
+      if (s.ran && !s.sim) s.sim = simulateTarget(s.temps);
       const sim = s.sim, checks = sim ? targetChecks(sim, step.goal) : step.goal.checks.map((c) => ({ text: c.text, ok: false }));
       const diagram = researchDiagram([['GAL4 driver'], ['UAS-RNAi'], ['GAL80ts repressor']], 'GAL4, UAS-RNAi and GAL80ts present (insertion sites unspecified)', 'Genetic tools retained throughout the schedule');
-      return { html: `<p>${esc(step.intro)}</p>${diagram}<div class="temperature-schedule">${STAGES.map((stage) => `<label>${esc(stage.label)}<select data-temp="${stage.id}">${[18, 29].map((t) => `<option value="${t}" ${s.temps[stage.id] === t ? 'selected' : ''}>${t} °C</option>`).join('')}</select></label>`).join('')}</div><div class="tool-row"><button type="button" class="primary" data-target-run>Simulate schedule</button>${s.tries && !s.done ? '<button type="button" data-target-example>Show a working schedule</button>' : ''}</div>${sim ? targetPlot(sim) : ''}${checksHTML(checks)}${s.tries && sim ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'The transgenes stay in the fly, but their activity and the target protein change at different rates. Check which stage window fails and adjust the temperature schedule.')}</p>` : ''}`, wire(el) {
-        el.querySelectorAll('[data-temp]').forEach((select) => select.addEventListener('change', () => { s.temps[select.dataset.temp] = Number(select.value); s.sim = null; s.done = false; render(); }));
-        const run = () => { s.sim = simulateTarget(s.temps); s.tries = (s.tries || 0) + 1; s.done = targetChecks(s.sim, step.goal).every((c) => c.ok); render(); };
+      return { html: `<p>${esc(step.intro)}</p>${diagram}<div class="temperature-schedule">${STAGES.map((stage) => `<label>${esc(stage.label)}<select data-temp="${stage.id}">${[18, 29].map((t) => `<option value="${t}" ${s.temps[stage.id] === t ? 'selected' : ''}>${t} °C</option>`).join('')}</select></label>`).join('')}</div><div class="tool-row"><button type="button" class="primary" data-target-run>Simulate schedule</button>${s.tries && !s.done ? '<button type="button" data-target-example>Show a working schedule</button>' : ''}</div>${checksHTML(checks)}${sim ? targetPlot(sim, step.goal) : ''}${s.tries && sim ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'The transgenes stay in the fly, but their activity and the target protein change at different rates. Check which stage window fails and adjust the temperature schedule.')}</p>` : ''}`, wire(el) {
+        el.querySelectorAll('[data-temp]').forEach((select) => select.addEventListener('change', () => { s.temps[select.dataset.temp] = Number(select.value); s.sim = null; s.ran = false; s.done = false; render(); }));
+        const run = () => { s.ran = true; s.sim = simulateTarget(s.temps); s.tries = (s.tries || 0) + 1; s.done = targetChecks(s.sim, step.goal).every((c) => c.ok); render(); };
         el.querySelector('[data-target-run]').addEventListener('click', run);
         el.querySelector('[data-target-example]')?.addEventListener('click', () => {
-          s.temps = Array.from({ length: 1 << STAGES.length }, (_, bits) => Object.fromEntries(STAGES.map((stage, i) => [stage.id, bits & (1 << i) ? 29 : 18]))).find((temps) => targetChecks(simulateTarget(temps), step.goal).every((c) => c.ok)); run();
+          s.assisted = true; s.temps = Array.from({ length: 1 << STAGES.length }, (_, bits) => Object.fromEntries(STAGES.map((stage, i) => [stage.id, bits & (1 << i) ? 29 : 18]))).find((temps) => targetChecks(simulateTarget(temps), step.goal).every((c) => c.ok)); run();
         });
       } };
     },
 
     screen(step, s) {
       s.dose ??= 35; s.lines ??= '1000';
+      if (s.ran && !s.result) s.result = screenStats(s.dose, Number(s.lines));
       const result = s.result;
       const resultHTML = result ? `<dl class="screen-stats"><div><dt>Chance of at least one target-gene allele</dt><dd>${(result.hitGene * 100).toFixed(3)}%</dd></div><div><dt>Expected lethal lines</dt><dd>${result.lethalLines.toFixed(1)}</dd></div><div><dt>Multiple-hit share among lethal lines</dt><dd>${(result.multiShare * 100).toFixed(1)}%</dd></div><div><dt>Maintenance vials</dt><dd>${result.vials.toLocaleString('en-GB')}</dd></div></dl>${checksHTML(screenChecks(s.dose, Number(s.lines), step.goal))}` : '';
-      return { html: `<p>${esc(step.intro)}</p>${fly('w/w; mut/CyO; +/+', { chroms: ['2'], caption: 'One independent mutagenised chromosome maintained over CyO' })}<div class="research-controls"><label>Mutagenesis preset<select data-dose>${DOSES.map((d) => `<option value="${d.mM}" ${s.dose === d.mM ? 'selected' : ''}>${esc(d.label)}</option>`).join('')}</select></label><label>Independent lines<input type="number" min="1" step="1" data-lines value="${esc(s.lines)}"/></label></div><div class="tool-row"><button type="button" class="primary" data-screen-run>Evaluate screen plan</button>${s.tries && !s.done ? '<button type="button" data-screen-example>Show a feasible plan</button>' : ''}</div>${resultHTML}${s.invalid ? '<p class="feedback wrong" role="status">Enter a positive whole number of independent chromosome lines.</p>' : s.tries ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'Check all three constraints. More independent chromosomes improve coverage, but cannot fix the fraction carrying multiple lethal hits at a given preset.')}</p>` : ''}`, wire(el) {
-        el.querySelector('[data-dose]').addEventListener('change', (e) => { s.dose = Number(e.target.value); s.result = null; s.done = false; render(); });
-        el.querySelector('[data-lines]').addEventListener('input', (e) => { s.lines = e.target.value; s.result = null; s.done = false; s.invalid = false; el.querySelectorAll('.screen-stats, .goal-checks, .feedback').forEach((node) => node.remove()); el.querySelector('[data-next], [data-finish]').disabled = true; });
-        const run = () => { const n = Number(s.lines); s.invalid = !String(s.lines).trim() || !Number.isSafeInteger(n) || n < 1; s.tries = (s.tries || 0) + 1; s.result = s.invalid ? null : screenStats(s.dose, n); s.done = !s.invalid && screenChecks(s.dose, n, step.goal).every((c) => c.ok); render(); };
+      return { html: `<p>${esc(step.intro)}</p>${fly('w/w; mut/CyO; +/+', { chroms: ['2'], caption: 'One independent mutagenised chromosome maintained over CyO' })}<div class="research-controls"><label>Mutagenesis preset<select data-dose>${DOSES.map((d) => `<option value="${d.mM}" ${s.dose === d.mM ? 'selected' : ''}>${esc(d.label)}</option>`).join('')}</select></label><label>Independent lines<input type="number" min="1" step="1" data-lines value="${esc(s.lines)}"/></label></div><div class="tool-row"><button type="button" class="primary" data-screen-run>Evaluate screen plan</button>${s.tries && !s.done ? '<button type="button" data-screen-example>Show a feasible plan</button>' : ''}</div>${resultHTML}${result ? screenPlot(s.dose, Number(s.lines), step.goal) : ''}${s.invalid ? '<p class="feedback wrong" role="status">Enter a positive whole number of independent chromosome lines.</p>' : s.tries ? `<p class="feedback ${s.done ? 'right' : 'wrong'}" role="status">${esc(s.done ? step.explain : 'Check all three constraints. More independent chromosomes improve coverage, but cannot fix the fraction carrying multiple lethal hits at a given preset.')}</p>` : ''}`, wire(el) {
+        el.querySelector('[data-dose]').addEventListener('change', (e) => { s.dose = Number(e.target.value); s.result = null; s.ran = false; s.done = false; render(); });
+        el.querySelector('[data-lines]').addEventListener('input', (e) => { s.lines = e.target.value; s.result = null; s.ran = false; s.done = false; s.invalid = false; el.querySelectorAll('.screen-stats, .screen-plot, .screen-comparison, .plot-key, .goal-checks, .feedback').forEach((node) => node.remove()); el.querySelector('[data-next], [data-finish]').disabled = true; });
+        const run = () => { const n = Number(s.lines); s.invalid = !String(s.lines).trim() || !Number.isSafeInteger(n) || n < 1; s.tries = (s.tries || 0) + 1; s.ran = !s.invalid; s.result = s.invalid ? null : screenStats(s.dose, n); s.done = !s.invalid && screenChecks(s.dose, n, step.goal).every((c) => c.ok); render(); };
         el.querySelector('[data-screen-run]').addEventListener('click', run);
         el.querySelector('[data-screen-example]')?.addEventListener('click', () => {
           const plan = DOSES.map((d) => ({ dose: d.mM, n: Math.ceil(Math.log(1 - step.goal.minHit) / Math.log(1 - d.lambda * PER_GENE)) })).find((p) => screenChecks(p.dose, p.n, step.goal).every((c) => c.ok));
-          s.dose = plan.dose; s.lines = String(plan.n); run();
+          s.assisted = true; s.dose = plan.dose; s.lines = String(plan.n); run();
         });
       } };
     },
 
     go(step) {
       return { html: `${paras(step.body)}<button type="button" class="primary big" data-go>${esc(step.action.label)}</button>`, ready: true,
-        wire(el) { el.querySelector('[data-go]').addEventListener('click', () => { progress.complete(id); onAction(step.action); }); } };
+        wire(el) { el.querySelector('[data-go]').addEventListener('click', () => { complete(); onAction(step.action); }); } };
     },
   };
 
@@ -455,18 +506,25 @@ export function mountLesson(root, id, { onExit, onAction }) {
     root.innerHTML = `<article class="lesson" data-step-type="${step.type}">
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button>
         <div><span class="eyebrow">${esc(lesson.title)}</span><h2>${esc(heading)}</h2></div>
-        <ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
-      <div class="lesson-body">${out.html}${last && s.done ? finishHTML() : ''}</div>
+        <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
+      <div class="lesson-body">${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
       ${lesson.model ? `<details class="support about lesson-model"><summary>About this model</summary>${paras(lesson.model)}</details>` : ''}
       <footer class="lesson-foot"><button type="button" data-back ${index === 0 ? 'disabled' : ''}>Back</button>
         <span class="secondary">${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>
         ${last ? (step.type === 'go' ? '<button type="button" data-finish>Back to course</button>' : `<button type="button" class="primary" data-finish ${s.done ? '' : 'disabled'}>Finish</button>`)
           : `<button type="button" class="primary" data-next ${s.done ? '' : 'disabled'}>Next</button>`}</footer></article>`;
     out.wire?.(root);
+    root.querySelectorAll('input, select, textarea').forEach((input) => {
+      input.addEventListener('input', save); input.addEventListener('change', save);
+    });
+    root.querySelector('[data-restart]').addEventListener('click', () => {
+      index = 0; state = lesson.steps.map(() => ({ done: false })); diagnosticAnswers = []; render();
+    });
+    save();
     root.querySelector('[data-exit]').addEventListener('click', onExit);
     root.querySelector('[data-back]').addEventListener('click', () => { index--; render(); });
     root.querySelector('[data-next]')?.addEventListener('click', () => { index++; render(); root.scrollTop = 0; });
-    root.querySelector('[data-finish]')?.addEventListener('click', () => { if (s.done) progress.complete(id); onExit(); });
+    root.querySelector('[data-finish]')?.addEventListener('click', () => { if (state.every((x) => x.done)) complete(); onExit(); });
     root.querySelector('[data-start]')?.addEventListener('click', (e) => { progress.complete(id); onAction({ kind: 'lesson', id: e.currentTarget.dataset.start }); });
   }
 

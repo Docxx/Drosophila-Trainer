@@ -47,8 +47,8 @@ with a Punnett square that marks lethal cells, and pick-the-class steps. The adv
 lessons add select-all-that-apply questions, estimates worked out from sampled counts,
 a vial-counting simulator, a step-by-step χ² table, and complementation grids with a
 deficiency map. Research steps add a three-point classification/calculation table,
-a seeded clone-disc simulator, a temperature-schedule planner with time courses,
-and a screen planner. Each choice option explains its reasoning, and the research
+an eight-disc clone experiment with replicate summaries, a temperature-schedule planner with assessed windows and thresholds,
+and a screen planner with coverage curves and preset/workload comparisons. Mapping feedback separates parental, DCO and middle-locus decisions, highlights the changed allele and checks the chromosome rows counted in each interval. Each choice option explains its reasoning, and the research
 lessons gather assumptions in an About this model panel. Changing a simulation
 plan clears its old result and relocks Next until the new plan works. Next unlocks
 once a step is worked through. Every answer a lesson checks is computed by the
@@ -58,17 +58,26 @@ genotypes are shown everywhere.
 The planner never reveals genotypes: classes are described by markers and eye colour,
 and a vial is checked only when the learner declares it the target. Feedback names the
 uncertain chromosome ("Some flies in this vial are the target, but not all") rather
-than the answer. Course progress is saved locally; notebooks are separate.
+than the answer. Course progress and unfinished lesson steps, inputs and plans are saved locally;
+notebooks are separate. Reopening an unfinished lesson resumes it; Restart lesson
+starts again. Derived tissue and temperature arrays are regenerated from saved plans.
+The hub distinguishes completion with worked support from independent fresh-case
+mapping practice; neither is a claim of laboratory competence. Fresh mapping cases
+vary phase and sampled counts while retaining the real locus order. Clones are
+assessed across eight independent seeded discs, with at least four meeting the tissue
+goal; the observed success fraction is a teaching sample, not a laboratory calibration.
+The trusted six-fly collection uses `fly-trainer.collection.v3`; earlier collection
+notebooks under v1/v2 keys are retained untouched. Cross notebooks remain v2.
 
 ## Current activities
 
-**Virgin collection:** inspect seven flies from a Canton-S vial cleared at 09:00 and
-collected at 17:00 (25 °C). Six eclosed since the clearing, at ages spread across the
-8 hours: the youngest still have folded, unexpanded wings, and the meconium shows for
-the first few hours. One older, fully pigmented fly was missed at clearing; collecting
-it is an error whatever its sex or actual history, because the record no longer
-supports it. Flies land on their sides or backs at random. Collect at least two
-virgin females, set uncertain flies aside, and declare the collection ready.
+**Virgin collection:** inspect six flies from a Canton-S vial completely cleared at
+09:00 and collected at 17:00 (25 °C). All six eclosed since that trusted clearing.
+The youngest can have folded wings and meconium, while others have already darkened
+and expanded their wings. These appearance cues cannot establish virginity or
+identify a missed adult. Use the clearing record for virginity and anatomy for sex.
+Flies land on their sides or backs at random. Collect at least two virgin females,
+set uncertain flies aside, and declare the collection ready.
 Feedback appears only after submission. Reopen the same batch
 to correct mistakes or start a new batch. Collection decisions, predictions,
 conclusions and action history are saved locally in the lab notebook, which can be
@@ -224,3 +233,9 @@ and [McGuire et al., TARGET](https://pubmed.ncbi.nlm.nih.gov/14657498/).
 
 Calendar management and individual verification/test-cross follow-ups remain
 subsequent stages.
+
+Biology corrections (8 November 2026): Drosophila Y chromosomes support male fertility,
+not sex determination ([primary study](https://pmc.ncbi.nlm.nih.gov/articles/PMC2516102/)).
+The appearance model allows wings to expand and adults to darken during the virgin
+collection interval; appearance cannot establish mating history. Timings are
+illustrative ([FlyBase-hosted teaching guide](https://flybase.org/flybase/associated_files/Experiments_with_Drosophila_for_Biology_Courses.pdf)).

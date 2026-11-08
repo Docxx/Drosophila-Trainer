@@ -101,8 +101,8 @@ function resize() {
 new ResizeObserver(resize).observe(canvas);
 
 // ---- Activities and saved notebook ------------------------------------------
-// v2: 8-hour batches with ages, poses and a holdover fly; v1 notebooks are left untouched.
-const STORAGE_KEY = 'fly-trainer.collection.v2';
+// New trusted six-fly cohort; earlier v1/v2 collection notebooks are left untouched.
+const STORAGE_KEY = 'fly-trainer.collection.v3';
 let persistenceWarning = '';
 function restoreSession() {
   try {
@@ -556,7 +556,7 @@ document.querySelector('.bench').addEventListener('click', (e) => {
   else if (act === 'hint') {
     document.getElementById('supervisor-note').textContent = mode === 'cross'
       ? (crossSession.snapshot().canReclear ? 'You cannot tell from looking whether these females have mated. When a vial’s history is unreliable, many people discard everything and clear it again.' : 'Predict daughters and sons separately: daughters get their father’s X, sons his Y. A white-eyed daughter means a white-eyed father.')
-      : 'Two questions for each fly: is it female (no sex combs on the forelegs), and is it young enough for the record? Pale colour, folded wings and a dark meconium mean a recent eclosion.';
+      : 'Use the trusted complete clearing record for virginity and foreleg anatomy for sex. Females may already be darkened and have expanded wings; colour cannot prove virginity.';
     record('hint', 'Requested a supervisor hint.');
   }
   if (['flip', 'turn', 'roll-left', 'roll-right', 'dorsal', 'lateral', 'ventral'].includes(act) && canHandle()) record('rotate', `${selected.reference.label}: inspected ${button.textContent.trim().toLowerCase()}.`);

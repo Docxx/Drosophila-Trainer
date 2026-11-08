@@ -9,9 +9,9 @@
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
-  const click = (s) => { const b = typeof s === 'string' ? $(s) : s; assert(b && !b.disabled, `Missing/disabled: ${s}`); b.click(); };
+  const click = (s) => { const b = typeof s === 'string' ? $(s) : s; assert(b && !b.disabled, `Missing/disabled: ${s}; lesson ${$('.lesson-head')?.textContent}; step ${window.course.current?.step}`); b.click(); };
   const near = (a, b) => Math.abs(a - b) < 1e-9;
-  localStorage.removeItem('fly-trainer.progress.v1');
+  progress.reset();
 
   async function solve(step) {
     if (step.type === 'choice') {
@@ -78,6 +78,9 @@
         click(`[data-judge="${fits ? 'fits' : 'reject'}"]`);
       });
     } else if (step.type === 'threepoint') {
+      const draft = progress.get().drafts.threepoint;
+      const caseSeed = draft?.state[draft.index]?.caseSeed;
+      if (caseSeed !== undefined) step = R.threePointPractice(step, caseSeed);
       const data = R.threePointData(step);
       assert(!$('[data-map-value]'), 'interval names stay hidden until order is inferred');
       click('[data-check-order]');
@@ -87,6 +90,12 @@
       const middle = $('[data-middle]'); middle.value = data.middle; middle.dispatchEvent(new Event('change'));
       click('[data-check-order]');
       assert($('[data-map-value="d1"]'), 'interval calculations unlock after correct chromosome order');
+      for (const [interval, kind] of [[1, 'I'], [2, 'II']]) {
+        data.counts.forEach((row, i) => { if (row.kind === kind || row.kind === 'D') {
+          const input = $(`[data-interval="${interval}"][data-interval-row="${i}"]`); input.checked = true; input.dispatchEvent(new Event('change'));
+        } });
+      }
+      assert($$('.changed-allele').length === 2, 'chromosome comparison highlights just the middle locus');
       const enter = (key, value) => { const input = $(`[data-map-value="${key}"]`); input.value = value; input.dispatchEvent(new Event('input')); };
       enter('d1', '0'); enter('d2', '0'); enter('coc', '0'); click('[data-check-map]');
       assert($('.feedback.wrong') && $('[data-next]').disabled, 'wrong map calculations are explained');
@@ -101,13 +110,17 @@
       click('[data-back]'); click('[data-next]');
       assert($('.mapping-counts').textContent === table && !$('[data-next]').disabled, 'Back preserves counts, assignments and completion');
     } else if (step.type === 'clones') {
+      const prediction = $('[data-clone-prediction]'); prediction.value = 'larger'; prediction.dispatchEvent(new Event('change'));
       click('[data-clone-run]'); assert($('.feedback.wrong') && $('[data-next]').disabled, 'unsuitable induction is challenged');
-      const plan = R.SHOCK_TIMES.flatMap((t) => R.SHOCK_LENGTHS.map((l) => ({ round: t.round, minutes: l.minutes, result: R.cloneTissue({ round: t.round, p: l.p, seed: step.seed }) }))).find((p) => R.cloneGoalMet(p.result, step.goal));
+      const plan = R.SHOCK_TIMES.flatMap((t) => R.SHOCK_LENGTHS.map((l) => ({ round: t.round, minutes: l.minutes, result: R.cloneCohort({ round: t.round, p: l.p, seed: step.seed, goal: step.goal }) }))).find((p) => p.result.met >= 4);
       const round = $('[data-clone-round]'); round.value = plan.round; round.dispatchEvent(new Event('change'));
       const length = $('[data-clone-length]'); length.value = plan.minutes; length.dispatchEvent(new Event('change'));
       click('[data-clone-run]');
       assert($('.clone-view svg rect') && !$('[data-next]').disabled && !$('.goal-checks .unmet'), 'disc and checks agree with a feasible model plan');
+      assert($$('.clone-replicates tbody tr').length === 8, 'eight independent discs displayed');
       const disc = $('.clone-view svg').outerHTML;
+      window.course.hub(); window.course.open('mosaics');
+      assert($('.clone-view svg').outerHTML === disc && !$('[data-next]').disabled, 'saved induction reconstructs independent discs and completion');
       click('[data-notation="both"]'); assert($('.clone-view svg').outerHTML === disc, 'notation changes do not reroll the tissue'); click('[data-notation="diagram"]');
       const changed = $('[data-clone-round]'); changed.value = R.SHOCK_TIMES[3].round; changed.dispatchEvent(new Event('change'));
       assert($('[data-next]').disabled && !$('.clone-view'), 'changing induction clears old result and completion');
@@ -118,7 +131,10 @@
       for (const [stage, temp] of Object.entries(plan)) { const select = $(`[data-temp="${stage}"]`); select.value = temp; select.dispatchEvent(new Event('change')); }
       click('[data-target-run]');
       assert($('.target-plot polyline') && !$('.goal-checks .unmet') && !$('[data-next]').disabled, 'schedule plot and stage windows are checked');
+      assert($('.checked-window') && $('.target-threshold'), 'assessed windows and thresholds visible');
       const plot = $('.target-plot').outerHTML;
+      window.course.hub(); window.course.open('target');
+      assert($('.target-plot').outerHTML === plot && !$('[data-next]').disabled, 'saved schedule reconstructs the time course and result');
       click('[data-notation="both"]'); assert($('.target-plot').outerHTML === plot, 'notation preserves the simulated time course'); click('[data-notation="diagram"]');
       const select = $('[data-temp="adult"]'); select.value = plan.adult === 18 ? 29 : 18; select.dispatchEvent(new Event('change'));
       assert($('[data-next]').disabled && !$('.target-plot'), 'changed schedule cannot retain stale completion');
@@ -131,6 +147,9 @@
       const dose = $('[data-dose]'); dose.value = plan.dose; dose.dispatchEvent(new Event('change'));
       const lines = $('[data-lines]'); lines.value = plan.n; lines.dispatchEvent(new Event('input')); click('[data-screen-run]');
       assert($('.screen-stats') && !$('.goal-checks .unmet') && !$('[data-next]').disabled, 'screen coverage, complexity and capacity all met');
+      const stats = $('.screen-stats').textContent; window.course.hub(); window.course.open('screens');
+      assert($('.screen-stats').textContent === stats && !$('[data-next]').disabled, 'saved screen plan reconstructs its statistics');
+      assert($('.screen-plot polyline') && $$('.screen-comparison tbody tr').length === 3, 'coverage curves and workload comparison');
       const changed = $('[data-lines]'); changed.value = step.goal.maxLines + 1; changed.dispatchEvent(new Event('input'));
       assert($('[data-next]').disabled && !$('.screen-stats'), 'editing screen capacity clears stale statistics');
       click('[data-screen-run]'); assert($('.goal-checks .unmet') && $('[data-next]').disabled, 'over-capacity plan fails');
@@ -158,6 +177,13 @@
     }
   }
 
+  window.course.open('threepoint'); window.course.current.goTo(2);
+  click('[data-map-row="0"][data-map-kind="parental"]');
+  const mid = $('[data-middle]'); mid.value = 'cv'; mid.dispatchEvent(new Event('change'));
+  window.course.hub(); window.course.open('threepoint');
+  assert(window.course.current.step === 2 && $('[data-map-row="0"][data-map-kind="parental"]').getAttribute('aria-pressed') === 'true' && $('[data-middle]').value === 'cv', 'unfinished lesson resumes step and unchecked answers');
+  click('[data-restart]'); assert(window.course.current.step === 0, 'explicit restart begins again');
+
   for (const id of ['inheritance', 'xlinked', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation', 'threepoint', 'mosaics', 'target', 'screens']) {
     await play(id, L.LESSON_CONTENT[id].steps.length - (L.LESSON_CONTENT[id].steps.at(-1).type === 'go' ? 1 : 0));
     if (L.LESSON_CONTENT[id].steps.at(-1).type === 'go') {
@@ -166,6 +192,15 @@
     }
     assert(progress.isDone(id), `${id} completed`);
   }
+  assert(progress.get().results.mosaics.assisted && progress.get().results.target.assisted && progress.get().results.screens.assisted, 'working plans are recorded as supported completion');
+  // Fresh mapping case transfers the method to a new phase and counts.
+  window.course.open('threepoint'); click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[1]); click('[data-next]'); click('[data-fresh-map]');
+  await solve(L.LESSON_CONTENT.threepoint.steps[2]);
+  window.course.hub(); window.course.open('threepoint');
+  assert(!$('[data-next]').disabled, 'solved fresh case resumes without losing its result');
+  click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[3]); click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[4]);
+  click('[data-finish]'); assert(progress.get().results.threepoint.independentPractice, 'fresh independent solution has a distinct saved result');
+
   // Quick check: answer everything right; it recommends the planner.
   await play('diagnostic', 5);
   await solve(L.LESSON_CONTENT.diagnostic.steps[5]);
@@ -226,8 +261,16 @@
   assert(document.body.dataset.view === 'scope' && window.scope.mode === 'exercise', 'tour hands over to Virgin collection');
   while (!window.scope.ready) await sleep(100);
 
+  window.course.open('screens'); window.course.current.goTo(2);
+  click('[data-restart]'); window.course.current.goTo(2);
+  const draftLines = $('[data-lines]'); draftLines.value = '4567'; draftLines.dispatchEvent(new Event('input'));
+  window.course.hub(); window.course.open('screens');
+  assert(window.course.current.step === 2 && $('[data-lines]').value === '4567', 'unchecked screen input survives leaving and reopening');
+
   // Leave a working temporal-control plot on screen for visual review.
   window.course.open('target'); window.course.current.goTo(2);
   await solve(L.LESSON_CONTENT.target.steps[2]);
-  return `PASS: 11 lessons (including four research techniques), bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
+  $('.target-plot').scrollIntoView({ block: 'center' });
+  assert(document.documentElement.scrollWidth <= window.innerWidth, 'lesson fits the window without horizontal overflow');
+  return `PASS: saved-step/input/model restoration, supported completion, fresh independent mapping; 11 lessons (including four research techniques), bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
 })();

@@ -15,8 +15,9 @@
       await new Promise((resolve) => setTimeout(resolve, 80));
     }
   };
-  const originalCollection = localStorage.getItem('fly-trainer.collection.v2');
-  await scope.startActivity('cross');
+  const originalCollection = localStorage.getItem('fly-trainer.collection.v3');
+  window.course.open('first-cross');
+  await ready();
   async function newBatch(scenario, { reclear = false } = {}) {
     document.getElementById('cross-scenario').value = scenario;
     click('[data-act="cross-new"]'); await ready();
@@ -28,7 +29,7 @@
       assert(scope.getSession().recleared && reclearButton.hidden, 'Re-clear must start a new batch once');
       assert(document.getElementById('cross-source-title').textContent === 'Re-cleared vial', 'Source record must show the re-clear');
       assert(/8 hours/.test(document.getElementById('cross-progress').textContent), 'The time cost must be shown');
-      assert(scope.specimens.every((s) => s.reference.stage !== 'mature'), 'A re-cleared vial holds only young flies');
+      assert(scope.specimens.length === 6, 'A re-cleared vial holds a fresh six-fly cohort; pigment is not evidence of virginity');
     }
     assert(scope.specimens.every((s) => s.reference.eye === 'white'), 'Cross mission must use its own white-eyed stock');
     assert(!/female|male/.test(document.getElementById('specimens').textContent), 'Candidate roster must not reveal sex');
@@ -91,7 +92,7 @@
   const recleared = await newBatch('uncertain', { reclear: true });
   assert(recleared.every((category) => ['red-F', 'white-M'].includes(category)), 'Your own clearing must give only virgin mothers');
   await newBatch('uncertain');
-  assert(localStorage.getItem('fly-trainer.collection.v2') === originalCollection, 'Cross mission must preserve the original collection notebook');
+  assert(localStorage.getItem('fly-trainer.collection.v3') === originalCollection, 'Cross mission must preserve the original collection notebook');
   click('[data-act="cross-previous"]'); await ready();
   scope.overview();
   const bounds = document.querySelector('.eyepiece').getBoundingClientRect();

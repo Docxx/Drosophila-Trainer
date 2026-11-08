@@ -19,7 +19,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 /** Plain-language description of one chromosome, for tooltips and screen readers. */
 export function describeHomolog(chrom, key) {
   const h = CHROMS[chrom][key];
-  if (h.isY) return 'Y chromosome (makes the fly male; carries no white gene)';
+  if (h.isY) return 'Y chromosome (carries no white gene; needed for normal male fertility, not sex determination)';
   if (key === '+') return `normal (wild-type) chromosome ${chrom}`;
   const bits = [h.label];
   if (h.balancer) bits.push('a balancer');

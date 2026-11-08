@@ -24,7 +24,7 @@ const seeds = (n) => Array.from({ length: n }, (_, i) => i + 1);
 test('documented virgins crossed to normal males produce only red daughters and white sons', () => {
   const session = new CrossSession({ seed: 21 });
   assert.equal(session.appearance.length, 6, 'The cross stock has no holdover fly');
-  assert(session.appearance.every((f) => f.stage !== 'mature'));
+  assert(session.appearance.some((f) => f.stage === 'mature'), 'Trusted virgins may already have adult pigmentation');
   setParents(session, (f) => f.sex === 'F');
   session.setPrediction('expected');
   develop(session);
@@ -107,7 +107,7 @@ test('re-clearing an uncertain vial gives a fresh documented batch at a cost of 
   assert(state.events.some((e) => /re-cleared/.test(e.detail)), 'The re-clear is recorded');
   assert(state.events.some((e) => e.action === 'mission') && state.events.some((e) => e.action === 'transfer'), 'Earlier history is kept');
   assert(state.events.findIndex((e) => e.action === 'mission') < state.events.findIndex((e) => /re-cleared/.test(e.detail)), 'Earlier history comes first');
-  assert(session.appearance.every((f) => f.stage !== 'mature'));
+  assert(session.appearance.some((f) => f.stage === 'mature'), 'Trusted virgins may already have adult pigmentation');
   assert.throws(() => session.reclear(), /uncertain/);
   setParents(session, (f) => f.sex === 'F'); develop(session);
   assert(f1(session).every((f) => f.sex === 'M' || f.eye === 'red'), 'Your own clearing yields only virgins');

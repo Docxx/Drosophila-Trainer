@@ -43,7 +43,7 @@ function hub() {
         const puzzles = l.id === 'planner' ? Object.keys(p.puzzles).length : 0;
         return `<button type="button" class="card ${done ? 'done' : ''} ${next?.id === l.id ? 'next' : ''}" data-open="${l.id}">
           <span class="eyebrow">${KIND[l.kind]}${l.practice ? ' · practice' : ''}</span><strong>${esc(l.title)}</strong><span>${esc(l.summary)}</span>
-          <span class="meta">${done ? '✓ Done' : next?.id === l.id ? 'Suggested next' : l.minutes ? `${l.minutes} min` : 'Open any time'}${puzzles ? ` · ${puzzles}/6 puzzles` : ''}</span></button>`;
+          <span class="meta">${done ? (p.results[l.id]?.independentPractice ? '✓ Independent fresh-case practice' : p.results[l.id]?.assisted ? '✓ Completed with support' : '✓ Completed') : p.drafts[l.id] ? 'Resume saved lesson' : next?.id === l.id ? 'Suggested next' : l.minutes ? `${l.minutes} min` : 'Open any time'}${puzzles ? ` · ${puzzles}/6 puzzles` : ''}</span></button>`;
       }).join('')}</div></section>`).join('')}
     <p class="secondary hub-foot">Progress is saved on this computer. <button type="button" class="link" data-reset>Reset course progress</button></p>
   </div>`;

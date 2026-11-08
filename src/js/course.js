@@ -14,7 +14,7 @@ export const SECTIONS = [
 export const LESSONS = [
   { id: 'tour', section: 'handling', kind: 'tour', title: 'Meet the fly', minutes: 8, summary: 'A guided tour of the microscope: zoom, turn a fly over, and find the sex combs and the meconium.' },
   { id: 'reference', section: 'handling', kind: 'scope', activity: 'reference', title: 'Reference bench', minutes: 5, summary: 'Five known flies to compare at your own pace. Nothing is assessed.', practice: true },
-  { id: 'collection', section: 'handling', kind: 'scope', activity: 'exercise', title: 'Virgin collection', minutes: 10, summary: 'Sort a real batch: find the virgin females and spot the fly that should not be there.' },
+  { id: 'collection', section: 'handling', kind: 'scope', activity: 'exercise', title: 'Virgin collection', minutes: 10, summary: 'Use a trusted clearing record and anatomy to collect virgin females, including adults that have already darkened.' },
   { id: 'inheritance', section: 'inheritance', kind: 'lesson', title: 'Chromosomes and inheritance', minutes: 12, summary: 'Build gametes from a Curly fly, predict its offspring, and discover why some genotypes never appear.' },
   { id: 'xlinked', section: 'inheritance', kind: 'lesson', title: 'The X chromosome', minutes: 10, summary: 'Why sons and daughters of the same cross can look different, using the white eye-colour gene.' },
   { id: 'first-cross', section: 'inheritance', kind: 'scope', activity: 'cross', title: 'First cross', minutes: 15, summary: 'Collect white-eyed females, cross them to red-eyed males and read the result in their offspring.' },
@@ -34,24 +34,36 @@ export const LESSONS = [
 export const DIAGNOSTIC = { id: 'diagnostic', title: 'Quick check', minutes: 3, summary: 'Six questions to suggest where to start. Optional.' };
 
 const KEY = 'fly-trainer.progress.v1';
+let memory = { done: [], puzzles: {}, drafts: {}, results: {}, notation: 'diagram' };
+let storageUnavailable = false;
 
 function read() {
+  if (storageUnavailable) return structuredClone(memory);
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
-    if (saved && typeof saved === 'object') return { done: [], puzzles: {}, notation: 'diagram', ...saved };
+    if (saved && typeof saved === 'object') return { done: [], puzzles: {}, drafts: {}, results: {}, notation: 'diagram', ...saved };
   } catch { /* fall through */ }
-  return { done: [], puzzles: {}, notation: 'diagram' };
+  return structuredClone(memory);
 }
 function write(p) {
-  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* progress stays in memory */ }
+  memory = structuredClone(p);
+  try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { storageUnavailable = true; }
 }
 
 export const progress = {
   get() { return read(); },
   isDone(id) { return read().done.includes(id); },
-  complete(id) {
+  saveDraft(id, draft) { const p = read(); p.drafts[id] = draft; write(p); },
+  clearDraft(id) { const p = read(); delete p.drafts[id]; write(p); },
+  complete(id, { assisted = false, independentPractice = false } = {}) {
     const p = read();
-    if (!p.done.includes(id)) { p.done.push(id); write(p); }
+    if (!p.done.includes(id)) p.done.push(id);
+    const previous = p.results[id];
+    p.results[id] = {
+      assisted: previous ? previous.assisted && assisted : assisted,
+      independentPractice: !!previous?.independentPractice || independentPractice,
+    };
+    delete p.drafts[id]; write(p);
     document.dispatchEvent(new CustomEvent('flytrainer:progress', { detail: { id } }));
   },
   /** Best result for a cross-planner puzzle: fewest generations. */
@@ -70,7 +82,7 @@ export const progress = {
   /** How genotypes are shown: 'diagram', 'notation' or 'both'. */
   get notation() { return read().notation; },
   set notation(value) { const p = read(); p.notation = value; write(p); },
-  reset() { write({ done: [], puzzles: {}, notation: read().notation }); },
+  reset() { write({ done: [], puzzles: {}, drafts: {}, results: {}, notation: read().notation }); },
 };
 
 /** The first lesson not yet completed, in course order (practice lessons are skipped). */

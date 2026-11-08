@@ -239,6 +239,14 @@ button.done { border-color: #5f9e72; }
 .target-plot { width: 100%; margin-top: 22px; overflow: visible; }
 .target-plot text { fill: #d7dce0; font-size: 11px; }
 .plot-key { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 11px; color: var(--muted); }
-.plot-key span:first-child { color: #e8b064; }.plot-key span:nth-child(2) { color: #8bc7e6; }
+.plot-key span:nth-child(2) { color: #e8b064; }.plot-key span:nth-child(3) { color: #8bc7e6; }
 .lesson-model { margin-top: 24px; }.lesson-model p { max-width: 85ch; }
+.support-status { padding: 10px 14px; border-left: 3px solid var(--accent); color: var(--muted); font-size: 12px; }
+.allele-comparison { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0; }
+.allele-comparison > span { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.allele-comparison .changed-allele { background: #493421; border-color: var(--accent); color: #ffd09a; }
+.interval-rows input { width: 20px; height: 20px; accent-color: var(--accent); }
+.clone-replicates, .screen-comparison { width: 100%; font-size: 12px; }
+.clone-replicates caption, .screen-comparison caption, .interval-rows caption { text-align: left; color: var(--muted); margin: 12px 0; }
+@media (max-width: 1000px) { .lesson-head { flex-wrap: wrap; }.lesson-head > div { min-width: 250px; }.lesson-head h2 { font-size: 20px; } }
 @media (max-width: 860px) { .clone-view { grid-template-columns: 1fr; }.clone-view svg { max-width: 350px; }.research-controls { gap: 12px; } }

@@ -18,6 +18,8 @@ import {
   expression, sampleCounts, rng, chiSquare, chiSquareP, complements, complementationCross, deficiencyMap,
 } from '../src/js/lessons.js';
 import { practiceProblem, benchCross, countVial, PRESETS } from '../src/js/sandboxLogic.js';
+import { lessonDraft, restoreDraft } from '../src/js/lessonDraft.js';
+import { threePointPractice, cloneCohort, targetWindow } from '../src/js/research.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-9;
 const steps = (type) => Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
@@ -356,4 +358,69 @@ test('screen plans balance independent chromosomes, conditional multiple-hit sha
     for (const p of feasible) assert.equal(screenChecks(p.dose, p.n - 1, step.goal)[0].ok, false, 'rounding below the minimum misses coverage');
     assert.equal(screenChecks(15, step.goal.maxLines + 1, step.goal).at(-1).ok, false, 'over-capacity plans fail even if coverage is sufficient');
   }
+});
+
+test('drafts preserve unchecked input and plans without storing derived model arrays', () => {
+  const lesson = LESSON_CONTENT.target;
+  const states = lesson.steps.map(() => ({ done: false }));
+  states[2] = { temps: { adult: 29 }, ran: true, sim: { points: [1, 2] }, result: { cells: [1, 2] }, assisted: true, value: '0.123' };
+  const draft = lessonDraft(lesson, 2, states);
+  const restored = restoreDraft(lesson, JSON.parse(JSON.stringify(draft)));
+  assert.equal(restored.index, 2);
+  assert.deepEqual(restored.state[2], { temps: { adult: 29 }, ran: true, assisted: true, value: '0.123' });
+  restored.state[2].temps.adult = 18;
+  assert.equal(draft.state[2].temps.adult, 29);
+  for (const bad of [{ ...draft, version: 0 }, { ...draft, index: -1 }, { ...draft, state: [] }, { ...draft, types: ['text'] }]) assert.equal(restoreDraft(lesson, bad), null);
+});
+
+test('supported completion and independent fresh-case practice are distinct, persistent results', () => {
+  progress.reset();
+  progress.saveDraft('threepoint', { index: 2 });
+  assert.equal(progress.get().drafts.threepoint.index, 2);
+  progress.complete('threepoint', { assisted: true });
+  assert.equal(progress.get().drafts.threepoint, undefined);
+  assert.deepEqual(progress.get().results.threepoint, { assisted: true, independentPractice: false });
+  progress.complete('threepoint', { independentPractice: true });
+  progress.complete('threepoint', { assisted: true });
+  assert.deepEqual(progress.get().results.threepoint, { assisted: false, independentPractice: true }, 'later supported revision does not erase independent practice');
+  progress.reset(); assert.deepEqual(progress.get().results, {});
+});
+
+test('fresh mapping cases preserve real locus order while changing phase and sampled offspring', () => {
+  const step = steps('threepoint')[0];
+  for (const seed of [7948, 15867, 23786, 31705]) {
+    const fresh = threePointPractice(step, seed), data = threePointData(fresh);
+    assert.deepEqual(fresh.order, ['y', 'cv', 'v']);
+    assert.deepEqual(threePointPractice(step, seed), fresh);
+    assert.notDeepEqual(data.counts.map((c) => c.n), threePointData(step).counts.map((c) => c.n));
+    assert(data.expectedDco > 0 && Number.isFinite(data.coc));
+    const sorted = data.counts.map((c, i) => ({ i, n: c.n })).sort((a, b) => a.n - b.n);
+    assert.deepEqual(sorted.slice(0, 2).map((c) => c.i).sort(), data.dco.slice().sort());
+    assert.deepEqual(sorted.slice(-2).map((c) => c.i).sort(), data.parental.slice().sort());
+  }
+});
+
+test('clone plans succeed across independent discs, with multiple feasible plans for each goal', () => {
+  for (const step of steps('clones')) {
+    const plans = SHOCK_TIMES.flatMap((t) => SHOCK_LENGTHS.map((l) => cloneCohort({ round: t.round, p: l.p, seed: step.seed, goal: step.goal })));
+    assert(plans.filter((c) => c.met >= 4).length > 1, 'avoid one lucky seed as the only solution');
+    assert(plans.some((c) => c.met < 4));
+    for (const cohort of plans) {
+      assert.equal(cohort.summaries.length, 8);
+      assert.equal(cohort.met, cohort.summaries.filter((d) => cloneGoalMet(d, step.goal)).length);
+    }
+    const repeat = cloneCohort({ round: 4, p: 0.15, seed: 17, goal: step.goal });
+    assert.deepEqual(cloneCohort({ round: 4, p: 0.15, seed: 17, goal: step.goal }), repeat);
+    assert(new Set(repeat.summaries.map((d) => JSON.stringify(d))).size > 1, 'discs are independent draws');
+  }
+});
+
+test('TARGET displayed windows use exactly the assessed hourly points', () => {
+  const sim = simulateTarget(Object.fromEntries(STAGES.map((s) => [s.id, 18])));
+  const check = { stages: ['adult'], measure: 'protein', last: 48, min: 0.9 };
+  const points = targetWindow(sim, check);
+  assert.equal(points.length, 48);
+  assert(points.every((p) => p.stage === 'adult'));
+  assert.equal(points.at(-1).t, sim.points.at(-1).t);
+  assert(targetChecks(sim, { checks: [check] })[0].ok);
 });

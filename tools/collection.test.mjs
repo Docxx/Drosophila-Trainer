@@ -4,29 +4,28 @@ import { CollectionSession, makePopulation, appearanceForAge, RESTS, VIRGIN_WIND
 
 // Tests may read the private population; the learner only ever sees `appearance`.
 const eligible = (seed) => makePopulation(seed).filter((f) => f.sex === 'F' && !f.holdover);
-const holdover = (seed) => makePopulation(seed).find((f) => f.holdover);
+const holdover = (seed) => makePopulation(seed, { holdover: true }).find((f) => f.holdover);
 
-test('batches: six flies from the 8-hour window plus one holdover, reproducible', () => {
+test('batches: six flies from a trusted clearing, reproducible', () => {
   for (const seed of [0, 1, 19, 200, 4294967295]) {
     const flies = makePopulation(seed);
-    assert.equal(flies.length, 7);
+    assert.equal(flies.length, 6);
     const young = flies.filter((f) => !f.holdover);
     assert.equal(young.length, 6);
     assert.equal(young.filter((f) => f.sex === 'F').length, 3);
-    assert(young.every((f) => f.ageMinutes < VIRGIN_WINDOW_MINUTES && f.stage !== 'mature'));
+    assert(young.every((f) => f.ageMinutes < VIRGIN_WINDOW_MINUTES));
     assert(young.filter((f) => f.sex === 'F').every((f) => f.matingHistory === 'unmated'));
-    const old = holdover(seed);
-    assert(old.ageMinutes >= 2880 && old.stage === 'mature' && !old.meconium);
+    assert(flies.every((f) => !f.holdover));
     assert.deepEqual(makePopulation(seed), flies);
-    assert.equal(new Set(flies.map((f) => `${f.x},${f.z}`)).size, 7, 'Every fly has its own spot on the pad');
+    assert.equal(new Set(flies.map((f) => `${f.x},${f.z}`)).size, 6, 'Every fly has its own spot on the pad');
   }
   assert.notDeepEqual(makePopulation(1).map((f) => f.sex), makePopulation(19).map((f) => f.sex));
 });
 
 test('appearance follows age: unexpanded wings in the first hour, meconium for a few hours', () => {
   assert.deepEqual(appearanceForAge(20), { stage: 'teneral', meconium: true });
-  assert.deepEqual(appearanceForAge(200), { stage: 'fresh', meconium: true });
-  assert.deepEqual(appearanceForAge(420), { stage: 'fresh', meconium: false });
+  assert.deepEqual(appearanceForAge(120), { stage: 'fresh', meconium: true });
+  assert.deepEqual(appearanceForAge(420), { stage: 'mature', meconium: false });
   assert.deepEqual(appearanceForAge(3000), { stage: 'mature', meconium: false });
 });
 
@@ -63,23 +62,22 @@ test('two eligible females suffice; uncertain/uncollected flies do not count as 
   assert(!JSON.stringify(report).includes(c.label));
 });
 
-test('a holdover counts as an error even when she happens to be unmated', () => {
+test('fully pigmented females within a trusted collection remain eligible', () => {
   let seed = 0;
-  while (!(holdover(seed).sex === 'F' && holdover(seed).matingHistory === 'unmated')) seed++;
+  while (!eligible(seed).some((f) => f.stage === 'mature')) seed++;
   const session = new CollectionSession({ seed });
-  const [a, b] = eligible(seed);
-  for (const f of [a, b, holdover(seed)]) session.move(f.id, 'collection');
+  eligible(seed).forEach((f) => session.move(f.id, 'collection'));
   const report = session.submit();
-  assert.equal(report.success, false);
-  assert.equal(report.errors, 1);
-  assert.match(report.rows.find((r) => r.id === holdover(seed).id).reason, /missed at clearing/);
+  assert.equal(report.success, true);
+  assert(report.rows.every((r) => /trusted clearing record/.test(r.reason)));
+  assert(report.rows.every((r) => !/far older|missed at clearing/.test(r.reason)));
 });
 
 test('collecting everything fails; retry allows correction and return', () => {
   const session = new CollectionSession({ seed: 8 });
   for (const f of session.appearance) session.move(f.id, 'collection');
   assert.equal(session.submit().success, false);
-  assert.equal(session.snapshot().report.errors, 4, 'Three males and the holdover');
+  assert.equal(session.snapshot().report.errors, 3, 'Three males');
   assert.throws(() => session.move('fly-1', 'pad'), /submitted/);
   session.retry();
   assert.equal(session.snapshot().report, null);
