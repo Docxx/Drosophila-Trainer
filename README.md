@@ -18,17 +18,25 @@ The launcher installs dependencies on first use; subsequent runs work offline.
 
 Fly Trainer opens on a **course hub**. Every lesson is open from the start; the hub
 suggests the next one and records what is done. An optional three-minute quick check
-suggests where to begin. Suggested order:
+suggests where to begin. A five-stage learning path runs from first contact through
+foundations, stock construction, experimental design and integrated investigations.
+All 17 taught modules expose learning goals, suggested prerequisites and a glossary.
+Each of the 15 teaching modules follows **explain → demonstrate → guide → practise →
+diagnose**; the two final investigations integrate those skills. Every module stays
+open, and experienced learners can start directly at its activity. Suggested order:
 
 | Section | Lesson | What the learner does |
 |---|---|---|
 | Handling flies | Meet the fly | Guided microscope tour: pick up a fly, zoom, turn it over, centre the sex combs, compare a female and a just-eclosed fly. Each step is checked from the real scope state; "Show me" does it for you. |
 | | Reference bench | Five known flies to compare (practice, never assessed). |
+| | From a vial to a reliable cross | Life cycle, generation identity, stock/source records, virginity evidence and parent removal. |
 | | Virgin collection | The collection exercise below. |
-| Inheritance | Chromosomes and inheritance | Build gametes by clicking chromosomes, predict Curly ratios, discover CyO/CyO lethality (2/3 Curly). |
+| Inheritance | Start here: the language of genetics | Cells, chromosomes, genes, alleles, genotype, phenotype, dominance and gametes with no genetics assumed. |
+| | Chromosomes and inheritance | Build gametes by clicking chromosomes, predict Curly ratios, discover CyO/CyO lethality (2/3 Curly). |
 | | The X chromosome | Sperm and egg types, white-eye criss-cross inheritance, the reciprocal cross, what a white-eyed daughter means. Ends at the First cross. |
 | | First cross | The bench cross below. |
-| Building stocks | Balancers | The three properties of a balancer, a true-breeding mut¹/CyO stock, crossing over in females only and its suppression by TM3, picking classes by markers. |
+| Building stocks | Read a fly stock and a cross | Translate slashes, semicolons, +, Y and chromosome names; distinguish records from inferred identity. |
+| | Balancers | The three properties of a balancer, a true-breeding mut¹/CyO stock, crossing over in females only and its suppression by TM3, picking classes by markers. |
 | | Cross planner | Six puzzles: cross vials, keep classes by their markers, declare the target stock. Par, hints on request. |
 | Experiments and analysis | Counting and chance | Count vials of 20, 100 and 1000 and watch the scatter shrink; χ² test a Curly × Curly vial against 1:1, 2:1 and 3:1; why "not rejected" is not "proven". |
 | | Recombination and mapping | Score 400 test-cross offspring by mini-white eye dosage and estimate the map distance; pick the recombinant class; plan screen sizes; verify recombinants. |
@@ -38,6 +46,9 @@ suggests where to begin. Suggested order:
 | | FLP/FRT clones and twin spots | Induce chromosome exchanges in a growing model disc; plan a few large mutant patches or many small ones. |
 | | GAL80ts: controlling time | Set stage-specific temperatures, inspect GAL4 and target-protein time courses, and meet developmental protection, knockdown and recovery windows. |
 | | Planning a genetic screen | Balance target-gene coverage, multiple-lethal burden and independent-line capacity; see the maintenance-vial workload. |
+| | Choose the genetic strategy | Forward/reverse genetics, reporter versus protein evidence, MARCM, maternal contribution and causal follow-up. |
+| Research investigations | Do not lose the invisible chromosome | Diagnose an ambiguous intermediate and construct a two-generation stock preserving an unmarked lethal. |
+| | Construct, verify and interpret | Build the three-generation research stock; choose validation, controls and timing; save an optional experimental argument for human review. |
 | Open practice | Genetics bench | Build any two flies (dropdowns or stock presets), see gamete counts and offspring classes, count a vial with a χ² test, and drill generated practice problems (one or two chromosomes, with a streak). |
 
 Lessons are step by step: explanations with chromosome diagrams, multiple choice with
@@ -51,8 +62,8 @@ an eight-disc clone experiment with replicate summaries, a temperature-schedule 
 and a screen planner with coverage curves and preset/workload comparisons. Mapping feedback separates parental, DCO and middle-locus decisions, highlights the changed allele and checks the chromosome rows counted in each interval. Each choice option explains its reasoning, and the research
 lessons gather assumptions in an About this model panel. Changing a simulation
 plan clears its old result and relocks Next until the new plan works. Next unlocks
-once a step is worked through. Every answer a lesson checks is computed by the
-genetics engine, never typed in. A Diagram / Notation / Both switch controls how
+once a step is worked through. Calculated inheritance and simulation answers come from the same pure models used
+in demonstrations. Conceptual questions have authored chromosome-based explanations. A Diagram / Notation / Both switch controls how
 genotypes are shown everywhere.
 
 The planner never reveals genotypes: classes are described by markers and eye colour,
@@ -71,8 +82,8 @@ notebooks under v1/v2 keys are retained untouched. Cross notebooks remain v2.
 
 ### Animated visual lessons
 
-All eleven genetics lessons include visual teaching. There are 21 guides with four
-captioned stages each (84 scenes), including guides selected for individual beginner steps.
+All 17 taught modules include visual teaching. There are 24 guides with four
+captioned stages each (96 scenes), including guides selected for individual beginner steps.
 Chromosomes separate into gametes, parental segments exchange at crossovers,
 GAL4 moves to a UAS-linked output, clone lineages expand and target protein
 disappears after RNAi activation. Allele labels accompany colour cues throughout.
@@ -89,7 +100,7 @@ operating system's reduced-motion setting. Everything runs offline, with no vide
 downloads or external assets. Watching a guide does not complete an assessment.
 
 Visual verification: `tools/review-visuals.js` runs in the isolated Electron snapshot
-profile; it checks all 84 scenes, playback/pause/replay, saved position/speed,
+profile; it checks all 96 scenes, playback/pause/replay, saved position/speed,
 notation changes and highlighting. The ordinary course walkthrough also checks
 the activity-guide targets at each exercise step.
 
@@ -102,6 +113,29 @@ not reused for a step where it would be misleading. Stage and speed are saved
 separately for each concept. `tools/review-beginners.js` checks the 17 specifically
 assigned beginner steps, including that watching leaves gametes and predictions
 for the learner to complete.
+
+### Worked teaching and investigations
+
+Fifteen full demonstrations show parents, gametes, combinations and conclusions,
+or the corresponding statistical/experimental reasoning. Calculated examples use
+actual genetics and research-model outputs. The Punnett demonstration shows each
+inherited chromosome and distinguishes non-viable combinations from adult classes;
+unequally weighted recombinant gametes use the full probability model instead.
+Play/pause and individual stages let learners control the explanation. Watching a
+demonstration never fills their next prediction or completes their construction.
+
+Teaching bridges introduce new operations before asking for an answer. Guided
+activities include a reasoning checklist; later practice removes that checklist.
+Diagnostic cases ask what evidence would investigate a surprising result.
+The two integrated missions retain the consequences of the learner's crosses and
+class choices over generations. Their saved action histories rebuild the experiment
+without storing a hidden-genotype answer key; target construction is checked again
+on restore. Research notes remain saved after lesson completion and progress reset.
+
+The expanded sequences invalidate incompatible unfinished lesson drafts and begin
+those modules afresh; completed progress and existing lab notebooks are retained.
+The [curriculum and evaluation guide](Documentation/Curriculum.md) describes scope,
+learning evidence, reference alignment and the separate need for real-lab validation.
 
 ## Current activities
 

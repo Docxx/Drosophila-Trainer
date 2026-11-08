@@ -5,12 +5,16 @@
   const assert = (c, m) => { if (!c) throw new Error(m); };
   const L = await import('app://fly/src/js/lessons.js');
   const { progress } = await import('app://fly/src/js/course.js');
+  const { PlannerSession } = await import('app://fly/src/js/plannerSession.js');
+  const { PUZZLES } = await import('app://fly/src/js/genetics/puzzles.js');
   const R = await import('app://fly/src/js/research.js');
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
   const click = (s) => { const b = typeof s === 'string' ? $(s) : s; assert(b && !b.disabled, `Missing/disabled: ${s}; lesson ${$('.lesson-head')?.textContent}; step ${window.course.current?.step}`); b.click(); };
   const near = (a, b) => Math.abs(a - b) < 1e-9;
+  const indexOf = (id,type) => L.LESSON_CONTENT[id].steps.findIndex(s=>s.type===type);
+  const stepOf = (id,type) => L.LESSON_CONTENT[id].steps[indexOf(id,type)];
   progress.reset();
 
   async function solve(step) {
@@ -19,7 +23,45 @@
       click(button);
       assert($('.guide-highlight'), `${step.type}: visual activity guide highlights its target`);
     }
-    if (step.type === 'choice') {
+    if (step.type === 'reflection') {
+      const note=$('[data-learning-note="hypothesis"]');note.value='A timed knockdown affects the assay only after protein depletion.';note.dispatchEvent(new Event('input'));
+      window.course.hub();window.course.open('research-project');
+      assert($('[data-learning-note="hypothesis"]').value.includes('timed knockdown'),'research argument persists separately from quiz answers');
+    } else if (step.type === 'worked') {
+      assert($('.worked-scene') && $('[data-next]').disabled, 'demonstration is not a preanswered quiz; all stages remain to view');
+      for(let phase=1;phase<4;phase++) click(`[data-visual-frame="${phase}"]`);
+      assert(!$('[data-next]').disabled && $('[data-guide-caption]').textContent===step.pages[3], 'worked model reaches the explained conclusion');
+    } else if (step.type === 'mission') {
+      const model=new PlannerSession(PUZZLES[step.puzzle]);
+      const keep=(c,want)=>model.keep(c.id,c.classes.findIndex(r=>Object.entries(want).every(([k,v])=>r.pheno[k]===v)));
+      let target;
+      if(step.puzzle===3){
+        const a=keep(model.cross('s0','s2'),{curly:false,scutoid:true,humeral:true,stubble:false});
+        const b=keep(model.cross('s1','s2'),{curly:true,scutoid:false,humeral:false,stubble:true});
+        target=keep(model.cross(a.id,b.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'orange'});
+      }else{
+        const trans=keep(model.cross('s1','s2'),{eye:'darkorange'});
+        const reporter=keep(model.cross('s0','s3'),{curly:false,scutoid:true,humeral:true,stubble:false});
+        const recombinant=keep(model.cross(trans.id,'s3'),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
+        target=keep(model.cross(recombinant.id,reporter.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
+      }
+      assert(model.declare(target.id).ok,'reference construction works');
+      let n=0;
+      for(const action of model.actions){
+        if(action.method==='cross'){
+          for(const [sex,id] of [['f',action.args[0]],['m',action.args[1]]]) if(!$(`[data-${sex}="${id}"]`).classList.contains('on')) click(`[data-${sex}="${id}"]`);
+          click('[data-cross]');
+        }else if(action.method==='keep') click(`[data-keep="${action.args[0]}:${action.args[1]}"]`);
+        else if(action.method==='declare') click(`[data-declare="${action.args[0]}"]`);
+        if(++n===2){
+          const id=step.puzzle===3?'investigation':'research-project';
+          const before=$('.vials').textContent;
+          window.course.hub();window.course.open(id);
+          assert($('.vials').textContent===before,'multi-generation mission restores its chosen classes');
+        }
+      }
+      assert(!$('[data-next]').disabled && !$('[data-mission]'), 'only a constructed target unlocks the mission');
+    } else if (step.type === 'choice') {
       const i = step.options.findIndex((o) => o.correct);
       if (step.options.length > 1 && !step.area) { click(`[data-option="${(i + 1) % step.options.length}"]`); assert($('.feedback.wrong'), 'wrong answer explained'); assert($('[data-next], [data-finish]').disabled, 'Next waits for a right answer'); }
       click(`[data-option="${i}"]`);
@@ -182,14 +224,14 @@
     }
   }
 
-  window.course.open('threepoint'); window.course.current.goTo(2);
+  window.course.open('threepoint'); window.course.current.goTo(indexOf('threepoint','threepoint'));
   click('[data-map-row="0"][data-map-kind="parental"]');
   const mid = $('[data-middle]'); mid.value = 'cv'; mid.dispatchEvent(new Event('change'));
   window.course.hub(); window.course.open('threepoint');
-  assert(window.course.current.step === 2 && $('[data-map-row="0"][data-map-kind="parental"]').getAttribute('aria-pressed') === 'true' && $('[data-middle]').value === 'cv', 'unfinished lesson resumes step and unchecked answers');
+  assert(window.course.current.step === indexOf('threepoint','threepoint') && $('[data-map-row="0"][data-map-kind="parental"]').getAttribute('aria-pressed') === 'true' && $('[data-middle]').value === 'cv', 'unfinished lesson resumes step and unchecked answers');
   click('[data-restart]'); assert(window.course.current.step === 0, 'explicit restart begins again');
 
-  for (const id of ['inheritance', 'xlinked', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation', 'threepoint', 'mosaics', 'target', 'screens']) {
+  for (const id of ['flyroom', 'foundations', 'inheritance', 'xlinked', 'notation', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation', 'threepoint', 'mosaics', 'target', 'screens', 'strategies', 'investigation', 'research-project']) {
     await play(id, L.LESSON_CONTENT[id].steps.length - (L.LESSON_CONTENT[id].steps.at(-1).type === 'go' ? 1 : 0));
     if (L.LESSON_CONTENT[id].steps.at(-1).type === 'go') {
       click('[data-go]'); await sleep(100);
@@ -199,12 +241,12 @@
   }
   assert(progress.get().results.mosaics.assisted && progress.get().results.target.assisted && progress.get().results.screens.assisted, 'working plans are recorded as supported completion');
   // Fresh mapping case transfers the method to a new phase and counts.
-  window.course.open('threepoint'); click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[1]); click('[data-next]'); click('[data-fresh-map]');
-  await solve(L.LESSON_CONTENT.threepoint.steps[2]);
-  window.course.hub(); window.course.open('threepoint');
-  assert(!$('[data-next]').disabled, 'solved fresh case resumes without losing its result');
-  click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[3]); click('[data-next]'); await solve(L.LESSON_CONTENT.threepoint.steps[4]);
-  click('[data-finish]'); assert(progress.get().results.threepoint.independentPractice, 'fresh independent solution has a distinct saved result');
+  window.course.open('threepoint');
+  for(let i=0;i<indexOf('threepoint','threepoint');i++){ await solve(L.LESSON_CONTENT.threepoint.steps[i]); click('[data-next]'); }
+  click('[data-fresh-map]'); await solve(stepOf('threepoint','threepoint'));
+  window.course.hub();window.course.open('threepoint');assert(!$('[data-next]').disabled,'fresh case resumes');
+  for(let i=indexOf('threepoint','threepoint')+1;i<L.LESSON_CONTENT.threepoint.steps.length;i++){click('[data-next]');await solve(L.LESSON_CONTENT.threepoint.steps[i]);}
+  click('[data-finish]');assert(progress.get().results.threepoint.independentPractice,'independent fresh case recorded');
 
   // Quick check: answer everything right; it recommends the planner.
   await play('diagnostic', 5);
@@ -266,16 +308,16 @@
   assert(document.body.dataset.view === 'scope' && window.scope.mode === 'exercise', 'tour hands over to Virgin collection');
   while (!window.scope.ready) await sleep(100);
 
-  window.course.open('screens'); window.course.current.goTo(2);
-  click('[data-restart]'); window.course.current.goTo(2);
+  window.course.open('screens'); window.course.current.goTo(indexOf('screens','screen'));
+  click('[data-restart]'); window.course.current.goTo(indexOf('screens','screen'));
   const draftLines = $('[data-lines]'); draftLines.value = '4567'; draftLines.dispatchEvent(new Event('input'));
   window.course.hub(); window.course.open('screens');
-  assert(window.course.current.step === 2 && $('[data-lines]').value === '4567', 'unchecked screen input survives leaving and reopening');
+  assert(window.course.current.step === indexOf('screens','screen') && $('[data-lines]').value === '4567', 'unchecked screen input survives leaving and reopening');
 
   // Leave a working temporal-control plot on screen for visual review.
-  window.course.open('target'); window.course.current.goTo(2);
-  await solve(L.LESSON_CONTENT.target.steps[2]);
+  window.course.open('target'); window.course.current.goTo(indexOf('target','target'));
+  await solve(stepOf('target','target'));
   $('.target-plot').scrollIntoView({ block: 'center' });
   assert(document.documentElement.scrollWidth <= window.innerWidth, 'lesson fits the window without horizontal overflow');
-  return `PASS: saved-step/input/model restoration, supported completion, fresh independent mapping; 11 lessons (including four research techniques), bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
+  return `PASS: saved-step/input/model restoration, supported completion, fresh independent mapping; 17 taught lessons, 15 worked demonstrations, two multi-generation investigations, bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
 })();

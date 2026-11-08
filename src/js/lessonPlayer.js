@@ -11,7 +11,12 @@ import {
 } from './lessons.js';
 import { progress, LESSONS } from './course.js';
 import { lessonDraft, restoreDraft } from './lessonDraft.js';
-import { visualGuideHTML, wireVisualGuide, actionGuideHTML, wireActionGuide } from './lessonVisuals.js';
+import { STAGES as TEACHING_STAGES } from './curriculum.js';
+import { teachingModel } from './teachingModels.js';
+import { mountPlanner } from './planner.js';
+import { replayPlan } from './plannerSession.js';
+import { PUZZLES } from './genetics/puzzles.js';
+import { visualGuideHTML, wireVisualGuide, actionGuideHTML, wireActionGuide, guideScene, VISUAL_GUIDES } from './lessonVisuals.js';
 import {
   TP_GENES, threePointData, threePointPractice, cloneCohort, SHOCK_TIMES, SHOCK_LENGTHS,
   STAGES, simulateTarget, targetChecks, targetWindow, DOSES, PER_GENE, screenStats, screenChecks,
@@ -19,7 +24,7 @@ import {
 
 const near = (a, b) => Math.abs(a - b) < 1e-6;
 const STATUS = {
-  choice: 'choose an answer', pick: 'pick a class', gametes: 'find every gamete', predict: 'check your prediction',
+  worked: 'follow all four demonstration stages', mission: 'build the target stock', choice: 'choose an answer', pick: 'pick a class', gametes: 'find every gamete', predict: 'check your prediction',
   multi: 'select and check', count: 'work it out from the counts', chance: 'count more vials', chisq: 'judge each hypothesis', grid: 'run every cross',
   threepoint: 'infer the order and calculate the map', clones: 'meet the clone goal', target: 'test a temperature schedule', screen: 'meet all screen constraints',
 };
@@ -38,6 +43,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
     independentPractice: state.some((s) => s.practice && s.done && !s.assisted),
   });
 
+  const scrollToTop = () => { const desk = root.closest('.desk'); if(desk) desk.scrollTop = 0; };
   const mode = () => progress.notation;
   const fly = (text, opts = {}) => genotypeHTML(parseGenotype(text), { mode: mode(), ...opts });
 
@@ -93,8 +99,80 @@ export function mountLesson(root, id, { onExit, onAction }) {
 
   const RENDER = {
     text(step) {
-      const figs = (step.diagrams || []).map((d) => fly(d.g, { chroms: d.chroms, caption: d.caption })).join('');
+      const figs = (step.diagrams || []).map((d) => fly(d.g, { chroms: d.chroms, caption: d.caption, mode: d.mode || mode() })).join('');
       return { html: `${paras(step.body)}${figs ? `<div class="figures">${figs}</div>` : ''}`, ready: true };
+    },
+
+    reflection(step) {
+      const notes = progress.get().learningNotes[id] || {};
+      return { ready: true, html: `<p>Make your own experimental argument. These optional notes are saved for you or a supervisor to review; their scientific quality is not automatically graded.</p><div class="research-notes">${Object.entries(step.prompts).map(([key,label])=>`<label>${esc(label)}<textarea rows="4" maxlength="5000" data-learning-note="${key}">${esc(notes[key]||'')}</textarea></label>`).join('')}</div><p class="secondary" data-note-status>Notes stay saved after finishing the module and after resetting course progress.</p>`, wire(el) {
+        el.querySelectorAll('[data-learning-note]').forEach(input=>input.addEventListener('input',()=>{notes[input.dataset.learningNote]=input.value;progress.saveLearningNote(id,notes);el.querySelector('[data-note-status]').textContent='Saved on this computer · ready for human review.';}));
+      }};
+    },
+
+    worked(step, s) {
+      const model = teachingModel(step);
+      const labels = step.kind === 'concept' ? VISUAL_GUIDES[step.visual].frames.map(f=>f[0]) : step.kind === 'cross' ? ['Read the parents', 'Make gametes', 'Combine chromosomes', 'Interpret the result'] : ['Define the question', 'Choose the model', 'Inspect the evidence', 'Explain the conclusion'];
+      const guide = { title: step.title, frames: step.pages.map((p,i) => [labels[i],p]) };
+      s.seen ||= [0]; s.phase ??= 0;
+      const table = (head, rows) => `<div class="research-table-wrap"><table class="counts"><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      const adultRows = () => table(['Adult class','Expected share of adults'],model.rows.map(r=>[r.label,fractionLabel(r.p)])) + `<p>${fractionLabel(model.dead)} of fertilised eggs do not survive in this model. Adult shares use surviving offspring as the denominator.</p>`;
+      const scene = (f, animate) => {
+        let html='';
+        if(step.kind==='concept') html=guideScene(step.visual,f,animate);
+        else if(step.kind==='cross') {
+          if(f===0) html=crossHTML(step);
+          else if(f===1) html=`<div class="worked-gametes">${[['Egg types',model.eggs],['Sperm types',model.sperm]].map(([name,gs])=>`<section><h4>${name}</h4>${gs.map(g=>`<div class="worked-gamete">${gameteHTML(g.gamete,{chroms:step.chroms,mode:mode()})}<span>${fractionLabel(g.p)}</span></div>`).join('')}</section>`).join('')}</div>`;
+          else if(f===2 && model.square) {
+            const sq=model.square, name=g=>step.chroms.map(c=>CHROMS[c][g[c]].label).join('; ');
+            html=`<table class="punnett"><caption>Each cell combines one egg with one sperm</caption><thead><tr><th>Egg ↓ · Sperm →</th>${sq.sperm.map(g=>`<th>${esc(name(g))}</th>`).join('')}</tr></thead><tbody>${sq.cells.map((row,i)=>`<tr><th>${esc(name(sq.eggs[i]))}</th>${row.map((c,j)=>`<td class="${c.viable?'':'lethal'}"><div class="worked-cell-chroms"><small>From the egg</small>${gameteHTML(sq.eggs[i],{chroms:step.chroms,mode:mode()})}<small>From the sperm</small>${gameteHTML(sq.sperm[j],{chroms:step.chroms,mode:mode()})}</div><code>${esc(step.chroms.map(k=>CHROMS[k][sq.eggs[i][k]].label+'/'+CHROMS[k][sq.sperm[j][k]].label).join('; '))}</code><strong>${c.viable?esc(c.label):'No adult offspring'}</strong>${c.viable?'':'<small>This chromosome combination does not survive.</small>'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+          } else html=adultRows();
+        } else if(step.kind==='statistics') {
+          if(f===0) html=crossHTML(step);
+          else html=table(['Class','Observed O','Expected E','(O − E)²/E'],model.test.rows.map((r,i)=>[i===0?'Curly':'Straight',step.observed[i],r.e.toFixed(1),f>=2?r.part.toFixed(3):'Calculate next']));
+          if(f===3) html+=`<p class="feedback right">χ² = ${model.test.chi.toFixed(3)} · critical value ${model.test.critical} · ${model.test.fits?'Cannot reject the stated hypothesis':'Reject the stated hypothesis'}.</p>`;
+        } else if(step.kind==='mapping') {
+          if(f===0) html=researchDiagram([step.shown.map(g=>step.phase[g]?g:'+'),step.shown.map(g=>step.phase[g]?'+':g)],'Known reference maternal X pair','Reference phase; locus columns are not map order');
+          else html=table(['Reference class','Sons',...(f>=2?['Chromosome assignment']:[])],model.counts.map(c=>[c.label,c.n,...(f>=2?[{P:'Parental',I:'Interval I',II:'Interval II',D:'DCO'}[c.kind]]:[])]));
+          if(f>=2) html+=`<p>Reference order: ${step.order.join(' — ')}. Interval I: ${model.d1.toFixed(2)} cM; interval II: ${model.d2.toFixed(2)} cM.</p>`;
+          if(f===3) html+=`<p>Observed DCO: ${model.dco.reduce((n,i)=>n+model.counts[i].n,0)}; expected: ${model.expectedDco.toFixed(2)}. Coincidence ${model.coc.toFixed(3)}; interference ${(1-model.coc).toFixed(3)}.</p>`;
+        } else if(step.kind==='clones') {
+          if(f===0) html=researchDiagram([['centromere','FRT','m'],['centromere','FRT','+']],'FRT m / FRT +','Known starting chromosome-arm pair');
+          else if(f===1) html='<p class="worked-number">36 h · 30 min · 8 independent discs</p><p>Goal per disc: 1–5 visible clones; largest at least 40 cells.</p>';
+          else html=table(['Disc','Clones','Mean size','Largest'],model.summaries.map((d,i)=>[i+1,d.clones,d.meanSize.toFixed(1),d.largest]));
+          if(f===3) html+=`<p class="worked-number">${model.met} of ${model.count} discs meet the goal</p>`;
+        } else if(step.kind==='target') {
+          if(f===0) html=researchDiagram([['GAL4'],['UAS-RNAi'],['GAL80ts']],'All three transgenes retained','Genetic tools; insertion locations unspecified');
+          else if(f===1) html=table(['Stage','Temperature','Model hours'],model.sim.bounds.map(b=>[b.label,b.temp+' °C',b.end-b.start]));
+          else if(f===2) { const a=model.sim.points.filter(p=>p.stage==='adult'); html=table(['Adult observation','GAL4 activity','Target protein'],[a[0],a[23],a.at(-1)].map(p=>[(p.t-model.sim.eclosion)+' h',(p.gal4*100).toFixed(1)+'%',(p.protein*100).toFixed(1)+'%'])); }
+          else html=targetPlot(model.sim,model.goal)+checksHTML(model.checks);
+        } else if(step.kind==='screen') {
+          if(f===0) html=fly('w/w; mut/CyO; +/+',{chroms:['2'],caption:'One independent founding chromosome per line'});
+          else if(f===1) html=`<p class="worked-number">Low preset · ${step.lines.toLocaleString('en-GB')} lines</p><p>Chance of a target allele: ${(model.selected.hitGene*100).toFixed(2)}%.</p>`;
+          else if(f===2) html=screenPlot(step.dose,step.lines,model.goal);
+          else html=table(['Quantity','Model expectation'],[['Coverage',(model.selected.hitGene*100).toFixed(2)+'%'],['Multiple hits among lethal lines',(model.selected.multiShare*100).toFixed(1)+'%'],['Expected lethal lines',model.selected.lethalLines.toFixed(0)],['Maintenance vials',model.selected.vials.toLocaleString('en-GB')]]);
+        }
+        return `<div class="worked-scene ${animate?'worked-arrival':''}" role="group" aria-label="${esc(labels[f])}">${html}</div>`;
+      };
+      return {html:visualGuideHTML('',true,guide)+'<p class="secondary">Follow all four stages. This is a fully explained demonstration; the next activity is yours to complete.</p>',wire(el){
+        return wireVisualGuide(el,'',{override:guide,sceneRenderer:scene,frame:s.phase,initialSpeed:s.speed,
+          onFrame(f){s.phase=f;if(!s.seen.includes(f))s.seen.push(f);s.done=s.seen.length===4;const b=el.querySelector('[data-next], [data-finish]');if(b)b.disabled=!s.done;const status=el.querySelector('[data-step-status]');if(status)status.textContent=`${index+1} / ${lesson.steps.length} · ${s.done?'demonstration complete':s.seen.length+'/4 stages viewed'}`;save();},
+          onSpeed(v){s.speed=v;save();}});
+      }};
+    },
+
+    mission(step,s) {
+      if (s.done) {
+        try { s.resultSummary = replayPlan(PUZZLES[step.puzzle], s.plan).solved; } catch { s.resultSummary = null; }
+        if (!s.resultSummary) s.done = false;
+      }
+      if(s.done) return {html:`<p>${esc(step.intro)}</p><p class="feedback right">Target class constructed in ${s.resultSummary.generations} generations${s.resultSummary.hints?' with hints':' without planner hints'}. Continue to interpret what this establishes.</p><button type="button" data-mission-again>Try the construction again</button>`,wire(el){el.querySelector('[data-mission-again]').addEventListener('click',()=>{s.done=false;s.plan=null;render();});}};
+      return {html:`<p>${esc(step.intro)}</p><div data-mission></div>`,wire(el){
+        const planner=mountPlanner(el.querySelector('[data-mission]'),{onExit:()=>{},mission:step.puzzle,savedPlan:s.plan,
+          onChange(plan){s.plan=plan;save();},
+          onSolved(result){s.resultSummary=result;s.done=true;s.assisted=!!result.hints;save();render();}});
+        return ()=>planner.destroy?.();
+      }};
     },
 
     choice(step, s) {
@@ -505,6 +583,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
     const guideOpen = step.visual ? !['choice', 'multi', 'pick', 'go'].includes(step.type) : step.type === 'text';
     const guideState = state[0].visualGuides?.[guideId] || (guideId === id ? { frame: state[0].visualFrame, speed: state[0].visualSpeed } : {});
     const s = state[index];
+    if (s.skipped) { s.skipped = false; s.done = false; }
     const out = RENDER[step.type](step, s);
     if (out.ready) s.done = true;
     const last = index === lesson.steps.length - 1;
@@ -512,31 +591,39 @@ export function mountLesson(root, id, { onExit, onAction }) {
     root.innerHTML = `<article class="lesson" data-step-type="${step.type}">
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button>
         <div><span class="eyebrow">${esc(lesson.title)}</span><h2>${esc(heading)}</h2></div>
-        <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
-      <div class="lesson-body">${visualGuideHTML(guideId, guideOpen)}${actionGuideHTML(step.type)}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
+        <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].skipped ? 'skipped' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
+      ${lesson.curriculum?`<details class="lesson-orientation" ${index===0?'open':''}><summary>${esc(lesson.curriculum.level)} · What you will learn</summary><button type="button" data-start-activity>Know the explanation? Start the activity</button><ul>${lesson.curriculum.objectives.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>${lesson.curriculum.prerequisites.length?`<p>Useful preparation: ${lesson.curriculum.prerequisites.map(p=>`<button class="link" type="button" data-open="${p}">${esc(LESSONS.find(l=>l.id===p)?.title||p)}</button>`).join(' · ')}. Every lesson remains open.</p>`:''}<dl class="lesson-glossary">${Object.entries(lesson.curriculum.terms).map(([term,meaning])=>`<div><dt>${esc(term)}</dt><dd>${esc(meaning)}</dd></div>`).join('')}</dl></details><nav class="teaching-cycle" aria-label="Learning sequence">${Object.entries(TEACHING_STAGES).map(([key,label])=>`<span aria-current="${step.stage===key?'step':'false'}">${esc(label)}</span>`).join('')}</nav>`:''}
+      <div class="lesson-body">${['worked','mission'].includes(step.type)?'':visualGuideHTML(guideId, guideOpen)}${actionGuideHTML(step.type)}${lesson.curriculum && step.stage==='guide'?`<aside class="coaching"><strong>Work through it in this order</strong><ol>${lesson.curriculum.coach.map(c=>`<li>${esc(c)}</li>`).join('')}</ol></aside>`:''}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
       ${lesson.model ? `<details class="support about lesson-model"><summary>About this model</summary>${paras(lesson.model)}</details>` : ''}
       <footer class="lesson-foot"><button type="button" data-back ${index === 0 ? 'disabled' : ''}>Back</button>
-        <span class="secondary">${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>
+        <span class="secondary" data-step-status>${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>
         ${last ? (step.type === 'go' ? '<button type="button" data-finish>Back to course</button>' : `<button type="button" class="primary" data-finish ${s.done ? '' : 'disabled'}>Finish</button>`)
           : `<button type="button" class="primary" data-next ${s.done ? '' : 'disabled'}>Next</button>`}</footer></article>`;
-    out.wire?.(root);
+    const stepCleanup = out.wire?.(root);
     wireActionGuide(root);
     const saveGuide = (change) => {
       state[0].visualGuides ||= {};
       state[0].visualGuides[guideId] = { ...guideState, ...state[0].visualGuides[guideId], ...change }; save();
     };
-    stopVisual = wireVisualGuide(root, guideId, { frame: guideState.frame, initialSpeed: guideState.speed,
+    if (['worked','mission'].includes(step.type)) stopVisual = stepCleanup || (() => {});
+    else stopVisual = wireVisualGuide(root, guideId, { frame: guideState.frame, initialSpeed: guideState.speed,
       onFrame(frame) { saveGuide({ frame }); }, onSpeed(speed) { saveGuide({ speed }); } });
     root.querySelectorAll('input, select, textarea').forEach((input) => {
       input.addEventListener('input', save); input.addEventListener('change', save);
     });
     root.querySelector('[data-restart]').addEventListener('click', () => {
-      index = 0; state = lesson.steps.map(() => ({ done: false })); diagnosticAnswers = []; render();
+      index = 0; state = lesson.steps.map(() => ({ done: false })); diagnosticAnswers = []; render(); scrollToTop();
     });
     save();
+    root.querySelector('[data-start-activity]')?.addEventListener('click', () => {
+      const first = lesson.steps.findIndex(step => ['guide','practise'].includes(step.stage));
+      if(first < 0) return;
+      for(let i=0;i<first;i++) if(!state[i].done) Object.assign(state[i], { done:true, skipped:true });
+      index=first; render(); scrollToTop();
+    });
     root.querySelector('[data-exit]').addEventListener('click', onExit);
-    root.querySelector('[data-back]').addEventListener('click', () => { index--; render(); });
-    root.querySelector('[data-next]')?.addEventListener('click', () => { index++; render(); root.scrollTop = 0; });
+    root.querySelector('[data-back]').addEventListener('click', () => { index--; render(); scrollToTop(); });
+    root.querySelector('[data-next]')?.addEventListener('click', () => { index++; render(); scrollToTop(); });
     root.querySelector('[data-finish]')?.addEventListener('click', () => { if (state.every((x) => x.done)) complete(); onExit(); });
     root.querySelector('[data-start]')?.addEventListener('click', (e) => { progress.complete(id); onAction({ kind: 'lesson', id: e.currentTarget.dataset.start }); });
   }

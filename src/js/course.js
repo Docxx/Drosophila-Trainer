@@ -7,6 +7,7 @@ export const SECTIONS = [
   { id: 'stocks', title: 'Building stocks', blurb: 'Balancers, and planning crosses across generations.' },
   { id: 'advanced', title: 'Experiments and analysis', blurb: 'Statistics, recombination mapping, GAL4/UAS experiments and complementation.' },
   { id: 'research', title: 'Research techniques', blurb: 'Three-point maps, FLP/FRT clones, temporal control and planning genetic screens.' },
+  { id: 'investigations', title: 'Research investigations', blurb: 'Integrate chromosome tracking, multi-generation construction and experimental interpretation.' },
   { id: 'practice', title: 'Open practice', blurb: 'Free experimentation and unlimited practice problems. Use any time.' },
 ];
 
@@ -14,34 +15,40 @@ export const SECTIONS = [
 export const LESSONS = [
   { id: 'tour', section: 'handling', kind: 'tour', title: 'Meet the fly', minutes: 8, summary: 'A guided tour of the microscope: zoom, turn a fly over, and find the sex combs and the meconium.' },
   { id: 'reference', section: 'handling', kind: 'scope', activity: 'reference', title: 'Reference bench', minutes: 5, summary: 'Five known flies to compare at your own pace. Nothing is assessed.', practice: true },
+  { id: 'flyroom', section: 'handling', kind: 'lesson', title: 'From a vial to a reliable cross', minutes: 15, summary: 'Follow the life cycle, distinguish generations and keep source, collection and stock records.' },
   { id: 'collection', section: 'handling', kind: 'scope', activity: 'exercise', title: 'Virgin collection', minutes: 10, summary: 'Use a trusted clearing record and anatomy to collect virgin females, including adults that have already darkened.' },
-  { id: 'inheritance', section: 'inheritance', kind: 'lesson', title: 'Chromosomes and inheritance', minutes: 12, summary: 'Build gametes from a Curly fly, predict its offspring, and discover why some genotypes never appear.' },
-  { id: 'xlinked', section: 'inheritance', kind: 'lesson', title: 'The X chromosome', minutes: 10, summary: 'Why sons and daughters of the same cross can look different, using the white eye-colour gene.' },
+  { id: 'foundations', section: 'inheritance', kind: 'lesson', title: 'Start here: the language of genetics', minutes: 20, summary: 'Learn cells, chromosomes, genes, alleles, genotype and phenotype with no assumed genetics knowledge.' },
+  { id: 'inheritance', section: 'inheritance', kind: 'lesson', title: 'Chromosomes and inheritance', minutes: 25, summary: 'Build gametes from a Curly fly, predict its offspring, and discover why some genotypes never appear.' },
+  { id: 'xlinked', section: 'inheritance', kind: 'lesson', title: 'The X chromosome', minutes: 25, summary: 'Why sons and daughters of the same cross can look different, using the white eye-colour gene.' },
   { id: 'first-cross', section: 'inheritance', kind: 'scope', activity: 'cross', title: 'First cross', minutes: 15, summary: 'Collect white-eyed females, cross them to red-eyed males and read the result in their offspring.' },
-  { id: 'balancers', section: 'stocks', kind: 'lesson', title: 'Balancers', minutes: 15, summary: 'How CyO, TM3 and TM6B keep mutations in place, and why every fly in a balanced stock looks the same.' },
+  { id: 'notation', section: 'stocks', kind: 'lesson', title: 'Read a fly stock and a cross', minutes: 20, summary: 'Decode slashes, semicolons, +, Y and marker names before planning a cross.' },
+  { id: 'balancers', section: 'stocks', kind: 'lesson', title: 'Balancers', minutes: 30, summary: 'How CyO, TM3 and TM6B keep mutations in place, and why every fly in a balanced stock looks the same.' },
   { id: 'planner', section: 'stocks', kind: 'planner', title: 'Cross planner', minutes: 30, summary: 'Six puzzles: plan the crosses that build a target stock, generation by generation.' },
-  { id: 'chance', section: 'advanced', kind: 'lesson', title: 'Counting and chance', minutes: 12, summary: 'Count vials of different sizes, see how far chance moves a ratio, and test counts with χ².' },
-  { id: 'recombination', section: 'advanced', kind: 'lesson', title: 'Recombination and mapping', minutes: 12, summary: 'Measure the distance between two insertions from real counts, then pick and verify a recombinant.' },
-  { id: 'gal4uas', section: 'advanced', kind: 'lesson', title: 'GAL4/UAS and controls', minutes: 12, summary: 'Switch genes on with GAL4/UAS, sort the right offspring, and choose the controls a knockdown needs.' },
-  { id: 'complementation', section: 'advanced', kind: 'lesson', title: 'Complementation and mapping', minutes: 15, summary: 'Run a complementation grid, then map three lethal mutations with overlapping deficiencies.' },
-  { id: 'threepoint', section: 'research', kind: 'lesson', title: 'Three-point mapping', minutes: 18, summary: 'Read three markers on maternal X chromosomes, infer gene order, and count double crossovers and interference.' },
-  { id: 'mosaics', section: 'research', kind: 'lesson', title: 'FLP/FRT clones and twin spots', minutes: 15, summary: 'Induce mitotic recombination in a model disc and plan for a few large clones or many small ones.' },
-  { id: 'target', section: 'research', kind: 'lesson', title: 'GAL80ts: controlling time', minutes: 15, summary: 'Plan temperature shifts, protect development, and allow for activation, protein depletion and recovery.' },
-  { id: 'screens', section: 'research', kind: 'lesson', title: 'Planning a genetic screen', minutes: 15, summary: 'Balance independent lines, gene coverage, multiple-hit chromosomes and fly-room capacity.' },
+  { id: 'chance', section: 'advanced', kind: 'lesson', title: 'Counting and chance', minutes: 25, summary: 'Count vials of different sizes, see how far chance moves a ratio, and test counts with χ².' },
+  { id: 'recombination', section: 'advanced', kind: 'lesson', title: 'Recombination and mapping', minutes: 25, summary: 'Measure the distance between two insertions from real counts, then pick and verify a recombinant.' },
+  { id: 'gal4uas', section: 'advanced', kind: 'lesson', title: 'GAL4/UAS and controls', minutes: 30, summary: 'Switch genes on with GAL4/UAS, sort the right offspring, and choose the controls a knockdown needs.' },
+  { id: 'complementation', section: 'advanced', kind: 'lesson', title: 'Complementation and mapping', minutes: 30, summary: 'Run a complementation grid, then map three lethal mutations with overlapping deficiencies.' },
+  { id: 'threepoint', section: 'research', kind: 'lesson', title: 'Three-point mapping', minutes: 30, summary: 'Read three markers on maternal X chromosomes, infer gene order, and count double crossovers and interference.' },
+  { id: 'mosaics', section: 'research', kind: 'lesson', title: 'FLP/FRT clones and twin spots', minutes: 25, summary: 'Induce mitotic recombination in a model disc and plan for a few large clones or many small ones.' },
+  { id: 'target', section: 'research', kind: 'lesson', title: 'GAL80ts: controlling time', minutes: 25, summary: 'Plan temperature shifts, protect development, and allow for activation, protein depletion and recovery.' },
+  { id: 'screens', section: 'research', kind: 'lesson', title: 'Planning a genetic screen', minutes: 25, summary: 'Balance independent lines, gene coverage, multiple-hit chromosomes and fly-room capacity.' },
+  { id: 'strategies', section: 'research', kind: 'lesson', title: 'Choose the genetic strategy', minutes: 30, summary: 'Forward/reverse genetics, reporter versus protein evidence, MARCM, maternal contributions and causal verification.' },
+  { id: 'investigation', section: 'investigations', kind: 'lesson', title: 'Do not lose the invisible chromosome', minutes: 30, summary: 'Diagnose an ambiguous intermediate and preserve an unmarked lethal through a multi-generation build.' },
+  { id: 'research-project', section: 'investigations', kind: 'lesson', title: 'Construct, verify and interpret', minutes: 45, summary: 'Build a three-generation research stock, then connect verification, controls and timing to a defensible conclusion.' },
   { id: 'sandbox', section: 'practice', kind: 'sandbox', title: 'Genetics bench', minutes: 0, summary: 'Build any two flies, see their gametes and offspring, count vials with a χ² test, and drill unlimited practice problems.', practice: true },
 ];
 
 export const DIAGNOSTIC = { id: 'diagnostic', title: 'Quick check', minutes: 3, summary: 'Six questions to suggest where to start. Optional.' };
 
 const KEY = 'fly-trainer.progress.v1';
-let memory = { done: [], puzzles: {}, drafts: {}, results: {}, notation: 'diagram' };
+let memory = { done: [], puzzles: {}, drafts: {}, results: {}, learningNotes: {}, notation: 'diagram' };
 let storageUnavailable = false;
 
 function read() {
   if (storageUnavailable) return structuredClone(memory);
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
-    if (saved && typeof saved === 'object') return { done: [], puzzles: {}, drafts: {}, results: {}, notation: 'diagram', ...saved };
+    if (saved && typeof saved === 'object') return { done: [], puzzles: {}, drafts: {}, results: {}, learningNotes: {}, notation: 'diagram', ...saved };
   } catch { /* fall through */ }
   return structuredClone(memory);
 }
@@ -55,6 +62,7 @@ export const progress = {
   isDone(id) { return read().done.includes(id); },
   saveDraft(id, draft) { const p = read(); p.drafts[id] = draft; write(p); },
   clearDraft(id) { const p = read(); delete p.drafts[id]; write(p); },
+  saveLearningNote(id, notes) { const p = read(); p.learningNotes[id] = Object.fromEntries(Object.entries(notes).map(([key,value]) => [key,String(value).slice(0,5000)])); write(p); },
   complete(id, { assisted = false, independentPractice = false } = {}) {
     const p = read();
     if (!p.done.includes(id)) p.done.push(id);
@@ -82,7 +90,7 @@ export const progress = {
   /** How genotypes are shown: 'diagram', 'notation' or 'both'. */
   get notation() { return read().notation; },
   set notation(value) { const p = read(); p.notation = value; write(p); },
-  reset() { write({ done: [], puzzles: {}, drafts: {}, results: {}, notation: read().notation }); },
+  reset() { write({ done: [], puzzles: {}, drafts: {}, results: {}, learningNotes: read().learningNotes, notation: read().notation }); },
 };
 
 /** The first lesson not yet completed, in course order (practice lessons are skipped). */

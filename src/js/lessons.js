@@ -4,6 +4,9 @@
 
 import { parseGenotype, offspring, phenotype, isViable, chromGametes, isMale, CHROMS, GENES_2 } from './genetics/genetics.js';
 import { ORDER } from './chromosomes.js';
+import { scaffoldLesson } from './curriculum.js';
+import { ADDITIONAL_LESSONS } from './courseAdditions.js';
+import { SPECIALIST_LESSONS } from './specialistLessons.js';
 
 // ---- engine helpers (pure, tested) ----------------------------------------------
 
@@ -696,12 +699,15 @@ export const LESSON_CONTENT = {
   },
 };
 
+Object.assign(LESSON_CONTENT, ADDITIONAL_LESSONS, SPECIALIST_LESSONS);
+for (const [id, lesson] of Object.entries(LESSON_CONTENT)) if (!lesson.diagnostic) LESSON_CONTENT[id] = scaffoldLesson(id, lesson);
+
 /** After the quick check: where to start, from the first area with a wrong answer. */
 export function recommendStart(answers) {
   const steps = LESSON_CONTENT.diagnostic.steps;
   const missed = (area) => steps.some((s, i) => s.area === area && !answers[i]);
   if (missed('handling')) return 'tour';
-  if (missed('inheritance')) return 'inheritance';
+  if (missed('inheritance')) return 'foundations';
   if (missed('stocks')) return 'balancers';
   if (missed('advanced')) return 'chance';
   return 'recombination';

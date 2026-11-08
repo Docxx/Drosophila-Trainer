@@ -12,7 +12,7 @@
   progress.reset();
   for (const [guideId, guide] of Object.entries(VISUAL_GUIDES)) {
     const location = Object.entries(LESSON_CONTENT).flatMap(([id, lesson]) => lesson.steps.map((step, i) => ({ id, step, i })))
-      .find(({ id, step }) => (step.visual || id) === guideId && !['choice','multi','pick','go'].includes(step.type));
+      .find(({ id, step }) => (step.visual || id) === guideId && !['choice','multi','pick','go','worked','mission'].includes(step.type));
     assert(location, `${guideId}: guide is connected to an actual teaching step`);
     const { id, i: stepIndex } = location;
     window.course.open(id); click('[data-restart]'); window.course.current.goTo(stepIndex);
@@ -63,12 +63,12 @@
   assert($('[data-visual-speed]').value === '1000', 'preferred speed is restored');
 
   // Visual guides point to the real task without choosing or checking answers.
-  window.course.open('threepoint'); window.course.current.goTo(2);
+  window.course.open('threepoint'); window.course.current.goTo(LESSON_CONTENT.threepoint.steps.findIndex(s=>s.type==='threepoint'));
   assert(!$('.visual-guide').open, 'practice keeps its own visual task central');
-  const before = JSON.stringify(progress.get().drafts.threepoint.state[2]);
+  const before = JSON.stringify(progress.get().drafts.threepoint.state[window.course.current.step]);
   click('[data-guide-target=".mapping-counts"]');
   assert($('.mapping-counts').classList.contains('guide-highlight') && document.activeElement === $('.mapping-counts'), 'activity guide highlights and focuses the chromosome table');
-  assert(JSON.stringify(progress.get().drafts.threepoint.state[2]) === before && $('[data-next]').disabled, 'activity guide leaves the answers untouched');
+  assert(JSON.stringify(progress.get().drafts.threepoint.state[window.course.current.step]) === before && $('[data-next]').disabled, 'activity guide leaves the answers untouched');
   for (const button of document.querySelectorAll('[data-guide-target]')) assert(document.querySelector(button.dataset.guideTarget), 'each guide points to an existing control or prerequisite');
   window.course.hub();
   await sleep(1100);

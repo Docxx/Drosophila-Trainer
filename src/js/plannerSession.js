@@ -22,6 +22,7 @@ export class PlannerSession {
     this.solved = null;
     this.log = [];
     this.next = 1;
+    this.actions = [];
   }
 
   vial(id) { return this.vials.find((v) => v.id === id); }
@@ -37,6 +38,7 @@ export class PlannerSession {
       dead, classes: phenoClasses(mix).map((row) => ({ ...row, label: classLabel(row.pheno), sexes: ['F', 'M'].filter((s) => row[s]) })),
     };
     this.crosses.push(cross);
+    this.actions.push({ method: 'cross', args: [femaleVial, maleVial] });
     this.log.push(`Generation ${cross.generation}: ${f.name} ♀ × ${m.name} ♂ → ${cross.classes.length} classes.`);
     return cross;
   }
@@ -51,6 +53,7 @@ export class PlannerSession {
       generation: cross.generation, stock: false, F: row.F?.members || null, M: row.M?.members || null, from: crossId, pheno: row.pheno,
     };
     this.vials.push(vial);
+    this.actions.push({ method: 'keep', args: [crossId, rowIndex, name || null] });
     this.log.push(`Kept ${row.label} as “${vial.name}”.`);
     return vial;
   }
@@ -59,11 +62,12 @@ export class PlannerSession {
     const v = this.vial(vialId);
     if (!v || v.stock) return;
     this.vials = this.vials.filter((x) => x !== v);
+    this.actions.push({ method: 'discard', args: [vialId] });
   }
 
   hint() {
     const h = this.puzzle.hints[this.hintsUsed];
-    if (h) this.hintsUsed++;
+    if (h) { this.hintsUsed++; this.actions.push({ method: 'hint', args: [] }); }
     return h || null;
   }
 
@@ -74,6 +78,7 @@ export class PlannerSession {
    */
   declare(vialId) {
     const v = this.vial(vialId);
+    this.actions.push({ method: 'declare', args: [vialId] });
     const t = this.target;
     const pure = ['F', 'M'].some((s) => v[s] && isPure(v[s], t));
     if (pure) {
@@ -101,3 +106,14 @@ export function targetChroms(t) {
   return { X: [t.X, t.X], 2: t.shown[0], 3: t.shown[1] };
 }
 export const label = (chrom, key) => CHROMS[chrom][key].label;
+
+/** Restore decisions, not hidden genotypes or an untrusted success flag. */
+export function replayPlan(puzzle, saved) {
+  if (!saved || saved.puzzle !== puzzle.id || !Array.isArray(saved.actions) || saved.actions.length > 2000) throw new Error('Unsupported saved construction');
+  const session = new PlannerSession(puzzle);
+  for (const action of saved.actions) {
+    if (!action || !['cross', 'keep', 'discard', 'hint', 'declare'].includes(action.method) || !Array.isArray(action.args)) throw new Error('Invalid saved construction action');
+    session[action.method](...action.args);
+  }
+  return session;
+}

@@ -13,7 +13,7 @@ import {
   threePointClasses, threePointData, cloneTissue, cloneGoalMet, SHOCK_TIMES, SHOCK_LENGTHS,
   STAGES, simulateTarget, targetChecks, DOSES, PER_GENE, screenStats, screenChecks,
 } from '../src/js/research.js';
-import { PlannerSession } from '../src/js/plannerSession.js';
+import { PlannerSession, replayPlan } from '../src/js/plannerSession.js';
 import {
   expression, sampleCounts, rng, chiSquare, chiSquareP, complements, complementationCross, deficiencyMap,
 } from '../src/js/lessons.js';
@@ -22,23 +22,27 @@ import { lessonDraft, restoreDraft } from '../src/js/lessonDraft.js';
 import { threePointPractice, cloneCohort, targetWindow } from '../src/js/research.js';
 import { VISUAL_GUIDES, guideScene, visualGuideHTML, actionGuideHTML } from '../src/js/lessonVisuals.js';
 
+import { CURRICULUM, PATH, STAGES as TEACHING_STAGES, DEMONSTRATIONS } from '../src/js/curriculum.js';
+import { teachingModel } from '../src/js/teachingModels.js';
+
 const near = (a, b) => Math.abs(a - b) < 1e-9;
 const steps = (type) => Object.entries(LESSON_CONTENT).flatMap(([id, l]) => l.steps.filter((s) => s.type === type).map((s) => ({ id, ...s })));
 const share = (rows, label) => rows.find((r) => r.label === label)?.p ?? 0;
 
 test('every genetics lesson has a labelled chromosome-first visual sequence', () => {
   for (const lesson of LESSONS.filter((l) => l.kind === 'lesson')) {
-    const guide = VISUAL_GUIDES[lesson.id];
+    const guideId = LESSON_CONTENT[lesson.id].steps[0].visual || lesson.id;
+    const guide = VISUAL_GUIDES[guideId];
     assert(guide && guide.frames.length >= 4, `${lesson.id}: explanatory stages`);
     const scenes = guide.frames.map(([title, caption], i) => {
       assert(title && caption.length > 40, `${lesson.id}: stage explains the biological change`);
-      const svg = guideScene(lesson.id, i);
+      const svg = guideScene(guideId, i);
       assert(svg.includes('role="img"') && svg.includes('aria-label='));
       assert(!/undefined|NaN|Infinity/.test(svg));
       return svg;
     });
     assert.equal(new Set(scenes).size, scenes.length);
-    assert(visualGuideHTML(lesson.id).includes('data-visual-play'));
+    assert(visualGuideHTML(guideId).includes('data-visual-play'));
   }
   assert.equal(visualGuideHTML('diagnostic'), '', 'assessment has no explanatory answer guide');
   assert.equal(guideScene('missing', 0), '');
@@ -90,7 +94,7 @@ test('every lesson in the course has content, and every step is well formed', ()
   for (const l of LESSONS.filter((x) => x.kind === 'lesson')) assert.ok(LESSON_CONTENT[l.id], `content for ${l.id}`);
   for (const [id, lesson] of Object.entries(LESSON_CONTENT)) {
     for (const s of lesson.steps) {
-      assert.ok(['text', 'choice', 'gametes', 'predict', 'pick', 'go', 'multi', 'count', 'chance', 'chisq', 'grid', 'threepoint', 'clones', 'target', 'screen'].includes(s.type), `${id}: step type ${s.type}`);
+      assert.ok(['text', 'choice', 'gametes', 'predict', 'pick', 'go', 'multi', 'count', 'chance', 'chisq', 'grid', 'threepoint', 'clones', 'target', 'screen', 'worked', 'mission', 'reflection'].includes(s.type), `${id}: step type ${s.type}`);
       for (const g of [s.parent, s.mother, s.father, ...(s.diagrams || []).map((d) => d.g)].filter(Boolean)) assert.doesNotThrow(() => parseGenotype(g), `${id}: ${g}`);
       if (s.type === 'multi') assert.ok(s.options.some((o) => o.correct) && s.options.every((o) => o.why), `${id}: multi has answers and notes`);
       if (s.type === 'choice') {
@@ -99,6 +103,69 @@ test('every lesson in the course has content, and every step is well formed', ()
       }
       if (s.type === 'go' && s.action.kind === 'scope') assert.ok(LESSONS.some((l) => l.activity === s.action.activity), `${id}: activity ${s.action.activity}`);
     }
+  }
+});
+
+test('the learning path is connected, optional and teaches before independent work', () => {
+  const ids = new Set(LESSONS.map(l=>l.id));
+  for (const part of PATH) for (const id of part.lessons) assert(ids.has(id), id);
+  const visit=(id, stack=[])=>{ assert(!stack.includes(id), `prerequisite cycle: ${id}`); for(const pre of CURRICULUM[id]?.prerequisites||[]){assert(ids.has(pre));visit(pre,[...stack,id]);} };
+  for(const [id, course] of Object.entries(CURRICULUM)) {
+    visit(id); assert(course.objectives.length>=3 && Object.keys(course.terms).length && course.coach.length>=3);
+    const lesson=LESSON_CONTENT[id]; assert(lesson && lesson.curriculum);
+    if(DEMONSTRATIONS[id]) {
+      const demo=lesson.steps.findIndex(s=>s.type==='worked');
+      const firstTask=lesson.steps.findIndex(s=>!['text','worked'].includes(s.type));
+      assert(demo>=0 && demo<firstTask, `${id}: demonstrate before asking`);
+      for(const stage of Object.keys(TEACHING_STAGES)) assert(lesson.steps.some(s=>s.stage===stage), `${id}: ${stage}`);
+      assert(lesson.steps.some(s=>s.stage==='diagnose' && s.type==='choice'));
+    }
+  }
+});
+
+test('worked examples use the same inheritance and research models as the exercises', () => {
+  for(const demo of Object.values(DEMONSTRATIONS)) {
+    assert.equal(demo.pages.length,4); assert(demo.pages.every(p=>p.length>60));
+    const model=teachingModel(demo);
+    if(demo.kind==='cross') {
+      assert(near(model.rows.reduce((n,r)=>n+r.p,0),1));
+      for(const gs of [model.eggs,model.sperm]) assert(near(gs.reduce((n,g)=>n+g.p,0),1));
+      if(model.square) for(const gs of [model.eggs,model.sperm]) assert(gs.every(g=>near(g.p,1/gs.length)), 'an equally weighted square requires equally likely gametes');
+      if(demo.recombine) assert.equal(model.square,null,'do not use an equally weighted square for unequal recombinant gametes');
+    }
+    if(demo.kind==='statistics') { assert(near(model.test.chi,.8)); assert(model.test.fits); }
+    if(demo.kind==='mapping') assert(model.d1>0 && model.d2>0 && Number.isFinite(model.coc));
+    if(demo.kind==='clones') assert(model.met>=4 && model.summaries.length===8);
+    if(demo.kind==='target') assert(model.checks.every(c=>c.ok));
+    if(demo.kind==='screen') assert(model.selected.hitGene>=.9 && model.selected.multiShare<=.35);
+  }
+  assert.equal(teachingModel(DEMONSTRATIONS.inheritance).dead,.25);
+  assert.equal(teachingModel(DEMONSTRATIONS.balancers).dead,.5);
+});
+
+test('multi-generation investigations replay decisions without storing hidden genotypes', () => {
+  for(const index of [3,5]) {
+    const s=new PlannerSession(PUZZLES[index]);
+    const keep=(c,want)=>s.keep(c.id,c.classes.findIndex(r=>Object.entries(want).every(([k,v])=>r.pheno[k]===v)));
+    let target;
+    if(index===3) {
+      const a=keep(s.cross('s0','s2'),{curly:false,scutoid:true,humeral:true,stubble:false});
+      const b=keep(s.cross('s1','s2'),{curly:true,scutoid:false,humeral:false,stubble:true});
+      target=keep(s.cross(a.id,b.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'orange'});
+    } else {
+      const trans=keep(s.cross('s1','s2'),{eye:'darkorange'});
+      const reporter=keep(s.cross('s0','s3'),{curly:false,scutoid:true,humeral:true,stubble:false});
+      const recombinant=keep(s.cross(trans.id,'s3'),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
+      target=keep(s.cross(recombinant.id,reporter.id),{curly:true,scutoid:false,humeral:true,stubble:false,eye:'darkorange'});
+    }
+    assert(s.declare(target.id).ok);
+    const saved=JSON.parse(JSON.stringify({puzzle:s.puzzle.id,actions:s.actions}));
+    assert(!JSON.stringify(saved).includes('members'));
+    const restored=replayPlan(s.puzzle,saved);
+    assert.deepEqual(restored.solved,s.solved); assert.deepEqual(restored.vials,s.vials); assert.deepEqual(restored.actions,s.actions);
+    assert.equal(restored.solved.generations,index===3?2:3);
+    assert.throws(()=>replayPlan(s.puzzle,{...saved,actions:[{method:'constructor',args:[]}]}),/Invalid/);
+    assert.throws(()=>replayPlan(s.puzzle,{...saved,puzzle:'other'}),/Unsupported/);
   }
 });
 
@@ -164,7 +231,7 @@ test('the quick check recommends the first area with a mistake', () => {
   // Questions: handling, handling, inheritance, inheritance, advanced, stocks.
   assert.equal(recommendStart([true, true, true, true, true, true]), 'recombination');
   assert.equal(recommendStart([false, true, true, true, true, true]), 'tour');
-  assert.equal(recommendStart([true, true, true, false, true, true]), 'inheritance');
+  assert.equal(recommendStart([true, true, true, false, true, true]), 'foundations');
   assert.equal(recommendStart([true, true, true, true, true, false]), 'balancers');
   assert.equal(recommendStart([true, true, true, true, false, true]), 'chance');
 });
@@ -232,7 +299,7 @@ test('progress is saved, suggests the next lesson and keeps the best puzzle resu
   globalThis.CustomEvent ??= class { constructor(type, init) { this.type = type; this.detail = init.detail; } };
   assert.equal(nextLesson().id, 'tour');
   progress.complete('tour');
-  assert.equal(nextLesson().id, 'collection', 'practice lessons are not suggested');
+  assert.equal(nextLesson().id, 'flyroom', 'practice lessons are not suggested');
   progress.solvePuzzle('cross-3', 3);
   progress.solvePuzzle('cross-3', 2);
   progress.solvePuzzle('cross-3', 4);
@@ -317,10 +384,10 @@ test('the bench handles every preset, and practice problems are answerable', () 
 
 // ---- research techniques ---------------------------------------------------------------
 
-test('research section exposes four freely accessible lessons with model notes', () => {
+test('research section exposes technique and strategy lessons with model notes', () => {
   assert.ok(SECTIONS.some((s) => s.id === 'research'));
   const lessons = LESSONS.filter((l) => l.section === 'research');
-  assert.deepEqual(lessons.map((l) => l.id), ['threepoint', 'mosaics', 'target', 'screens']);
+  assert.deepEqual(lessons.map((l) => l.id), ['threepoint', 'mosaics', 'target', 'screens', 'strategies']);
   for (const l of lessons) {
     assert.equal(l.kind, 'lesson');
     assert.ok(LESSON_CONTENT[l.id].model.length, `${l.id}: model assumptions available together`);
@@ -484,4 +551,14 @@ test('TARGET displayed windows use exactly the assessed hourly points', () => {
   assert(points.every((p) => p.stage === 'adult'));
   assert.equal(points.at(-1).t, sim.points.at(-1).t);
   assert(targetChecks(sim, { checks: [check] })[0].ok);
+});
+
+test('research arguments survive completion and progress reset without automatic grading', () => {
+  progress.saveLearningNote('research-project', { hypothesis: 'Compare timed depletion with temperature-matched controls.' });
+  progress.complete('research-project');
+  assert(progress.get().learningNotes['research-project'].hypothesis.includes('timed depletion'));
+  progress.reset();
+  assert(progress.get().learningNotes['research-project'].hypothesis.includes('timed depletion'));
+  const noteStep=LESSON_CONTENT['research-project'].steps.find(s=>s.type==='reflection');
+  assert.equal(noteStep.stage,'diagnose'); assert.equal(Object.keys(noteStep.prompts).length,3);
 });

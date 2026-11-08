@@ -25,10 +25,10 @@
     }
   }
   // A manual animation does not build a gamete or answer a prediction for the learner.
-  window.course.open('inheritance'); click('[data-restart]'); window.course.current.goTo(3);
+  window.course.open('inheritance'); click('[data-restart]'); window.course.current.goTo(LESSON_CONTENT.inheritance.steps.findIndex(s=>s.title==='Make her eggs'));
   click('[data-visual-frame="3"]');
   assert($('.found li') === null && $('[data-next]').disabled, 'gametes must still be constructed');
-  window.course.current.goTo(4); click('[data-visual-frame="3"]');
+  window.course.current.goTo(LESSON_CONTENT.inheritance.steps.findIndex(s=>s.title==='Curly × normal')); click('[data-visual-frame="3"]');
   assert(!$('.fractions .on') && $('[data-next]').disabled, 'predictions are left unanswered');
   // Leave the basic chromosome primer on screen for visual review.
   click('[data-restart]'); click('[data-visual-frame="1"]');

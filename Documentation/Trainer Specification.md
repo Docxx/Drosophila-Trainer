@@ -174,3 +174,18 @@ The early lessons now select visual guides for individual concepts rather than r
 - Open the relevant guides during beginner teaching activities; keep quiz guidance folded. Watching leaves predictions, gamete construction and lesson completion to the learner.
 - Save guide positions and speeds per concept, with compatibility for earlier chapter-level saved positions. Existing lesson answers and completion records remain valid.
 - Validation: 51 automated tests plus mesh checks, all 84 visual stages in Electron, 17 beginner-specific step assignments, and the full course walkthrough at 1000 × 700. Human validation of transfer to real flies remains outstanding.
+
+## Guided curriculum implementation, 8 November 2026
+
+Ray requests a taught progression from no genetics knowledge to integrated research-level reasoning, with explanation and animation before assessment. The hub now presents five learning stages, suggested preparation and explicit outcomes. There are 17 taught modules, including two integrated construction investigations; the 15 teaching modules contain complete four-stage worked demonstrations.
+
+- New entry teaching covers vial life cycle and records, genetics vocabulary and reading stock/cross notation. New specialist teaching covers forward/reverse approaches, loss/gain effects, reporter versus protein evidence, MARCM and maternal contributions. The local Prokop guides were consulted for this coverage and for cross-design/stock-record principles.
+- Each teaching module follows explain, demonstrate, guide, practise and diagnose. Explanatory bridges introduce new operations before the learner is asked to perform them. The first activity of a type has a coaching checklist; later work removes it. Objectives, definitions and recommended preparation remain accessible in the lesson.
+- Worked crosses show known parents, gamete probabilities, chromosome contributions to each combination, viability and adult shares. Unequal recombinant gametes use the full model rather than an equally weighted square. Statistical and research demonstrations show actual calculated evidence; life-cycle and MARCM demonstrations are explicitly schematic.
+- Complete four-stage examples can be played, paused and revisited. Learners can deliberately skip explanations and start at an activity, with skipped pages marked distinctly. All lessons remain open.
+- The two investigations use the real cross planner for two- and three-generation construction. Wrong selections change descendants and can leave an ambiguous class. Action histories save and replay without a stored hidden-genotype key. A saved mission success is checked again against the replayed construction.
+- Research-project notes record a learner's hypothesis, design, controls, validation and interpretation for human review. They are optional and not automatically graded, and survive module completion and course-progress reset.
+- Expanded step sequences restart incompatible unfinished lesson drafts. Completed progress and lab notebooks remain intact.
+- Validation covers the full taught sequence and both constructed targets at 1000 × 700, all 24 visual guides/96 scenes, worked-stage playback and persistence, the glossary and skip option, construction replay and all six puzzle pars. Automated checks remain distinct from evidence of educational transfer.
+
+The detailed module map, reference alignment and evaluation criteria are in `Documentation/Curriculum.md`. Expert competence is not awarded by a completion badge; the programme requires further human validation on unfamiliar cases and supervised real laboratory work.

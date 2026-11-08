@@ -135,6 +135,27 @@ Object.assign(VISUAL_GUIDES, {
   ] },
 });
 
+Object.assign(VISUAL_GUIDES, {
+ 'life-cycle':{title:'Follow a vial through the life cycle',frames:[
+  ['Egg','Adults lay eggs. A collection or cross record must distinguish the parents from the generation developing in the vial.'],
+  ['Larva','Larvae hatch, feed and grow through three instars. A vial can contain developing offspring even when no new adults are visible.'],
+  ['Pupa','Larvae leave the food and pupate. Metamorphosis precedes adult eclosion; a pupa is not a newly collected adult.'],
+  ['Adult','New adults eclose. Record clearing and collection history to establish a collection interval. Development and sexual maturity depend on conditions; colour alone cannot establish virginity.'],
+ ]},
+ marcm:{title:'MARCM: mark the clone that loses repression',frames:[
+  ['Repress the reporter','The starting heterozygous cell carries matching FRT sites, the mutation on one homolog and GAL80 on the other. GAL4 and UAS-GFP are also present, but GAL80 represses expression.'],
+  ['Induce exchange','FLP-mediated mitotic recombination at matching FRT sites can produce informative reciprocal daughter lineages. The mutation and GAL80 lie distal to the FRT site in this schematic.'],
+  ['Lose GAL80 in one daughter','With the informative segregation shown, m/m cells no longer carry GAL80. The reciprocal +/+ lineage retains GAL80. Other segregation outcomes do not yield this marked mutant pair.'],
+  ['Read the marked clone','Where the driver is active, the m/m lineage can express UAS-GFP after losing repression. Fluorescence identifies a lineage in this designed system; it does not by itself establish a causal biological effect.'],
+ ]},
+ maternal:{title:'Separate maternal supply from the embryo’s genotype',frames:[
+  ['Maternal supply','A heterozygous mother can supply functional RNA or protein to developing eggs. That supply is different from the allele the egg inherits.'],
+  ['Mutant zygote, maternal product','An m/m embryo can initially retain maternal product from a mother carrying a functional copy. An early normal appearance therefore need not show that the gene is dispensable.'],
+  ['Mutant germline clone','A homozygous mutant germline clone can produce eggs without the normal product of that gene, if the relevant oogenesis and survival requirements permit it. The mother’s somatic genotype need not be homozygous mutant.'],
+  ['Compare maternal and zygotic contributions','Follow the paternal allele as well as the maternal supply. A functional paternal allele can contribute zygotic expression later; compare the relevant genotypes and developmental windows rather than calling all embryos equivalent.'],
+ ]},
+});
+
 const amber = '#efb95f', blue = '#88ccec', purple = '#c89bdc', green = '#93d5a5';
 const text = (x, y, label, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" class="${cls}">${esc(label)}</text>`;
 const label = (x, y, title, subtitle = '') => text(x, y, title, 'scene-title') + (subtitle ? text(x, y + 24, subtitle, 'scene-note') : '');
@@ -289,7 +310,24 @@ function balancerTransmission(frame) {
   return label(450,38,'One homolog from the pair per gamete')+[260,650].map((x,i)=>cell(x,165,85)+chrom(x,165,i?'Bal':'G',i?purple:amber,{from:450-x,balancer:!!i})+text(x,295,i?'Balancer-bearing gamete':'Insertion-bearing gamete','scene-note')).join('');
 }
 
-const SCENES = { chromosomes, dominance, fertilisation, assortment, lethals, 'x-copies': xCopies, 'sex-gametes': sexGametes, reciprocal, 'male-meiosis': maleMeiosis, 'balancer-transmission': balancerTransmission, inheritance, xlinked, balancers, chance, recombination: (f) => exchange(f), gal4uas, complementation, threepoint: (f) => exchange(f, true), mosaics, target, screens };
+function lifeCycle(f) {
+ const names=['Egg','Larva','Pupa','Adult'];
+ const shapes=[`<ellipse cx="450" cy="170" rx="50" ry="90" fill="#ece7d7"/><path d="M425 88v-20M475 88v-20" stroke="#ece7d7" stroke-width="4"/>`,
+ `<path d="M260 190C310 90 350 230 400 145S510 240 570 150S630 130 660 160" fill="none" stroke="#e8ddba" stroke-width="38" stroke-linecap="round"/><circle cx="658" cy="160" r="5" fill="#6b5540"/>`,
+ `<rect x="395" y="75" width="110" height="190" rx="50" fill="#a76b40"/>${[110,140,170,200,230].map(y=>`<path d="M400 ${y}h100" stroke="#754625" stroke-width="4"/>`).join('')}`,
+ flySketch(450,180)];
+ return label(450,38,`${f+1} · ${names[f]}`)+`<g class="scene-token">${shapes[f]}</g>`+text(450,310,'Egg → three larval instars → pupa → adult · timing depends on conditions','scene-note');
+}
+function marcm(f) {
+ if(f<2)return label(450,38,f?'FLP exchange at matching FRT sites':'GAL80 represses GAL4 in the starting cell')+pair(450,145,'FRT · m','FRT · GAL80',purple,blue)+text(450,235,f?'Informative exchange and segregation can separate m from GAL80.':'GAL4 + UAS-GFP present, reporter repressed','scene-note')+(f?arrow(250,145,350,145):'')+text(450,305,'Loci and insertion sites are schematic.','scene-note');
+ return label(450,38,f===2?'Informative reciprocal daughters':'Only the de-repressed lineage is marked')+[270,650].map((x,i)=>cell(x,165,88,i?blue:green)+pair(x,165,i?'+ · GAL80':'m',i?'+ · GAL80':'m',i?blue:purple,i?blue:purple)+text(x,290,i?'Reciprocal +/+ · GAL80 retained':'m/m · GAL80 lost','scene-note')+(f===3?text(x,320,i?'Reporter repressed':'GFP where GAL4 is active','scene-note'):'')).join('');
+}
+function maternal(f) {
+ const supplied=f<2;
+ return label(450,38,['Maternal genotype and egg supply are different','Maternal protein can mask an early defect','A mutant germline can change the egg supply','Paternal allele can change later zygotic expression'][f])+pair(230,150,f<2?'m':'m',f<2?'+':'m',purple,blue)+arrow(330,150,480,150)+cell(650,165,88)+([0,2].includes(f)?chrom(650,135,'m egg',purple):pair(650,135,'m',f===3?'+':'m',purple,blue))+Array.from({length:6},(_,i)=>protein(600+i%3*45,200+Math.floor(i/3)*25,green,!supplied)).join('')+text(230,295,f<2?'Mother carries a functional copy':'Mutant germline clone','scene-note')+text(650,295,supplied?'Functional maternal product present':f===3?'Later zygotic expression must be tested':'Normal maternal product absent here','scene-note');
+}
+
+const SCENES = { 'life-cycle':lifeCycle, marcm, maternal, chromosomes, dominance, fertilisation, assortment, lethals, 'x-copies': xCopies, 'sex-gametes': sexGametes, reciprocal, 'male-meiosis': maleMeiosis, 'balancer-transmission': balancerTransmission, inheritance, xlinked, balancers, chance, recombination: (f) => exchange(f), gal4uas, complementation, threepoint: (f) => exchange(f, true), mosaics, target, screens };
 
 // Point to the learner's actual controls without filling in an answer.
 const ACTION_GUIDES = {
@@ -329,21 +367,21 @@ export function guideScene(id, frame, animate = false) {
   return `<svg class="visual-scene ${animate ? 'is-moving' : ''}" viewBox="0 0 900 340" role="img" aria-label="${esc(guide.frames[i][0] + ': ' + guide.frames[i][1])}"><defs><marker id="guide-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#a4afb9"/></marker></defs>${SCENES[id](i)}</svg>`;
 }
 
-export function visualGuideHTML(id, expanded = true) {
-  const guide = VISUAL_GUIDES[id];
+export function visualGuideHTML(id, expanded = true, override = null) {
+  const guide = override || VISUAL_GUIDES[id];
   if (!guide) return '';
   return `<details class="visual-guide" ${expanded ? 'open' : ''}><summary><span class="visual-badge">Animated guide</span><strong>${esc(guide.title)}</strong></summary><div class="guide-content"><p class="guide-example">Separate teaching example · labels and chromosome positions are schematic</p><div data-guide-scene></div><ol class="guide-frames" aria-label="Animation stages">${guide.frames.map(([title], i) => `<li><button type="button" data-visual-frame="${i}"><span>${i + 1}</span>${esc(title)}</button></li>`).join('')}</ol><div class="guide-controls"><button type="button" data-visual-back aria-label="Previous animation stage">←</button><button type="button" class="primary" data-visual-play>Play animation</button><button type="button" data-visual-next aria-label="Next animation stage">→</button><button type="button" data-visual-replay>Replay</button><label>Speed <select data-visual-speed><option value="3000">Slow</option><option value="1800" selected>Normal</option><option value="1000">Fast</option></select></label></div><p class="guide-caption" data-guide-caption aria-live="polite"></p></div></details>`;
 }
 
-export function wireVisualGuide(root, id, { frame = 0, initialSpeed = 1800, onFrame = () => {}, onSpeed = () => {} } = {}) {
-  const el = root.querySelector('.visual-guide'), guide = VISUAL_GUIDES[id];
+export function wireVisualGuide(root, id, { frame = 0, initialSpeed = 1800, onFrame = () => {}, onSpeed = () => {}, override = null, sceneRenderer = null } = {}) {
+  const el = root.querySelector('.visual-guide'), guide = override || VISUAL_GUIDES[id];
   if (!el || !guide) return () => {};
   let index = Number.isInteger(frame) ? Math.max(0, Math.min(guide.frames.length - 1, frame)) : 0;
   let timer = null, playing = false, speed = [1000, 1800, 3000].includes(initialSpeed) ? initialSpeed : 1800;
   el.querySelector('[data-visual-speed]').value = String(speed);
   const stop = () => { clearTimeout(timer); timer = null; playing = false; el.querySelector('[data-visual-play]').textContent = 'Play animation'; };
   const draw = (animate = false) => {
-    el.querySelector('[data-guide-scene]').innerHTML = guideScene(id, index, animate);
+    el.querySelector('[data-guide-scene]').innerHTML = sceneRenderer ? sceneRenderer(index, animate) : guideScene(id, index, animate);
     el.querySelector('[data-guide-caption]').textContent = guide.frames[index][1];
     el.querySelectorAll('[data-visual-frame]').forEach((b, i) => { b.setAttribute('aria-current', i === index ? 'step' : 'false'); });
     el.querySelector('[data-visual-back]').disabled = index === 0;

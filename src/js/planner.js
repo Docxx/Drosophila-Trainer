@@ -4,10 +4,10 @@
 import { PUZZLES } from './genetics/puzzles.js';
 import { ratioText } from './genetics/crosses.js';
 import { genotypeHTML, esc } from './chromosomes.js';
-import { PlannerSession, targetChroms } from './plannerSession.js';
+import { PlannerSession, replayPlan, targetChroms } from './plannerSession.js';
 import { progress } from './course.js';
 
-export function mountPlanner(root, { onExit }) {
+export function mountPlanner(root, { onExit, mission = null, savedPlan = null, onChange = () => {}, onSolved = null }) {
   let session = null;
   let pick = { F: null, M: null };
   let latest = null;
@@ -18,7 +18,7 @@ export function mountPlanner(root, { onExit }) {
     const best = progress.get().puzzles;
     root.innerHTML = `<article class="planner-list">
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button><div><span class="eyebrow">Building stocks</span><h2>Cross planner</h2></div></header>
-      <p>Each puzzle gives you a few stocks and a target. Cross vials, keep the offspring classes you want by their markers, and declare the vial you believe is the target. You see what a geneticist sees: markers and eye colour, never the genotype. <strong>Par</strong> is the fewest generations that can do it.</p>
+      <p>Start with puzzles 1–2 after Balancers. Revisit the driver, lethal and recombination puzzles after their teaching modules. Each puzzle gives you a few stocks and a target. Cross vials, keep the offspring classes you want by their markers, and declare the vial you believe is the target. You see what a geneticist sees: markers and eye colour, never the genotype. <strong>Par</strong> is the fewest generations that can do it.</p>
       <div class="cards">${PUZZLES.map((p, i) => `<button type="button" class="card ${best[p.id] ? 'done' : ''}" data-puzzle="${i}">
         <span class="eyebrow">${i + 1} · ${esc(p.skill)}</span><strong>${esc(p.title)}</strong><span>${esc(p.summary)}</span>
         <span class="meta">Par ${p.par}${best[p.id] ? ` · solved in ${best[p.id]}` : ''}</span></button>`).join('')}</div></article>`;
@@ -68,6 +68,7 @@ export function mountPlanner(root, { onExit }) {
         </section>
       </div></article>`;
     wire();
+    onChange({ puzzle: p.id, actions: structuredClone(s.actions), pick: { ...pick }, latest: latest?.id || null });
   }
 
   function resultHTML(c) {
@@ -79,7 +80,9 @@ export function mountPlanner(root, { onExit }) {
 
   function wire() {
     const s = session;
-    root.querySelector('[data-list]').addEventListener('click', list);
+    const back = root.querySelector('[data-list]');
+    if (mission !== null) back.textContent = 'Restart mission';
+    back.addEventListener('click', () => mission === null ? list() : open(mission));
     root.querySelector('[data-restart]').addEventListener('click', () => open(PUZZLES.indexOf(s.puzzle)));
     root.querySelector('[data-hint]').addEventListener('click', () => { const h = s.hint(); if (h) hints.push(h); render(); });
     root.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { pick.F = pick.F === b.dataset.f ? null : b.dataset.f; render(); }));
@@ -107,11 +110,24 @@ export function mountPlanner(root, { onExit }) {
         notice = { kind: 'right', html: `<strong>Target built in ${r.generations} generation${r.generations === 1 ? '' : 's'}.</strong> ${verdict}${r.hints ? ` You used ${r.hints} hint${r.hints === 1 ? '' : 's'}.` : ''} <button type="button" class="link" data-list2>Next puzzle</button>` };
       } else notice = { kind: 'wrong', html: esc(r.message) };
       render();
+      if (r.ok && onSolved) { onSolved(r); return; }
       root.querySelector('[data-list2]')?.addEventListener('click', list);
     }));
   }
 
-  list();
+  if (mission === null) list();
+  else if (savedPlan) {
+    try {
+      session = replayPlan(PUZZLES[mission], savedPlan);
+      pick = { F: session.vial(savedPlan.pick?.F)?.F ? savedPlan.pick.F : null, M: session.vial(savedPlan.pick?.M)?.M ? savedPlan.pick.M : null };
+      latest = session.crosses.find((c) => c.id === savedPlan.latest) || session.crosses.at(-1) || null;
+      hints = session.puzzle.hints.slice(0, session.hintsUsed);
+      render();
+    } catch {
+      open(mission);
+      notice = { kind: 'wrong', html: 'The saved construction could not be restored. Start again from the known stocks.' }; render();
+    }
+  } else open(mission);
   return { rerender: () => (session ? render() : list()) };
 }
 

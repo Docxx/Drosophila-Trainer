@@ -7,6 +7,7 @@ import { mountPlanner } from './planner.js';
 import { mountSandbox } from './sandbox.js';
 import { startTour } from './tour.js';
 import { esc } from './chromosomes.js';
+import { PATH, CURRICULUM } from './curriculum.js';
 
 const desk = document.getElementById('desk');
 const stage = document.getElementById('desk-stage');
@@ -18,7 +19,7 @@ const KIND = { tour: 'Microscope · guided', scope: 'Microscope', lesson: 'Inter
 function setView(view) {
   document.body.dataset.view = view;
   desk.hidden = view !== 'desk';
-  if (view === 'desk') window.scrollTo(0, 0);
+  if (view === 'desk') { window.scrollTo(0, 0); desk.scrollTop = 0; }
 }
 
 function hub() {
@@ -31,19 +32,20 @@ function hub() {
   stage.innerHTML = `<div class="hub">
     <section class="hero">
       <div><span class="eyebrow">${fresh ? 'Welcome' : 'Continue'}</span>
-        <h2>${fresh ? 'Learn fly pushing and fly genetics by doing it' : next ? esc(next.title) : 'Course complete'}</h2>
+        <h2>${fresh ? 'Learn fly pushing and fly genetics by doing it' : next ? esc(next.title) : 'Taught modules completed'}</h2>
         <p>${fresh ? 'Handle flies under a 3D microscope, then follow their chromosomes into the next generation. Every lesson is open: go in order or jump to what you need.' : next ? esc(next.summary) : 'Every lesson is done. Keep practising at the bench or in the cross planner.'}</p>
         <div class="tool-row">${next ? `<button type="button" class="primary big" data-open="${next.id}">${fresh ? 'Start with ' : 'Continue: '}${esc(next.title)}</button>` : ''}
           <button type="button" data-open="${DIAGNOSTIC.id}">${esc(DIAGNOSTIC.title)} · ${DIAGNOSTIC.minutes} min</button></div>
         ${fresh ? `<p class="secondary">Done some fly work before? The quick check suggests where to start.</p>` : ''}</div>
       <div class="progress-ring" style="--done:${LESSONS.filter((l) => p.done.includes(l.id)).length / LESSONS.length}"><strong>${LESSONS.filter((l) => p.done.includes(l.id)).length}/${LESSONS.length}</strong><span>done</span></div>
     </section>
+    <section class="learning-path"><h3>Your learning path</h3><p>Learn the idea → watch a worked demonstration → try with guidance → practise independently → investigate unexpected results. Skip ahead when ready; prerequisites are recommendations.</p><div class="path-stages">${PATH.map((part)=>`<section><span class="eyebrow">${esc(part.level)}</span><h4>${esc(part.title)}</h4><p>${esc(part.goal)}</p><div>${part.lessons.map(id=>`<button class="link" type="button" data-open="${id}">${p.done.includes(id)?'✓ ':''}${esc(LESSONS.find(l=>l.id===id)?.title||id)}${id==='planner'?' · start with puzzles 1–2':''}</button>`).join('')}</div><small>${part.lessons.filter(id=>p.done.includes(id)).length}/${part.lessons.length} modules completed</small></section>`).join('')}</div><p class="secondary">Completion records activity in this trainer. Independent construction and real laboratory competence require their own evidence.</p></section>
     ${SECTIONS.map((s) => `<section class="hub-section"><h3>${esc(s.title)}</h3><p class="secondary">${esc(s.blurb)}</p><div class="cards">${
       LESSONS.filter((l) => l.section === s.id).map((l) => {
         const done = p.done.includes(l.id);
         const puzzles = l.id === 'planner' ? Object.keys(p.puzzles).length : 0;
         return `<button type="button" class="card ${done ? 'done' : ''} ${next?.id === l.id ? 'next' : ''}" data-open="${l.id}">
-          <span class="eyebrow">${KIND[l.kind]}${l.practice ? ' · practice' : ''}</span><strong>${esc(l.title)}</strong><span>${esc(l.summary)}</span>
+          <span class="eyebrow">${CURRICULUM[l.id]?.level || KIND[l.kind]}${l.practice ? ' · practice' : ''}</span><strong>${esc(l.title)}</strong><span>${esc(l.summary)}</span>
           <span class="meta">${done ? (p.results[l.id]?.independentPractice ? '✓ Independent fresh-case practice' : p.results[l.id]?.assisted ? '✓ Completed with support' : '✓ Completed') : p.drafts[l.id] ? 'Resume saved lesson' : next?.id === l.id ? 'Suggested next' : l.minutes ? `${l.minutes} min` : 'Open any time'}${puzzles ? ` · ${puzzles}/6 puzzles` : ''}</span></button>`;
       }).join('')}</div></section>`).join('')}
     <p class="secondary hub-foot">Progress is saved on this computer. <button type="button" class="link" data-reset>Reset course progress</button></p>
