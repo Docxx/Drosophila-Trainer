@@ -6,6 +6,7 @@ export const SECTIONS = [
   { id: 'inheritance', title: 'Inheritance', blurb: 'Follow chromosomes from parents to offspring, then test it at the bench.' },
   { id: 'stocks', title: 'Building stocks', blurb: 'Balancers, and planning crosses across generations.' },
   { id: 'advanced', title: 'Experiments and analysis', blurb: 'Statistics, recombination mapping, GAL4/UAS experiments and complementation.' },
+  { id: 'research', title: 'Research techniques', blurb: 'Three-point maps, FLP/FRT clones, temporal control and planning genetic screens.' },
   { id: 'practice', title: 'Open practice', blurb: 'Free experimentation and unlimited practice problems. Use any time.' },
 ];
 
@@ -23,6 +24,10 @@ export const LESSONS = [
   { id: 'recombination', section: 'advanced', kind: 'lesson', title: 'Recombination and mapping', minutes: 12, summary: 'Measure the distance between two insertions from real counts, then pick and verify a recombinant.' },
   { id: 'gal4uas', section: 'advanced', kind: 'lesson', title: 'GAL4/UAS and controls', minutes: 12, summary: 'Switch genes on with GAL4/UAS, sort the right offspring, and choose the controls a knockdown needs.' },
   { id: 'complementation', section: 'advanced', kind: 'lesson', title: 'Complementation and mapping', minutes: 15, summary: 'Run a complementation grid, then map three lethal mutations with overlapping deficiencies.' },
+  { id: 'threepoint', section: 'research', kind: 'lesson', title: 'Three-point mapping', minutes: 18, summary: 'Read three markers on maternal X chromosomes, infer gene order, and count double crossovers and interference.' },
+  { id: 'mosaics', section: 'research', kind: 'lesson', title: 'FLP/FRT clones and twin spots', minutes: 15, summary: 'Induce mitotic recombination in a model disc and plan for a few large clones or many small ones.' },
+  { id: 'target', section: 'research', kind: 'lesson', title: 'GAL80ts: controlling time', minutes: 15, summary: 'Plan temperature shifts, protect development, and allow for activation, protein depletion and recovery.' },
+  { id: 'screens', section: 'research', kind: 'lesson', title: 'Planning a genetic screen', minutes: 15, summary: 'Balance independent lines, gene coverage, multiple-hit chromosomes and fly-room capacity.' },
   { id: 'sandbox', section: 'practice', kind: 'sandbox', title: 'Genetics bench', minutes: 0, summary: 'Build any two flies, see their gametes and offspring, count vials with a χ² test, and drill unlimited practice problems.', practice: true },
 ];
 

@@ -5,6 +5,7 @@
   const assert = (c, m) => { if (!c) throw new Error(m); };
   const L = await import('app://fly/src/js/lessons.js');
   const { progress } = await import('app://fly/src/js/course.js');
+  const R = await import('app://fly/src/js/research.js');
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
@@ -76,6 +77,64 @@
         click(`[data-judge="${fits ? 'reject' : 'fits'}"]`); assert($('.feedback.wrong'), 'a wrong verdict is explained');
         click(`[data-judge="${fits ? 'fits' : 'reject'}"]`);
       });
+    } else if (step.type === 'threepoint') {
+      const data = R.threePointData(step);
+      assert(!$('[data-map-value]'), 'interval names stay hidden until order is inferred');
+      click('[data-check-order]');
+      assert($('.feedback.wrong') && $('[data-next]').disabled, 'incomplete chromosome classification is challenged');
+      for (const i of data.parental) click(`[data-map-row="${i}"][data-map-kind="parental"]`);
+      for (const i of data.dco) click(`[data-map-row="${i}"][data-map-kind="dco"]`);
+      const middle = $('[data-middle]'); middle.value = data.middle; middle.dispatchEvent(new Event('change'));
+      click('[data-check-order]');
+      assert($('[data-map-value="d1"]'), 'interval calculations unlock after correct chromosome order');
+      const enter = (key, value) => { const input = $(`[data-map-value="${key}"]`); input.value = value; input.dispatchEvent(new Event('input')); };
+      enter('d1', '0'); enter('d2', '0'); enter('coc', '0'); click('[data-check-map]');
+      assert($('.feedback.wrong') && $('[data-next]').disabled, 'wrong map calculations are explained');
+      enter('d1', data.d1.toFixed(2)); enter('d2', data.d2.toFixed(2)); enter('coc', data.coc.toFixed(3)); click('[data-check-map]');
+      assert(!$('[data-next]').disabled && /interference/.test($('.lesson-body').textContent), 'sampled map and interference accepted');
+      const table = $('.mapping-counts').textContent;
+      click('[data-notation="notation"]');
+      assert($('.research-diagram .notation') && !$('.research-hom'), 'research notation display applies');
+      click('[data-notation="both"]');
+      assert($('.research-diagram .notation') && $('.research-hom'), 'research diagrams and notation coexist');
+      click('[data-notation="diagram"]');
+      click('[data-back]'); click('[data-next]');
+      assert($('.mapping-counts').textContent === table && !$('[data-next]').disabled, 'Back preserves counts, assignments and completion');
+    } else if (step.type === 'clones') {
+      click('[data-clone-run]'); assert($('.feedback.wrong') && $('[data-next]').disabled, 'unsuitable induction is challenged');
+      const plan = R.SHOCK_TIMES.flatMap((t) => R.SHOCK_LENGTHS.map((l) => ({ round: t.round, minutes: l.minutes, result: R.cloneTissue({ round: t.round, p: l.p, seed: step.seed }) }))).find((p) => R.cloneGoalMet(p.result, step.goal));
+      const round = $('[data-clone-round]'); round.value = plan.round; round.dispatchEvent(new Event('change'));
+      const length = $('[data-clone-length]'); length.value = plan.minutes; length.dispatchEvent(new Event('change'));
+      click('[data-clone-run]');
+      assert($('.clone-view svg rect') && !$('[data-next]').disabled && !$('.goal-checks .unmet'), 'disc and checks agree with a feasible model plan');
+      const disc = $('.clone-view svg').outerHTML;
+      click('[data-notation="both"]'); assert($('.clone-view svg').outerHTML === disc, 'notation changes do not reroll the tissue'); click('[data-notation="diagram"]');
+      const changed = $('[data-clone-round]'); changed.value = R.SHOCK_TIMES[3].round; changed.dispatchEvent(new Event('change'));
+      assert($('[data-next]').disabled && !$('.clone-view'), 'changing induction clears old result and completion');
+      click('[data-clone-example]'); assert(!$('[data-next]').disabled, 'working-plan support uses an achievable model setting');
+    } else if (step.type === 'target') {
+      click('[data-target-run]'); assert($('.feedback.wrong') && $('[data-next]').disabled, 'uninduced target fails the knockdown objective');
+      const plan = Array.from({ length: 64 }, (_, bits) => Object.fromEntries(R.STAGES.map((st, i) => [st.id, bits & (1 << i) ? 29 : 18]))).find((temps) => R.targetChecks(R.simulateTarget(temps), step.goal).every((c) => c.ok));
+      for (const [stage, temp] of Object.entries(plan)) { const select = $(`[data-temp="${stage}"]`); select.value = temp; select.dispatchEvent(new Event('change')); }
+      click('[data-target-run]');
+      assert($('.target-plot polyline') && !$('.goal-checks .unmet') && !$('[data-next]').disabled, 'schedule plot and stage windows are checked');
+      const plot = $('.target-plot').outerHTML;
+      click('[data-notation="both"]'); assert($('.target-plot').outerHTML === plot, 'notation preserves the simulated time course'); click('[data-notation="diagram"]');
+      const select = $('[data-temp="adult"]'); select.value = plan.adult === 18 ? 29 : 18; select.dispatchEvent(new Event('change'));
+      assert($('[data-next]').disabled && !$('.target-plot'), 'changed schedule cannot retain stale completion');
+      click('[data-target-example]'); assert(!$('[data-next]').disabled, 'working schedule satisfies the pure model checks');
+    } else if (step.type === 'screen') {
+      click('[data-screen-run]'); assert($('.feedback.wrong') && $('[data-next]').disabled, 'high-complexity screen is challenged');
+      const input = $('[data-lines]'); input.value = ''; input.dispatchEvent(new Event('input')); click('[data-screen-run]');
+      assert($('.feedback.wrong') && !$('.screen-stats'), 'blank line count is not treated as a valid screen');
+      const plan = R.DOSES.map((d) => ({ dose: d.mM, n: Math.ceil(Math.log(1 - step.goal.minHit) / Math.log(1 - d.lambda * R.PER_GENE)) })).find((p) => R.screenChecks(p.dose, p.n, step.goal).every((c) => c.ok));
+      const dose = $('[data-dose]'); dose.value = plan.dose; dose.dispatchEvent(new Event('change'));
+      const lines = $('[data-lines]'); lines.value = plan.n; lines.dispatchEvent(new Event('input')); click('[data-screen-run]');
+      assert($('.screen-stats') && !$('.goal-checks .unmet') && !$('[data-next]').disabled, 'screen coverage, complexity and capacity all met');
+      const changed = $('[data-lines]'); changed.value = step.goal.maxLines + 1; changed.dispatchEvent(new Event('input'));
+      assert($('[data-next]').disabled && !$('.screen-stats'), 'editing screen capacity clears stale statistics');
+      click('[data-screen-run]'); assert($('.goal-checks .unmet') && $('[data-next]').disabled, 'over-capacity plan fails');
+      click('[data-screen-example]'); assert(!$('[data-next]').disabled, 'feasible-plan support meets all constraints');
     } else if (step.type === 'grid') {
       while ($('[data-cell]')) click('[data-cell]');
       step.rows.forEach((r, i) => step.cols.forEach((c, j) => {
@@ -99,7 +158,7 @@
     }
   }
 
-  for (const id of ['inheritance', 'xlinked', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation']) {
+  for (const id of ['inheritance', 'xlinked', 'balancers', 'chance', 'recombination', 'gal4uas', 'complementation', 'threepoint', 'mosaics', 'target', 'screens']) {
     await play(id, L.LESSON_CONTENT[id].steps.length - (L.LESSON_CONTENT[id].steps.at(-1).type === 'go' ? 1 : 0));
     if (L.LESSON_CONTENT[id].steps.at(-1).type === 'go') {
       click('[data-go]'); await sleep(100);
@@ -167,8 +226,8 @@
   assert(document.body.dataset.view === 'scope' && window.scope.mode === 'exercise', 'tour hands over to Virgin collection');
   while (!window.scope.ready) await sleep(100);
 
-  // Leave the Curly × Curly reveal on screen for visual review.
-  await play('inheritance', 6);
-  await solve(L.LESSON_CONTENT.inheritance.steps[6]);
-  return `PASS: 7 lessons, bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
+  // Leave a working temporal-control plot on screen for visual review.
+  window.course.open('target'); window.course.current.goTo(2);
+  await solve(L.LESSON_CONTENT.target.steps[2]);
+  return `PASS: 11 lessons (including four research techniques), bench and practice, quick check, notation switch, planner puzzle 1, 9-step tour; done = ${progress.get().done.join(', ')}`;
 })();

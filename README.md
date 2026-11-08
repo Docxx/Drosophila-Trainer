@@ -34,6 +34,10 @@ suggests where to begin. Suggested order:
 | | Recombination and mapping | Score 400 test-cross offspring by mini-white eye dosage and estimate the map distance; pick the recombinant class; plan screen sizes; verify recombinants. |
 | | GAL4/UAS and controls | Driver × reporter; sorting GAL4 flies by the balancer marker; choose the controls a knockdown needs; sibling controls and their limits. |
 | | Complementation and mapping | Run a complementation grid for three lethals, then map them against three overlapping deficiencies. |
+| Research techniques | Three-point mapping | Identify parental and double-crossover X chromosomes, infer the middle marker, calculate both intervals and coincidence/interference from 2,000 sampled sons. |
+| | FLP/FRT clones and twin spots | Induce chromosome exchanges in a growing model disc; plan a few large mutant patches or many small ones. |
+| | GAL80ts: controlling time | Set stage-specific temperatures, inspect GAL4 and target-protein time courses, and meet developmental protection, knockdown and recovery windows. |
+| | Planning a genetic screen | Balance target-gene coverage, multiple-lethal burden and independent-line capacity; see the maintenance-vial workload. |
 | Open practice | Genetics bench | Build any two flies (dropdowns or stock presets), see gamete counts and offspring classes, count a vial with a χ² test, and drill generated practice problems (one or two chromosomes, with a streak). |
 
 Lessons are step by step: explanations with chromosome diagrams, multiple choice with
@@ -42,7 +46,11 @@ explains why it does nothing in males or over a balancer), predict-then-reveal t
 with a Punnett square that marks lethal cells, and pick-the-class steps. The advanced
 lessons add select-all-that-apply questions, estimates worked out from sampled counts,
 a vial-counting simulator, a step-by-step χ² table, and complementation grids with a
-deficiency map. Next unlocks
+deficiency map. Research steps add a three-point classification/calculation table,
+a seeded clone-disc simulator, a temperature-schedule planner with time courses,
+and a screen planner. Each choice option explains its reasoning, and the research
+lessons gather assumptions in an About this model panel. Changing a simulation
+plan clears its old result and relocks Next until the new plan works. Next unlocks
 once a step is worked through. Every answer a lesson checks is computed by the
 genetics engine, never typed in. A Diagram / Notation / Both switch controls how
 genotypes are shown everywhere.
@@ -148,6 +156,7 @@ src/js/plannerSession.js   Cross-planner state (no DOM; tested in node)
 src/js/planner.js          Cross-planner UI
 src/js/tour.js             "Meet the fly" guided microscope tour
 src/js/scope.js            Microscope, activity UI, transfers and notebook presentation
+src/js/research.js         Pure models used by research-technique lessons
 src/js/collection.js       Collection session, private biological state and assessment
 src/js/experiment.js       White-eye cross, explicit mating history, event time and F1 assessment
 src/js/flyModel.js         Fly assembly, sex/developmental variants and materials
@@ -202,5 +211,16 @@ outside its scope.
 Background references: [FlyBase white gene report](https://flybase.org/reports/FBgn0003996.htm)
 and [Berg lab guidance on sperm storage and virgin collection](https://depts.washington.edu/cberglab/wordpress/outreach/an-introduction-to-fruit-flies/1000/).
 
-Calendar management, individual verification/test-cross follow-ups and the advanced
-genetics course remain subsequent stages.
+Research lessons reuse `research.js`: no new stock genotypes or chromosomes were
+invented in the core genetics catalogue. Three-point estimates come from the
+sampled counts; the reference recombination fractions are not accepted as the
+sampled answer. Clone induction and GAL80ts kinetics are schematic, and screen
+presets and per-gene rates are model assumptions rather than laboratory advice.
+The existing GAL4/UAS stock-building model remains all-or-none; the TARGET lesson
+uses its own temporal RNAi model.
+
+Background for the chromosome mechanisms: [Mosaic Analysis in Drosophila (FlyBook)](https://pmc.ncbi.nlm.nih.gov/articles/PMC5788516/)
+and [McGuire et al., TARGET](https://pubmed.ncbi.nlm.nih.gov/14657498/).
+
+Calendar management and individual verification/test-cross follow-ups remain
+subsequent stages.
