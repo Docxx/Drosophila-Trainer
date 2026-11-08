@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fly Trainer</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="course.css" />
   <script type="importmap">
     { "imports": { "three": "../node_modules/three/build/three.module.js", "three/addons/": "../node_modules/three/examples/jsm/" } }
   </script>
 </head>
-<body data-mode="exercise">
+<body data-mode="exercise" data-view="desk">
   <main class="bench">
     <header class="hud left">
       <div class="brand"><span class="brand-mark">FT</span><div><h1>Fly Trainer</h1><p id="mode-label">Virgin collection</p></div></div>
+      <button type="button" class="course-btn" data-view="desk">← Course</button>
       <nav class="mode-switch" aria-label="Activity">
         <button data-mode="exercise" aria-pressed="true" class="on">Collection</button>
         <button data-mode="cross" aria-pressed="false">First cross</button>
@@ -100,6 +102,14 @@
     </footer>
   </main>
 
+  <section id="desk" class="desk" aria-label="Course" hidden>
+    <header class="desk-bar">
+      <button type="button" class="brand link" id="desk-home"><span class="brand-mark">FT</span><span><strong>Fly Trainer</strong><small>Fly pushing and genetics</small></span></button>
+      <div class="notation-switch" id="notation" role="group" aria-label="How genotypes are shown"><span>Genotypes as</span><button type="button" data-notation="diagram">Diagram</button><button type="button" data-notation="notation">Notation</button><button type="button" data-notation="both">Both</button></div>
+    </header>
+    <div id="desk-stage" class="desk-stage"></div>
+  </section>
+
   <dialog id="notebook" aria-labelledby="notebook-title"><div class="dialog-heading"><div><span class="eyebrow" id="notebook-context">Canton-S · First collection</span><h2 id="notebook-title">Lab notebook</h2></div><button data-close="notebook" aria-label="Close notebook">Close</button></div>
     <p>Actions are recorded automatically. Your prediction and conclusion are optional and saved as you type.</p>
     <label for="prediction">Prediction / collection plan</label><textarea id="prediction" maxlength="5000" placeholder="Which evidence will you use to identify females and support virgin collection?"></textarea>
@@ -115,5 +125,6 @@
     <p id="cross-review-summary"></p><div class="result-counts" id="cross-review-counts"></div><p id="cross-review-learning"></p><ul id="cross-review-corrections" class="history"></ul><p id="cross-review-limitations" class="secondary"></p><button data-act="cross-rescore">Revisit F1 observations</button>
   </dialog>
   <script type="module" src="js/scope.js"></script>
+  <script type="module" src="js/desk.js"></script>
 </body>
 </html>

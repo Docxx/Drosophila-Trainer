@@ -39,7 +39,9 @@ function createWindow() {
   win.webContents.on('console-message', (_e, level, message, line, source) => {
     if (level >= 2) console.error(`[renderer] ${message} (${source}:${line})`);
   });
-  win.loadURL('app://fly/src/index.html');
+  // Dev aid: `--open=<lesson id>` starts on that lesson instead of the course hub.
+  const openArg = process.argv.find((a) => a.startsWith('--open='))?.split('=')[1];
+  win.loadURL(`app://fly/src/index.html${openArg ? `?open=${encodeURIComponent(openArg)}` : ''}`);
 
   if (snapshotArg) {
     // Dev aid: `electron . --snapshot=out.png` saves the window once the fly has loaded.

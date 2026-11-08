@@ -14,6 +14,36 @@ npm start
 
 The launcher installs dependencies on first use; subsequent runs work offline.
 
+## The course
+
+Fly Trainer opens on a **course hub**. Every lesson is open from the start; the hub
+suggests the next one and records what is done. An optional three-minute quick check
+suggests where to begin. Suggested order:
+
+| Section | Lesson | What the learner does |
+|---|---|---|
+| Handling flies | Meet the fly | Guided microscope tour: pick up a fly, zoom, turn it over, centre the sex combs, compare a female and a just-eclosed fly. Each step is checked from the real scope state; "Show me" does it for you. |
+| | Reference bench | Five known flies to compare (practice, never assessed). |
+| | Virgin collection | The collection exercise below. |
+| Inheritance | Chromosomes and inheritance | Build gametes by clicking chromosomes, predict Curly ratios, discover CyO/CyO lethality (2/3 Curly). |
+| | The X chromosome | Sperm and egg types, white-eye criss-cross inheritance, the reciprocal cross, what a white-eyed daughter means. Ends at the First cross. |
+| | First cross | The bench cross below. |
+| Building stocks | Balancers | The three properties of a balancer, a true-breeding mut¹/CyO stock, crossing over in females only and its suppression by TM3, picking classes by markers. |
+| | Cross planner | Six puzzles: cross vials, keep classes by their markers, declare the target stock. Par, hints on request. |
+
+Lessons are step by step: explanations with chromosome diagrams, multiple choice with
+an explanation for every option, a gamete builder (with a crossover switch that
+explains why it does nothing in males or over a balancer), predict-then-reveal tables
+with a Punnett square that marks lethal cells, and pick-the-class steps. Next unlocks
+once a step is worked through. Every answer a lesson checks is computed by the
+genetics engine, never typed in. A Diagram / Notation / Both switch controls how
+genotypes are shown everywhere.
+
+The planner never reveals genotypes: classes are described by markers and eye colour,
+and a vial is checked only when the learner declares it the target. Feedback names the
+uncertain chromosome ("Some flies in this vial are the target, but not all") rather
+than the answer. Course progress is saved locally; notebooks are separate.
+
 ## Current activities
 
 **Virgin collection:** inspect seven flies from a Canton-S vial cleared at 09:00 and
@@ -75,16 +105,19 @@ available in the left panel. No timing, injury or CO2 fertility penalties apply.
 
 ## Checks and previews
 
-- `npm run check`: actual mesh builds plus collection, inheritance, experiment and notebook domain tests.
+- `npm run check`: actual mesh builds plus collection, experiment, notebook, lesson, planner and progress tests.
 - `npm run check:genetics`: verify the retained genetics engine's six cross puzzles.
 - `npm run serve`: local browser preview at http://127.0.0.1:5180.
 - `npm run snapshot`: hidden Electron snapshot, saved as `snapshot.png`.
-- `npx electron . --snapshot=tmp/collection.png --snapshot-js=tools/review-collection.js`:
+- `npx electron . --snapshot=tmp/course.png --snapshot-js=tools/review-course.js`:
+  plays every lesson, the quick check, a planner puzzle and the full guided tour through the real controls.
+- `npx electron . --open=collection --snapshot=tmp/collection.png --snapshot-js=tools/review-collection.js`:
   renderer integration checks and exercise screenshot.
-- `npx electron . --snapshot=tmp/reference.png --snapshot-js=tools/review-scope.js`:
+- `npx electron . --open=reference --snapshot=tmp/reference.png --snapshot-js=tools/review-scope.js`:
   reference selection, inspection and keyboard checks.
-- `npx electron . --snapshot=tmp/cross.png --snapshot-js=tools/review-cross.js`:
+- `npx electron . --open=first-cross --snapshot=tmp/cross.png --snapshot-js=tools/review-cross.js`:
   documented/uncertain parent collections, event progression, F1 scoring and evidence review.
+- `--open=<lesson id>` starts on that lesson instead of the hub (any run, not only snapshots).
 - Add `--snapshot-size=1000x700` to inspect the minimum supported window size.
 
 Snapshot runs use a separate profile under `tmp/snapshot-profile`, so tests do not
@@ -95,6 +128,14 @@ browser preview and desktop app do not share notebooks.
 
 ```
 main.cjs                  Electron shell and hidden snapshot support
+src/js/desk.js             Course hub and router (opens lessons, planner, tour, microscope)
+src/js/course.js           Lesson catalogue, suggested order and saved progress
+src/js/lessons.js          Lesson content and engine helpers (gametes, classes, Punnett squares)
+src/js/lessonPlayer.js     Interactive lesson steps
+src/js/chromosomes.js      Chromosome-bar diagrams and notation
+src/js/plannerSession.js   Cross-planner state (no DOM; tested in node)
+src/js/planner.js          Cross-planner UI
+src/js/tour.js             "Meet the fly" guided microscope tour
 src/js/scope.js            Microscope, activity UI, transfers and notebook presentation
 src/js/collection.js       Collection session, private biological state and assessment
 src/js/experiment.js       White-eye cross, explicit mating history, event time and F1 assessment
@@ -106,8 +147,7 @@ tools/                    Model tools and checks
 Documentation/            Teaching references and agreed Trainer Specification
 ```
 
-The 3D cross mission now uses the shared genetics engine for Mendelian progeny.
-The advanced puzzle interface has not yet been reintroduced. A local V1 source recovery archive is in
+The 3D cross mission, the lessons and the cross planner all use the shared genetics engine. A local V1 source recovery archive is in
 `tmp/migration/v1-source.zip`; it is outside the active app and excluded from Git.
 
 The project is under Git (local repository, branch `main`). Commit before handing the

@@ -8,7 +8,7 @@
     "start": "electron .",
     "serve": "node tools/serve.mjs",
     "snapshot": "electron . --snapshot=snapshot.png",
-    "check": "node tools/check-models.mjs && node --test tools/collection.test.mjs tools/experiment.test.mjs",
+    "check": "node tools/check-models.mjs && node --test tools/collection.test.mjs tools/experiment.test.mjs tools/course.test.mjs",
     "convert-model": "node tools/convert-model.mjs",
     "check:genetics": "node tools/check-puzzles.mjs"
   },

@@ -5,6 +5,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildFly } from './flyModel.js';
 import { CollectionSession, SOURCE_RECORD } from './collection.js';
 import { CrossSession, SCORE_CLASSES, CROSS_PREDICTIONS, CROSS_INTERPRETATIONS } from './experiment.js';
+import { progress } from './course.js';
 
 const canvas = document.getElementById('scope');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -291,6 +292,7 @@ async function loadActivity(nextMode) {
   loading.classList.add('done');
   document.querySelectorAll('[data-mode]').forEach((b) => b.disabled = false);
   window.scope.ready = true;
+  if (mode === 'reference' && document.body.dataset.view === 'scope') progress.complete('reference');
   save();
 }
 function startActivity(nextMode) {
@@ -415,6 +417,7 @@ for (const field of ['prediction', 'conclusion']) document.getElementById(field)
 function showReview() {
   if (busy || mode !== 'exercise') return;
   const result = session.submit(); save(); select(selected, false); renderInventory();
+  if (result.success) progress.complete('collection');
   document.getElementById('review-title').textContent = result.success ? 'Collection ready' : 'Review your collection';
   document.getElementById('review-summary').textContent = result.success
     ? `You collected ${result.females} virgin females and nothing else.`
@@ -488,6 +491,7 @@ function renderCrossControls() {
 function showCrossReview() {
   if (busy || mode !== 'cross') return;
   const report = crossSession.submit(); save(); renderCrossControls();
+  progress.complete('first-cross');
   document.getElementById('cross-review-summary').textContent = report.explanation;
   document.getElementById('cross-review-learning').textContent = `Identification: ${report.correct}/${report.total} observations match; ${report.uncertain} marked uncertain. ${report.interpretation === 'unknown' ? 'You requested more evidence.' : report.interpretationSupported ? 'Your interpretation is supported by these observations.' : 'Reconsider your interpretation using the observed counts below.'} ${crossSession.snapshot().prediction === 'unknown' ? 'No definite prediction recorded.' : report.predictionCorrect ? 'Your prediction for the intended cross was correct.' : 'For the intended cross, daughters receive a normal paternal X; sons receive the paternal Y.'}`;
   const counts = document.getElementById('cross-review-counts'); counts.replaceChildren();
@@ -587,6 +591,7 @@ function frame(now) {
 resize(); updateCamera(); setTool('move');
 window.scope = { THREE, scene, camera, view, updateCamera, specimens, select, setTool, focusSelected, overview, flipOver, turn,
   get holder() { return selected?.holder; }, getFly: () => selected?.fly, ready: false,
+  get selectedId() { return selected?.reference.id || null; }, get mode() { return mode; }, selectById: (id) => select(specimens.find((s) => s.reference.id === id) || null),
   // Development/test controls return the same public session snapshot as the UI.
   startActivity, getSession: () => activeSession().snapshot() };
 startActivity(mode);
