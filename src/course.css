@@ -309,7 +309,11 @@ button.done { border-color: #5f9e72; }
 .path-stages small { display: block; margin-top: 14px; color: var(--muted); }
 .lesson-orientation { padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; font-size: 13px; }
 .lesson-orientation summary { cursor: pointer; font-weight: 600; color: #f3c779; }
-.lesson-glossary { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 12px; }.lesson-glossary dt { color: #88ccec; font-weight: 600; }.lesson-glossary dd { margin: 4px 0 0; color: var(--muted); }
+.lesson-glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 20px; margin-top: 12px; }
+.lesson-glossary > div { display: block; margin: 0; font-size: 13px; }
+.lesson-glossary dt { color: #88ccec; font-weight: 600; }
+.lesson-glossary dd { margin: 3px 0 0; color: var(--muted); line-height: 1.45; }
+.lesson-orientation summary + button { margin: 10px 0 4px; }
 .teaching-cycle { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 20px; }.teaching-cycle span { padding: 5px 9px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); font-size: 11px; }.teaching-cycle [aria-current=step] { color: #ffdaa3; border-color: var(--accent); background: #3a3224; }
 .coaching { padding: 14px 18px; border-left: 3px solid #88ccec; background: #162b38; border-radius: 0 10px 10px 0; margin-bottom: 18px; font-size: 13px; }.coaching li { margin: 6px 0; }
 .worked-scene { min-height: 260px; border: 1px solid #4c606c; border-radius: 12px; background: #111c24; padding: 20px; overflow-x: auto; }.worked-scene .cross-line { justify-content: center; }.worked-scene .counts { width: 100%; }.worked-number { font-size: 24px; color: #f3c779; font-weight: 600; }
