@@ -3,15 +3,20 @@
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
   const { VISUAL_GUIDES, guideScene } = await import('app://fly/src/js/lessonVisuals.js');
   const { progress } = await import('app://fly/src/js/course.js');
+  const { LESSON_CONTENT } = await import('app://fly/src/js/lessons.js');
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (s) => document.querySelector(s);
   const click = (s) => { const b = $(s); assert(b && !b.disabled, `Missing visual control: ${s}`); b.click(); };
   const frame = () => Number($('[data-visual-frame][aria-current="step"]').dataset.visualFrame);
   const goto = (n) => click(`[data-visual-frame="${n}"]`);
   progress.reset();
-  for (const [id, guide] of Object.entries(VISUAL_GUIDES)) {
-    window.course.open(id);
-    assert($('.visual-guide').open, `${id}: explanation opens visually`);
+  for (const [guideId, guide] of Object.entries(VISUAL_GUIDES)) {
+    const location = Object.entries(LESSON_CONTENT).flatMap(([id, lesson]) => lesson.steps.map((step, i) => ({ id, step, i })))
+      .find(({ id, step }) => (step.visual || id) === guideId && !['choice','multi','pick','go'].includes(step.type));
+    assert(location, `${guideId}: guide is connected to an actual teaching step`);
+    const { id, i: stepIndex } = location;
+    window.course.open(id); click('[data-restart]'); window.course.current.goTo(stepIndex);
+    assert($('.visual-guide').open, `${guideId}: explanation opens visually`);
     assert($('.visual-scene').getAttribute('role') === 'img', `${id}: accessible labelled scene`);
     const initial = $('.visual-scene').outerHTML;
     for (let i = 0; i < guide.frames.length; i++) {
@@ -28,14 +33,22 @@
     assert(frame() === 2 && $('.visual-scene').innerHTML === scene, `${id}: notation changes preserve the visual example`);
     click('[data-notation="diagram"]');
     window.course.hub(); window.course.open(id);
+    assert(window.course.current.step === stepIndex, `${id}: correct lesson step resumes`);
     assert(frame() === 2, `${id}: guide position survives leaving and reopening`);
     assert(!progress.isDone(id), `${id}: watching never completes an assessment`);
     click('[data-restart]'); assert(frame() === 0, `${id}: restart clears the guide position`);
   }
   window.course.open('diagnostic'); assert(!$('.visual-guide'), 'diagnostic has no answer hints');
 
+  window.course.open('inheritance'); click('[data-restart]'); goto(3);
+  window.course.current.goTo(1); assert(frame() === 0, 'dominance does not inherit the chromosome-primer stage'); goto(1);
+  window.course.current.goTo(0); assert(frame() === 3, 'chromosome-primer position is kept separately');
+  window.course.hub(); window.course.open('inheritance');
+  assert(frame() === 3, 'beginner concept position survives reopening');
+  click('[data-restart]'); assert(frame() === 0, 'restart clears all beginner concept positions');
+
   // Real playback, pause, speed, single-step and end-stop behavior.
-  window.course.open('recombination');
+  window.course.open('recombination'); click('[data-restart]');
   const speed = $('[data-visual-speed]'); speed.value = '1000'; speed.dispatchEvent(new Event('change'));
   click('[data-visual-play]'); assert($('[data-visual-play]').textContent === 'Pause animation', 'play enters a running state');
   await sleep(1150); assert(frame() === 1, 'play actually advances the animation');
@@ -65,5 +78,5 @@
   window.course.open('recombination'); goto(1);
   $('.visual-guide').scrollIntoView({ block: 'start' });
   assert(document.documentElement.scrollWidth <= innerWidth, 'visual guide fits the supported window');
-  return `PASS: ${Object.keys(VISUAL_GUIDES).length} visual guides / 44 scenes; playback, pause, speed, single-step, replay, persistence, notation, assessment isolation and activity highlighting`;
+  return `PASS: ${Object.keys(VISUAL_GUIDES).length} visual guides / ${Object.values(VISUAL_GUIDES).reduce((n, g) => n + g.frames.length, 0)} scenes; playback, pause, speed, single-step, replay, persistence, notation, assessment isolation and activity highlighting`;
 })();

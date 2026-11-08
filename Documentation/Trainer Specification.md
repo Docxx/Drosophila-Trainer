@@ -161,3 +161,16 @@ Ray requests very visual lessons with animations and visual guides. All eleven g
 - Numbered activity guides highlight and focus the relevant chromosomes, controls, count tables and result plots without making a prediction or supplying an answer. Watching an animation never marks an exercise complete or certifies independent competence.
 - No external media or network service is needed. The microscope activities retain their interactive 3D fly views.
 - Validation includes 50 domain tests plus mesh checks, an Electron walkthrough of all 44 visual stages and playback/persistence controls, and the full course walkthrough at 1000 × 700 with checks of the activity-guide targets.
+
+## Beginner visual teaching follow-up, 8 November 2026
+
+The early lessons now select visual guides for individual concepts rather than repeating one chapter-wide animation. Ten new four-stage guides bring the catalogue to 21 guides and 84 scenes. Seventeen steps in Chromosomes and inheritance, The X chromosome and Balancers explicitly select the matching visual explanation.
+
+- Begin with a fly, a diploid body cell and all four chromosome pairs, including chromosome 4. Distinguish a gene locus from an allele, then show one homolog from every pair entering a gamete.
+- Link a known CyO/+ chromosome pair to a schematic Curly phenotype; explain genotype versus phenotype and what dominance means.
+- Animate fertilisation, independent assortment across two pairs, and the change from fertilised-egg combinations to the surviving-adult denominator when a homozygous genotype is lethal.
+- Teach X-linked copy number, X/Y sperm, identical scored egg types and reciprocal cross direction separately. Keep the Y/fertility distinction explicit.
+- Give male meiosis and balancer transmission their own guides. Balancer text now matches the visual caveat: suppressed recovery of recombinants in biology, with intact transmission in this teaching model.
+- Open the relevant guides during beginner teaching activities; keep quiz guidance folded. Watching leaves predictions, gamete construction and lesson completion to the learner.
+- Save guide positions and speeds per concept, with compatibility for earlier chapter-level saved positions. Existing lesson answers and completion records remain valid.
+- Validation: 51 automated tests plus mesh checks, all 84 visual stages in Electron, 17 beginner-specific step assignments, and the full course walkthrough at 1000 × 700. Human validation of transfer to real flies remains outstanding.

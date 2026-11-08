@@ -71,6 +71,70 @@ export const VISUAL_GUIDES = {
   ] },
 };
 
+// Beginner concepts are selected by the lesson step, not just its chapter.
+Object.assign(VISUAL_GUIDES, {
+  chromosomes: { title: 'Zoom from a fly to a gene', frames: [
+    ['Fly → body cell', 'A fly is made of cells. In a typical diploid body cell, the nucleus contains the chromosomes. The sizes here are schematic.'],
+    ['Four chromosome pairs', 'This female cell has four pairs: X, 2, 3 and the tiny 4. That is eight chromosomes: one homolog of each pair originally came from each parent.'],
+    ['Gene and allele', 'A gene occupies a locus on a chromosome. Homologs carry the same loci; A and a are different versions, or alleles, of one gene. A bar is a chromosome, not a single gene.'],
+    ['One from every pair', 'Meiosis produces gametes with one chromosome from each pair: four chromosomes, not four pairs. The course often draws only the pairs relevant to a cross.'],
+  ] },
+  dominance: { title: 'Connect the chromosome pair to the visible fly', frames: [
+    ['Read the two homologs', 'CyO names a balancer chromosome. It carries the dominant Curly marker; + denotes a normal homolog in this example.'],
+    ['One copy can show', 'A CyO/+ fly has one Curly-bearing chromosome 2 and one normal homolog. One copy of the dominant marker is sufficient for the Curly phenotype.'],
+    ['Compare the normal pair', 'A +/+ fly has no Curly-bearing chromosome. Compare its straight wings with the schematic Curly wing shape.'],
+    ['Genotype → phenotype', 'Genotype describes the chromosome combination. Phenotype describes an observable trait. Dominant means visible with one copy here; it does not mean stronger, more common or necessarily beneficial.'],
+  ] },
+  fertilisation: { title: 'Build offspring one egg–sperm combination at a time', frames: [
+    ['Start with the parents', 'Separate example: an A/a mother is crossed to an a/a father. Follow just this chromosome pair; no dominance or lethality is assumed.'],
+    ['Separate their gametes', 'The mother can contribute A or a. The father contributes a in either case. A gamete contains one chromosome from this pair.'],
+    ['Join one egg and one sperm', 'Either egg type can meet an a-carrying sperm. Fertilisation restores two homologs, one from each parent.'],
+    ['Read the combinations', 'The possible offspring genotypes are A/a and a/a. Each has probability one half in this model, although a finite vial need not contain exact halves.'],
+  ] },
+  assortment: { title: 'Choose one chromosome from EACH pair', frames: [
+    ['Two different pairs', 'This example parent is A/a on one chromosome pair and B/b on another. Letters identify alleles; the two pairs sort independently in the model.'],
+    ['Choose from pair 1', 'One homolog of the A/a pair enters each gamete. Choosing A or a does not decide which chromosome the B/b pair contributes.'],
+    ['Choose from pair 2', 'For either first choice, B or b is possible. Each gamete must receive one chromosome from both pairs, not two from one pair.'],
+    ['Four combinations', 'AB, Ab, aB and ab are four possible gamete types, each with probability one quarter here. Independent assortment applies to different chromosome pairs, not automatically to two genes on the same chromosome.'],
+  ] },
+  lethals: { title: 'Count fertilised eggs, then count surviving adults', frames: [
+    ['A separate model cross', 'Here M is a visible dominant marker whose chromosome is lethal in two copies. Cross M/+ to M/+. This is a worked teaching example, not an unknown stock.'],
+    ['Four egg–sperm combinations', 'Each parent contributes M or +. The four equally likely combinations are M/M, M/+, +/M and +/+. The two mixed orders have the same genotype.'],
+    ['Apply viability', 'M/M does not survive in this example. Both M/+ combinations and the +/+ combination can contribute adults.'],
+    ['Change the denominator', 'Among surviving adults, two of the three viable combinations carry the marker. The expected adult ratio is 2:1, not the 3:1 obtained when all genotypes survive.'],
+  ] },
+  'x-copies': { title: 'Count functional copies at an X-linked locus', frames: [
+    ['Usual XX and XY flies', 'An XX female has two X homologs. An XY male has one X and a Y. In Drosophila the Y is needed for normal male fertility, not sex determination.'],
+    ['Locate the gene', 'This example locus is on the X. The Y has no matching functional copy of this gene. Do not treat a Y as another allele at the X-linked locus.'],
+    ['A recessive allele in a female', 'For this recessive loss-of-function example, an Xᴬ/Xᵃ female has a functional A copy. Xᵃ/Xᵃ has no functional A copy at this locus.'],
+    ['A single X in a male', 'An Xᵃ/Y male has only a at this locus. Its recessive effect is exposed because there is no functional A copy on a second X.'],
+  ] },
+  'sex-gametes': { title: 'Follow X chromosomes into eggs and sperm', frames: [
+    ['Look at the chromosome pairs', 'This example uses an Xᵃ/Xᵃ female and an Xᴬ/Y male. Both eggs and sperm receive one sex chromosome, not the whole pair.'],
+    ['The male makes X or Y sperm', 'His Xᴬ and Y segregate. Half the sperm carry Xᴬ and half carry Y in the model. A sperm does not carry both together.'],
+    ['The female contributes X', 'Both of this female’s X homologs carry a, so every egg has the same allele at this locus even though it receives just one of her X chromosomes.'],
+    ['Keep copy count separate from variety', 'One chromosome per gamete does not mean only one gamete type. Different homologs can give different types; identical alleles can give the same scored type.'],
+  ] },
+  reciprocal: { title: 'See what changes when the sexes of the parents swap', frames: [
+    ['First direction', 'Separate example: Xᵃ/Xᵃ mother × Xᴬ/Y father. A is functional and a is recessive. Track the maternal X and the paternal X or Y.'],
+    ['Follow their offspring', 'The daughters receive paternal Xᴬ and maternal Xᵃ; sons receive maternal Xᵃ and paternal Y. The sons lack functional A at this locus.'],
+    ['Reverse the parental sexes', 'Now cross Xᴬ/Xᴬ mothers to Xᵃ/Y fathers. The mother contributes Xᴬ to every offspring, including every son.'],
+    ['Compare the directions', 'Both daughters and sons in the reversed cross have a functional A copy. For an X-linked gene, a reciprocal cross can change the outcome because fathers pass their X only to daughters in these usual XX/XY crosses.'],
+  ] },
+  'male-meiosis': { title: 'Watch male transmission without crossing over', frames: [
+    ['Two parental homologs', 'This male carries AB on one homolog and ab on the other. These two genes lie on the same chromosome pair in this example.'],
+    ['Copy before segregation', 'The homologs replicate into sister chromatids before meiosis. Replication copies the existing allele arrangements; it does not combine AB with ab.'],
+    ['No meiotic exchange', 'Drosophila males do not undergo meiotic crossing over. The parental arrangements remain intact as the chromatids segregate.'],
+    ['Two scored sperm types', 'Sperm carry either AB or ab. Ab and aB recombinant types are not generated by meiotic crossing over in this male.'],
+  ] },
+  'balancer-transmission': { title: 'Follow a chromosome beside a balancer', frames: [
+    ['Keep the homologs distinct', 'A fly carries an insertion-bearing chromosome G beside a balancer Bal. G is an insertion label here, not a recessive lethal mutation.'],
+    ['Recognise the balancer', 'The balancer’s inversion pattern and visible marker help maintain and follow the paired chromosome. The drawing is a symbol for inversions, not a literal DNA map.'],
+    ['Use the teaching-model rule', 'This course model recovers the intact G or Bal chromosome, without recombinant products from this pair. Real balancers suppress recovery of recombinants rather than making all exchange physically impossible.'],
+    ['Read the gamete types', 'The gametes scored by the model carry G or Bal. Bal does not copy, repair or replace G; the homologs remain different chromosomes.'],
+  ] },
+});
+
 const amber = '#efb95f', blue = '#88ccec', purple = '#c89bdc', green = '#93d5a5';
 const text = (x, y, label, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" class="${cls}">${esc(label)}</text>`;
 const label = (x, y, title, subtitle = '') => text(x, y, title, 'scene-title') + (subtitle ? text(x, y + 24, subtitle, 'scene-note') : '');
@@ -160,7 +224,72 @@ function screens(frame) {
     return `<g class="${frame === 1 ? 'scene-line' : ''}" style="--delay:${i * 35}ms"><path d="M${x - 25} ${y}v57q25 22 50 0v-57" fill="${hit ? '#493e29' : '#243541'}" stroke="${hit ? amber : blue}" stroke-width="2"/><path d="M${x - 27} ${y}h54" stroke="#a6b3bd" stroke-width="7"/>${text(x, y + 84, `Line ${i + 1}`, 'scene-note')}${hit ? text(x, y + 40, frame === 3 ? '★ + •' : '★', 'scene-hit') : ''}</g>`;
   }).join('') + text(450, 318, frame === 3 ? '★ target allele · • additional hit on the same chromosome · Two vials per line in the model' : frame === 2 ? 'Illustrative hit placement: most real screens need far more than ten lines.' : 'Different lines must represent independent mutagenised chromosomes.', 'scene-note');
 }
-const SCENES = { inheritance, xlinked, balancers, chance, recombination: (f) => exchange(f), gal4uas, complementation, threepoint: (f) => exchange(f, true), mosaics, target, screens };
+function flySketch(x, y, curly = false) {
+  return `<g transform="translate(${x} ${y})"><path d="M-8 -10L-52 -40M-10 5L-60 0M-8 20L-48 50M8 -10L52 -40M10 5L60 0M8 20L48 50" stroke="#becad0" stroke-width="4" fill="none"/>
+    <ellipse cx="0" cy="16" rx="15" ry="37" fill="#c99761"/><ellipse cx="0" cy="-18" rx="20" ry="22" fill="#b5824b"/><circle cx="0" cy="-48" r="15" fill="#c99761"/>
+    ${curly ? '<path d="M-13 -16Q-88 -94 -67 -18Q-59 9 -14 18M13 -16Q88 -94 67 -18Q59 9 14 18" fill="#b5d5df" fill-opacity=".8" stroke="#e1edf0" stroke-width="2"/>' : '<ellipse cx="-32" cy="-8" rx="18" ry="49" transform="rotate(-28 -32 -8)" fill="#b5d5df" fill-opacity=".8"/><ellipse cx="32" cy="-8" rx="18" ry="49" transform="rotate(28 32 -8)" fill="#b5d5df" fill-opacity=".8"/>'}
+    <path d="M-10 18h20M-10 29h20M-7 40h14" stroke="#705331" stroke-width="3"/></g>`;
+}
+function chromosomeSet(x, y, haploid = false, small = false) {
+  const gap = small ? 43 : 98, scale = small ? .55 : 1;
+  return ['X', '2', '3', '4'].map((name, i) => {
+    const height = [76, 106, 92, 26][i] * scale, cx = x + (i - 1.5) * gap;
+    return `<g class="scene-token" style="--travel:${haploid ? -160 : 0}px">${[0, ...(haploid ? [] : [1])].map((j) => `<rect x="${cx + (haploid ? 0 : j ? 8 : -12)}" y="${y - height / 2}" width="${small ? 9 : 14}" height="${height}" rx="7" fill="${j || haploid && i % 2 ? blue : amber}"/>`).join('')}</g>` + text(cx + 7, y + 76 * scale, name, 'scene-note');
+  }).join('');
+}
+function chromosomes(frame) {
+  if (!frame) return label(450, 38, 'From the animal to a typical diploid body cell') + flySketch(220, 170) + arrow(310, 170, 430, 170) + cell(600, 170, 105) + cell(600, 170, 62, purple) + chromosomeSet(600, 165, false, true) + text(220, 295, 'Schematic fly', 'scene-note') + text(600, 295, 'Cell → nucleus → chromosomes', 'scene-note');
+  if (frame === 1) return label(450, 38, 'Four pairs = eight chromosomes') + chromosomeSet(450, 160) + text(450, 302, 'Amber: maternal origin · Blue: paternal origin · Female XX example', 'scene-note');
+  if (frame === 2) return label(450, 38, 'Chromosome → gene locus → allele') + pair(450, 155, 'A', 'a') + `<rect x="430" y="112" width="40" height="88" rx="6" fill="none" stroke="${purple}" stroke-width="3"/>` + arrow(450, 208, 450, 247) + text(450, 274, 'Same locus on the homologs; A and a are two alleles.', 'scene-note') + text(450, 308, 'A chromosome contains many genes, not just the labelled example.', 'scene-note');
+  return label(450, 38, 'Meiosis: keep one homolog from every pair') + cell(250, 165, 105) + chromosomeSet(250, 165, false, true) + arrow(380, 165, 490, 165) + cell(650, 165, 96) + chromosomeSet(650, 165, true, true) + text(250, 295, 'Body cell: four pairs', 'scene-note') + text(650, 295, 'Gamete: four chromosomes', 'scene-note');
+}
+function dominance(frame) {
+  if (!frame) return label(450, 38, 'CyO names a chromosome carrying the Curly marker') + cell(450,165,88) + pair(450,165,'CyO · Curly','+',purple,blue) + text(450,300,'One Curly-bearing homolog and one normal homolog','scene-note');
+  if (frame < 2) return label(450, 38, frame ? 'One Curly copy is enough to affect the wings' : 'A chromosome name and the marker it carries') + pair(250, 165, 'CyO · Curly', '+', purple, blue) + arrow(355, 165, 520, 165) + flySketch(670, 174, frame === 1) + text(250, 290, 'Genotype: CyO/+', 'scene-note') + text(670, 290, frame ? 'Curly phenotype' : 'Follow the chromosome to the trait', 'scene-note');
+  return label(450, 38, frame === 2 ? 'Compare the chromosome pairs and the wings' : 'Genotype describes copies; phenotype describes appearance') + [260, 650].map((x, i) => pair(x, 110, i ? '+' : 'CyO', '+', i ? blue : purple, blue) + flySketch(x, 240, !i) + text(x, 320, i ? '+/+ · straight wings' : 'CyO/+ · Curly wings', 'scene-note')).join('');
+}
+function fertilisation(frame) {
+  if (!frame) return label(450, 38, 'Follow one pair through a separate example cross') + cell(260, 165, 85) + pair(260, 165, 'A', 'a') + cell(650, 165, 85) + pair(650, 165, 'a', 'a', purple, purple) + text(260, 300, 'Mother A/a', 'scene-note') + text(650, 300, 'Father a/a', 'scene-note');
+  if (frame === 1) return label(450, 38, 'Egg types and sperm types') + chrom(220, 130, 'A', amber, { from: 120 }) + chrom(220, 215, 'a', blue, { from: 120 }) + chrom(670, 175, 'a', purple, { from: -120 }) + text(220, 300, 'Two egg types', 'scene-note') + text(670, 300, 'One scored sperm type', 'scene-note');
+  return label(450, 38, frame === 2 ? 'An a-carrying sperm can meet either egg type' : 'Each fertilised egg restores a chromosome pair') + [260, 650].map((x, i) => cell(x, 165, 85) + chrom(x, 145, i ? 'a' : 'A', i ? blue : amber, { from: -100 }) + chrom(x, 185, 'a', purple, { from: 100 }) + text(x, 295, frame === 3 ? `${i ? 'a/a' : 'A/a'} · expected share ½` : i ? 'a egg + a sperm' : 'A egg + a sperm', 'scene-note')).join('');
+}
+function assortment(frame) {
+  if (!frame) return label(450, 38, 'Two pairs, two independent choices') + pair(270, 160, 'A', 'a') + pair(650, 160, 'B', 'b', green, purple) + text(270, 290, 'Chromosome pair 1', 'scene-note') + text(650, 290, 'Chromosome pair 2', 'scene-note');
+  if (frame === 1) return label(450, 38, 'First choose A or a') + chrom(270, 170, 'A', amber, { from: 100 }) + chrom(650, 170, 'a', blue, { from: -100 }) + text(450, 295, 'You still need a chromosome from the other pair.', 'scene-note');
+  return label(450, 38, frame === 2 ? 'Either first choice can be joined by B or b' : 'Four gamete types, each with one chromosome from EACH pair') + [['A','B'],['A','b'],['a','B'],['a','b']].map(([a,b], i) => { const x=150+i*200; return cell(x, 170, 88) + chrom(x, 150, a, a === 'A' ? amber : blue, {from:450-x}) + chrom(x, 190, b, b === 'B' ? green : purple, {from:450-x}) + text(x, 295, `${a}${b}${frame === 3 ? ' · ¼' : ''}`, 'scene-note'); }).join('');
+}
+function lethals(frame) {
+  if (!frame) return label(450, 38, 'M/+ × M/+ · M is a dominant marker, lethal in two copies') + [260,650].map((x) => cell(x,165,85)+pair(x,165,'M','+',amber,blue)).join('') + text(450, 302, 'A separate teaching example; both parents survive.', 'scene-note');
+  const pairs = [['M','M'],['M','+'],['+','M'],['+','+']];
+  return label(450, 38, frame === 1 ? 'Count four equally likely fertilisation combinations' : frame === 2 ? 'M/M cannot contribute an adult' : 'Adult denominator: three surviving combinations') + pairs.map(([a,b],i) => { const x=150+i*200, dead=frame>=2&&i===0; return `<g opacity="${dead ? '.3':'1'}">${cell(x,165,88)}${pair(x,165,a,b,a==='M'?amber:blue,b==='M'?amber:blue)}</g>` + (dead ? `<path d="M${x-45} 115l90 100M${x+45} 115l-90 100" stroke="#e49a95" stroke-width="4"/>` : '') + text(x, 295, dead ? 'Does not survive' : frame===3 ? i<3 ? 'Marker visible' : 'Marker absent' : `${a}/${b}`, 'scene-note'); }).join('') + (frame===3 ? text(450,326,'Expected adult share: 2 marker-bearing / 3 survivors = ⅔','scene-note'):'');
+}
+function xCopies(frame) {
+  if (frame < 2) return label(450,38,frame ? 'Only the X carries this example locus' : 'Count X homologs in usual XX and XY flies') + pair(260,165,frame?'X · locus A':'X',frame?'X · locus a':'X') + pair(650,165,frame?'X · locus a':'X','Y',amber,purple) + text(260,295,'XX female: two X homologs','scene-note') + text(650,295,frame?'Y: no matching copy here':'XY male: one X plus Y','scene-note');
+  if (frame===2) return label(450,38,'Recessive example: compare functional allele copies') + pair(260,165,'Xᴬ','Xᵃ') + pair(650,165,'Xᵃ','Xᵃ',blue,blue) + text(260,295,'A functional copy remains','scene-note') + text(650,295,'No functional A copy','scene-note');
+  return label(450,38,'A male cannot obtain A from a Y at this locus') + cell(450,165,88)+pair(450,165,'Xᵃ','Y',blue,purple) + text(450,295,'Only a is present at this X-linked locus.','scene-note');
+}
+function sexGametes(frame) {
+  if (!frame) return label(450,38,'One sex chromosome per gamete')+pair(260,165,'Xᵃ','Xᵃ',amber,amber)+pair(650,165,'Xᴬ','Y',purple,purple)+text(260,295,'Mother Xᵃ/Xᵃ','scene-note')+text(650,295,'Father Xᴬ/Y','scene-note');
+  if (frame===1) return label(450,38,'Male: two different sperm types')+[260,650].map((x,i)=>cell(x,165,75)+chrom(x,165,i?'Y':'Xᴬ',purple,{from:450-x})+text(x,295,i?'Y sperm · expected ½':'Xᴬ sperm · expected ½','scene-note')).join('');
+  if (frame===2) return label(450,38,'Female: both homologs carry the same allele')+pair(260,165,'Xᵃ','Xᵃ',amber,amber)+arrow(365,165,535,165)+cell(670,165,75)+chrom(670,165,'Xᵃ',amber,{from:-130})+text(450,300,'One scored egg type; each egg still receives only ONE X.','scene-note');
+  return label(450,38,'Chromosome count and gamete variety are different questions')+label(260,145,'Each gamete: ONE sex chromosome','An X or a Y; not the whole pair')+label(650,145,'Scored varieties depend on the homologs','Identical alleles can give one scored type')+text(450,295,'Different pairs must also contribute one chromosome each.','scene-note');
+}
+function reciprocal(frame) {
+  const reversed=frame>=2;
+  if (frame%2===0) return label(450,38,reversed?'Reverse which parent carries a':'First direction of the cross')+pair(260,165,reversed?'Xᴬ':'Xᵃ',reversed?'Xᴬ':'Xᵃ',amber,amber)+pair(650,165,reversed?'Xᵃ':'Xᴬ','Y',purple,purple)+text(260,295,'Mother contributes X to every offspring','scene-note')+text(650,295,'Father contributes X or Y','scene-note');
+  return label(450,38,reversed?'Every offspring now receives maternal Xᴬ':'Trace daughters and sons separately')+[270,650].map((x,i)=>cell(x,165,85)+pair(x,165,reversed?'Xᴬ':'Xᵃ',i?'Y':reversed?'Xᵃ':'Xᴬ',amber,purple)+text(x,295,i?(reversed?'Son: functional A':'Son: no functional A'):'Daughter: functional A','scene-note')).join('');
+}
+function maleMeiosis(frame) {
+  if (!frame) return label(450,38,'Male homologs: AB and ab')+pair(450,165,'A B','a b')+text(450,300,'These loci share one chromosome pair.','scene-note');
+  if (frame<3) return label(450,38,frame===1?'Replicate without changing the allele arrangement':'Segregate without meiotic crossing over')+['A B','A B','a b','a b'].map((a,i)=>chrom(450,98+i*48,a,i<2?amber:blue)).join('')+text(450,305,'No exchange between the parental chromatids in male meiosis.','scene-note');
+  return label(450,38,'Only the two parental scored sperm types')+[260,650].map((x,i)=>cell(x,165,85)+chrom(x,165,i?'a b':'A B',i?blue:amber,{from:450-x})+text(x,295,i?'ab sperm':'AB sperm','scene-note')).join('');
+}
+function balancerTransmission(frame) {
+  if (frame<3) return label(450,38,['One insertion-bearing homolog and one balancer','Recognise the inversion symbol','Model: recover intact parental chromosomes'][frame])+cell(450,165,88)+pair(450,165,'G','Bal',amber,purple)+text(450,300,frame===2?'Suppressed recovery of recombinants; no repair or copying of G.':'G is an insertion label, not a recessive lethal.','scene-note');
+  return label(450,38,'One homolog from the pair per gamete')+[260,650].map((x,i)=>cell(x,165,85)+chrom(x,165,i?'Bal':'G',i?purple:amber,{from:450-x,balancer:!!i})+text(x,295,i?'Balancer-bearing gamete':'Insertion-bearing gamete','scene-note')).join('');
+}
+
+const SCENES = { chromosomes, dominance, fertilisation, assortment, lethals, 'x-copies': xCopies, 'sex-gametes': sexGametes, reciprocal, 'male-meiosis': maleMeiosis, 'balancer-transmission': balancerTransmission, inheritance, xlinked, balancers, chance, recombination: (f) => exchange(f), gal4uas, complementation, threepoint: (f) => exchange(f, true), mosaics, target, screens };
 
 // Point to the learner's actual controls without filling in an answer.
 const ACTION_GUIDES = {

@@ -501,6 +501,9 @@ export function mountLesson(root, id, { onExit, onAction }) {
   function render() {
     stopVisual();
     const step = lesson.steps[index];
+    const guideId = step.visual || id;
+    const guideOpen = step.visual ? !['choice', 'multi', 'pick', 'go'].includes(step.type) : step.type === 'text';
+    const guideState = state[0].visualGuides?.[guideId] || (guideId === id ? { frame: state[0].visualFrame, speed: state[0].visualSpeed } : {});
     const s = state[index];
     const out = RENDER[step.type](step, s);
     if (out.ready) s.done = true;
@@ -510,7 +513,7 @@ export function mountLesson(root, id, { onExit, onAction }) {
       <header class="lesson-head"><button type="button" class="link" data-exit>← Course</button>
         <div><span class="eyebrow">${esc(lesson.title)}</span><h2>${esc(heading)}</h2></div>
         <button type="button" class="link" data-restart>Restart lesson</button><ol class="dots" aria-label="Progress">${lesson.steps.map((_, i) => `<li class="${i === index ? 'now' : state[i].done ? 'done' : ''}" aria-current="${i === index ? 'step' : 'false'}"></li>`).join('')}</ol></header>
-      <div class="lesson-body">${visualGuideHTML(id, step.type === 'text')}${actionGuideHTML(step.type)}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
+      <div class="lesson-body">${visualGuideHTML(guideId, guideOpen)}${actionGuideHTML(step.type)}${state.some((x) => x.assisted) ? '<p class="support-status">Worked support used · this run is recorded as completed with support.</p>' : ''}${out.html}${last && s.done ? finishHTML() : ''}</div>
       ${lesson.model ? `<details class="support about lesson-model"><summary>About this model</summary>${paras(lesson.model)}</details>` : ''}
       <footer class="lesson-foot"><button type="button" data-back ${index === 0 ? 'disabled' : ''}>Back</button>
         <span class="secondary">${index + 1} / ${lesson.steps.length}${!s.done ? ` · ${STATUS[step.type] || 'check your answer'}` : ''}</span>
@@ -518,9 +521,12 @@ export function mountLesson(root, id, { onExit, onAction }) {
           : `<button type="button" class="primary" data-next ${s.done ? '' : 'disabled'}>Next</button>`}</footer></article>`;
     out.wire?.(root);
     wireActionGuide(root);
-    stopVisual = wireVisualGuide(root, id, { frame: state[0].visualFrame, initialSpeed: state[0].visualSpeed,
-      onFrame(frame) { state[0].visualFrame = frame; save(); },
-      onSpeed(speed) { state[0].visualSpeed = speed; save(); } });
+    const saveGuide = (change) => {
+      state[0].visualGuides ||= {};
+      state[0].visualGuides[guideId] = { ...guideState, ...state[0].visualGuides[guideId], ...change }; save();
+    };
+    stopVisual = wireVisualGuide(root, guideId, { frame: guideState.frame, initialSpeed: guideState.speed,
+      onFrame(frame) { saveGuide({ frame }); }, onSpeed(speed) { saveGuide({ speed }); } });
     root.querySelectorAll('input, select, textarea').forEach((input) => {
       input.addEventListener('input', save); input.addEventListener('change', save);
     });

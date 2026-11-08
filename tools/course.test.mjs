@@ -58,6 +58,34 @@ test('visual activities offer navigation cues, with a separate mapping example',
   assert(VISUAL_GUIDES.balancers.frames[2][1].includes('not absolute'));
 });
 
+test('beginner steps select specific visual concepts and all guide stages render', () => {
+  const teaching = (id, title) => LESSON_CONTENT[id].steps.find((s) => s.title === title);
+  for (const [title, expected] of [
+    ['Genes ride on chromosomes', 'chromosomes'], ['Meet Curly', 'dominance'],
+    ['Curly × normal', 'fertilisation'], ['Two pairs at once', 'assortment'], ['Curly × Curly', 'lethals'],
+  ]) assert.equal(teaching('inheritance', title).visual, expected);
+  assert.equal(teaching('xlinked', 'Females XX, males XY').visual, 'x-copies');
+  assert.equal(teaching('xlinked', 'Swap the parents').visual, 'reciprocal');
+  assert.equal(teaching('balancers', 'The same chromosomes in a male').visual, 'male-meiosis');
+  assert.equal(teaching('balancers', 'And over a balancer').visual, 'balancer-transmission');
+  for (const lesson of Object.values(LESSON_CONTENT)) for (const step of lesson.steps) {
+    if (step.visual) assert(VISUAL_GUIDES[step.visual], `unknown guide ${step.visual}`);
+  }
+  for (const [id, guide] of Object.entries(VISUAL_GUIDES)) for (let i = 0; i < guide.frames.length; i++) {
+    const scene = guideScene(id, i);
+    assert(!/undefined|NaN|Infinity/.test(scene), `${id} stage ${i}: finite, labelled geometry`);
+    assert(scene.includes('role="img"') && scene.includes('aria-label='));
+  }
+  assert(VISUAL_GUIDES.assortment.frames[3][1].includes('different chromosome pairs'));
+  assert(VISUAL_GUIDES.lethals.frames[3][1].includes('surviving adults'));
+  assert(VISUAL_GUIDES['x-copies'].frames[0][1].includes('not sex determination'));
+  assert.equal((guideScene('chromosomes', 1).match(/<rect /g) || []).length, 8, 'four pairs in a diploid cell');
+  assert.equal((guideScene('chromosomes', 3).match(/<rect /g) || []).length, 12, 'eight body-cell chromosomes and four in a gamete');
+  assert.equal((guideScene('assortment', 3).match(/<rect /g) || []).length, 8, 'four gamete types each contain two depicted chromosomes');
+  assert(guideScene('male-meiosis', 3).includes('>AB sperm</text>'));
+  assert(!guideScene('male-meiosis', 3).includes('>Ab sperm</text>'));
+});
+
 test('every lesson in the course has content, and every step is well formed', () => {
   for (const l of LESSONS.filter((x) => x.kind === 'lesson')) assert.ok(LESSON_CONTENT[l.id], `content for ${l.id}`);
   for (const [id, lesson] of Object.entries(LESSON_CONTENT)) {

@@ -71,7 +71,8 @@ notebooks under v1/v2 keys are retained untouched. Cross notebooks remain v2.
 
 ### Animated visual lessons
 
-All eleven genetics lessons include a visual guide with four captioned stages.
+All eleven genetics lessons include visual teaching. There are 21 guides with four
+captioned stages each (84 scenes), including guides selected for individual beginner steps.
 Chromosomes separate into gametes, parental segments exchange at crossovers,
 GAL4 moves to a UAS-linked output, clone lineages expand and target protein
 disappears after RNAi activation. Allele labels accompany colour cues throughout.
@@ -80,16 +81,27 @@ uses A–B–C rather than revealing the exercise's locus order.
 
 Use **Play animation**, pause, the arrow buttons, the numbered stages or **Replay**.
 Slow/normal/fast speed and the selected stage are saved with the unfinished lesson.
-Guides open on explanation pages and fold away during exercises. Numbered activity
+Guides open on explanation pages. Beginner teaching activities also open the relevant
+concept guide; quiz guidance stays optional. Numbered activity
 guides highlight the actual controls, tables or results without entering answers.
 Animations start only when requested, stop when closed or left, and respect the
 operating system's reduced-motion setting. Everything runs offline, with no video
 downloads or external assets. Watching a guide does not complete an assessment.
 
 Visual verification: `tools/review-visuals.js` runs in the isolated Electron snapshot
-profile; it checks all 44 scenes, playback/pause/replay, saved position/speed,
+profile; it checks all 84 scenes, playback/pause/replay, saved position/speed,
 notation changes and highlighting. The ordinary course walkthrough also checks
 the activity-guide targets at each exercise step.
+
+The beginner sequence zooms from fly to cell to all four chromosome pairs, then
+distinguishes a chromosome, gene and allele. Dedicated guides cover Curly dominance,
+fertilisation, independent assortment, lethal zygotes versus surviving adults,
+X-linked copy number, egg/sperm types and reciprocal crosses. Male meiosis and
+balancer transmission have their own guides so a female-crossover animation is
+not reused for a step where it would be misleading. Stage and speed are saved
+separately for each concept. `tools/review-beginners.js` checks the 17 specifically
+assigned beginner steps, including that watching leaves gametes and predictions
+for the learner to complete.
 
 ## Current activities
 
